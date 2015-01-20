@@ -1,26 +1,22 @@
-﻿@using System.Linq
-@helper PostDate(DateTime rawDate) {
-    <time datetime="@rawDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss")" pubdate data-updated="true">@rawDate.ToString("MMM d, yyyy")</time>
-}
 
 <html>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Tomasz Jaskula's blog</title>
-    <link rel="stylesheet" href="@Model.Root/stylesheets/bootstrap/less/bootstrap.css">
-    <link rel="stylesheet" href="@Model.Root/stylesheets/pygment_trac.css">
-    <link rel="shortcut icon" href="@Model.Root/favicon.png">
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/bootstrap/less/bootstrap.css">
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
+    <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="@Description" />
+    <meta name="description" content="Improve signal, reduce noise = use F#" />
     <meta name="author" content="Tomasz Jaskuła" />
     <meta name="copyright" content="Tomasz Jaskuła 2015" />
 
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:creator" content="@("@tjaskula")">
-    <meta name="twitter:title" content="@Title">
-    <meta name="twitter:description" content="@Description">
+    <meta name="twitter:creator" content="@tjaskula">
+    <meta name="twitter:title" content="Tomasz Jaskula's blog">
+    <meta name="twitter:description" content="Improve signal, reduce noise = use F#">
     
     <!-- End Twitter cards -->
 
@@ -39,8 +35,8 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <!-- FSharp.Formatting Styles --> 
-    <link rel="stylesheet" type="text/css" media="screen" href="@Model.Root/fsharp.formatting/tooltips.css" />
-  	<script type="text/javascript" src="@Model.Root/fsharp.formatting/tooltips.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="http://jaskula.fr//fsharp.formatting/tooltips.css" />
+  	<script type="text/javascript" src="http://jaskula.fr//fsharp.formatting/tooltips.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
     <script>
@@ -66,7 +62,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <h1><a class="" href="@Model.Root/index.html">Tomasz Jaskula's blog</a>
+            <h1><a class="" href="http://jaskula.fr//index.html">Tomasz Jaskula's blog</a>
                 <small>Improve signal, reduce noise = use F#</small>
             </h1>
         </div>
@@ -74,13 +70,13 @@
         <nav class="collapse navbar-collapse bs-navbar-collapse">
           <ul class="nav navbar-nav">
               <li>
-                  <a href="@Model.Root/blog/">Blog</a>
+                  <a href="http://jaskula.fr//blog/">Blog</a>
               </li>
               <!-- <li>
-                  <a href="@Model.Root/about-me/">About Me</a>
+                  <a href="http://jaskula.fr//about-me/">About Me</a>
               </li> -->
               <!-- <li class="active">
-                    <a href="@Model.Root/talks/">Talks</a>
+                    <a href="http://jaskula.fr//talks/">Talks</a>
               </li> -->
           </ul>
         </nav>
@@ -90,11 +86,35 @@
     <div class="container">
       <div class="row">
         <main class="col-lg-8">
-              @RenderBody()
+              
+
+    <h3 class="h2link">
+        <a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Welcome</a>
+    </h3>
+    <h6>
+            <time datetime="2015-01-20T11:10:42" pubdate data-updated="true">20 January 2015</time>
+
+    </h6>
+    <br />
+    <article>
+        <div class="row">
+<div class="medium-8 columns">
+
+<p>When I started to think about what title would best fit my new blog, I was stuck. I couldn't find anything that really translated the state of my mind. I wanted it to be short but also communicative. Something, that when you read it you already have an idea of what kind of content you can find on this blog. Still nothing on my mind...</p>
+
+</div>
+</div>
+
+
+
+
+        <a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Read more ...</a>
+    </article>
+
         </main>
         <aside class="col-lg-4">
               <article>
-                <img class="img-responsive img-circle" src="@Model.Root/img/aside_face.jpg" />
+                <img class="img-responsive img-circle" src="http://jaskula.fr//img/aside_face.jpg" />
                 <div class="aside-text">
                     <blockquote class="small">
                         <p><cite>Welcome to my blog! F# and functional programming it's what I'm interested in and passionate about at the moment. However, software architecture, software craftsmanship, Domain Driven Design are also topics dear to my heart. So stay tuned! There is more to come...</cite></p>
@@ -102,24 +122,22 @@
                     </blockquote>
                 </div>
                 <div class="social">
-                    <a href="https://www.facebook.com/thomas.jaskula" title="facebook"><img src="@Model.Root/img/facebook.jpg" /></a>
-                    <a href="https://github.com/tjaskula" title="github"><img src="@Model.Root/img/github.jpg" /></a>
-                    <a href="https://plus.google.com/u/1/106268061202265370189/about" title="google"><img src="@Model.Root/img/google.jpg" /></a>
-                    <a href="https://twitter.com/tjaskula" title="twitter"><img src="@Model.Root/img/twitter.jpg" /></a>
+                    <a href="https://www.facebook.com/thomas.jaskula" title="facebook"><img src="http://jaskula.fr//img/facebook.jpg" /></a>
+                    <a href="https://github.com/tjaskula" title="github"><img src="http://jaskula.fr//img/github.jpg" /></a>
+                    <a href="https://plus.google.com/u/1/106268061202265370189/about" title="google"><img src="http://jaskula.fr//img/google.jpg" /></a>
+                    <a href="https://twitter.com/tjaskula" title="twitter"><img src="http://jaskula.fr//img/twitter.jpg" /></a>
                 </div>
             </article>
               <article>
                    <h2>Recent posts</h2>
 
                       <ul class="articles-list">
-                          @foreach (var post in Enumerable.Take(Model.Posts, 5))
-                      		{
                               <li>
-                                  <h3><a href="@Model.Root/blog/@post.Url/index.html">@post.Title</a>
-                                      <span>@PostDate(post.Date)</span>
+                                  <h3><a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Welcome</a>
+                                      <span>    <time datetime="2015-01-20T11:10:42" pubdate data-updated="true">Jan 20, 2015</time>
+</span>
                                   </h3>
                               </li>
-                      		}
                       </ul>
 
               </article>
@@ -139,6 +157,6 @@
 
       </footer>
 
-    <script src="@Model.Root/javascripts/scale.fix.js"></script>
+    <script src="http://jaskula.fr//javascripts/scale.fix.js"></script>
   </body>
 </html>
