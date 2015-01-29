@@ -1,0 +1,384 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Tomasz Jaskula's blog</title>
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/bootstrap/less/bootstrap.css">
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
+    <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="Attempts to make work ASP.NET Web Api (beta) with IDependencyResolver" />
+    <meta name="author" content="Tomasz Jaskuła" />
+    <meta name="copyright" content="Tomasz Jaskuła 2015" />
+
+    <!-- Twitter cards -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:creator" content="@tjaskula">
+    <meta name="twitter:title" content="Web Api (beta) and Castle.Windsor…without IDependencyResolver ?">
+    <meta name="twitter:description" content="Attempts to make work ASP.NET Web Api (beta) with IDependencyResolver">
+    
+    <!-- End Twitter cards -->
+
+    <link rel="alternate" type="application/rss+xml" title="Tomasz Jaskula's blog" href="http://jaskula.fr/rss.xml" />
+
+      <script>
+          (function(d) {
+              var config = {
+                          kitId: 'xfo7ulp',
+                          scriptTimeout: 3000
+                      },
+                      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='//use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+          })(document);
+      </script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- FSharp.Formatting Styles --> 
+    <link rel="stylesheet" type="text/css" media="screen" href="http://jaskula.fr//fsharp.formatting/tooltips.css" />
+  	<script type="text/javascript" src="http://jaskula.fr//fsharp.formatting/tooltips.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-58152976-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+
+  </head>
+  <body>
+
+	  <header>
+
+        <div class="navbar-header">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <h1><a class="" href="http://jaskula.fr//index.html">Tomasz Jaskula's blog</a>
+                <small>Improve signal, reduce noise = use F#</small>
+            </h1>
+        </div>
+
+        <nav class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+              <li>
+                  <a href="http://jaskula.fr//blog/">Blog</a>
+              </li>
+              <!-- <li>
+                  <a href="http://jaskula.fr//about-me/">About Me</a>
+              </li> -->
+              <!-- <li class="active">
+                    <a href="http://jaskula.fr//talks/">Talks</a>
+              </li> -->
+          </ul>
+        </nav>
+
+    </header>
+
+    <div class="container">
+      <div class="row">
+        <main class="col-lg-8">
+              
+<h1>Web Api (beta) and Castle.Windsor…without IDependencyResolver ?</h1>
+
+<div class="row">
+<div class="medium-8 columns">
+
+<p>I've been reading through several blog post about how people configure DI support in the new <a href="http://www.asp.net/web-api">ASP.NET Web Api</a>. For example you can read about it here :</p>
+
+</div>
+</div>
+
+<!-- more -->
+
+<ul>
+<li>Official "<a href="http://www.asp.net/web-api/overview/extensibility/using-the-web-api-dependency-resolver">Using the Web API Dependency Resolver</a>"</li>
+<li>"<a href="http://alexmg.com/post/2012/03/08/Autofac-ASPNET-Web-API-(Beta)-Integration.aspx">Autofac ASP.NET Web API (Beta) Integration</a>"</li>
+<li>"<a href="http://wildermuth.com/2012/2/26/WebAPI_and_Ninject">Web Api and Ninject</a>"</li>
+</ul>
+
+<p>What stands out is that every implementation relays on <code>System.Web.Http.Services.IDependencyResolver</code> interface which is similar to the one introduced in the ASP.NET MVC 3 and which lives in the <code>System.Web.Mvc</code> namespace to avoid confusion. Let's look at its implementation details :</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">interface</span> IDependencyResolver
+{
+    <span class="k">object</span> GetService(System.Type serviceType);
+    IEnumerable&lt;<span class="k">object</span>&gt; GetServices(System.Type serviceType);
+}</pre></td></tr></table>
+
+<p>Since it was introduced in MVC 3 I've never used it because of its lack of "Release" method and the fact that there is no way cleaning-up resolved services from you DI container. If it's not a problem for all DI containers, it is certainly a problem for Castle.Windsor which tracks resolved components. <a href="http://mikehadlow.blogspot.com/">Mike Hadlow</a> already spotted it was a problem and wrote a blog post "<a href="http://mikehadlow.blogspot.com/2011/02/mvc-30-idependencyresolver-interface-is.html">The MVC 3.0 IDependencyResolver interface is broken. Don't use it with Windsor.</a>" I think that this problem still remains with a WebApi <code>IDependencyResolver</code> interface and that’s why I decided to not use it. But will I manage to do it ?</p>
+
+<h2>Self Hosting</h2>
+
+<p>My current WebApi project is using self hosting feature and for the moment I won't be interested in IIS hosting. After all, there should not be significant differences between two hosting options on adding IoC container support. We will check it after.</p>
+
+<p>Given that in ASP.NET MVC 3 we weren't compelled to implement <code>IDependencyResolver</code> at all I started to figure out what other hooks WebApi offers in order to set up my <a href="http://blog.ploeh.dk/2011/07/28/CompositionRoot.aspx">Composition Root</a>. After few minutes of inspecting WebApi's API, I found <code>IHttpControllerFactory</code> in the <code>System.Web.Http.Dispatcher</code> namespace which seems to me like a viable seam for connecting my own implementation. This interface is quite similar to the one from the <code>System.Web.Mvc</code> namespace and is all what I need.</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">interface</span> IHttpControllerFactory
+{
+    IHttpController CreateController(HttpControllerContext controllerContext, 
+                                        <span class="k">string</span> controllerName);
+    <span class="k">void</span> ReleaseController(IHttpController controller);
+}</pre></td></tr></table>
+
+<p>As you noticed, there is "Create" and "Release" controller methods which allows me to use it with Castle.Windsor. Let's look at it :</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> WindsorHttpControllerFactory <span class="o">:</span> IHttpControllerFactory
+{
+    <span class="k">private</span> <span class="k">readonly</span> IWindsorContainer _windsorContainer;
+
+    <span class="k">public</span> WindsorHttpControllerFactory(IWindsorContainer windsorContainer)
+    {
+        <span class="k">if</span> (windsorContainer <span class="o">=</span><span class="o">=</span> <span class="k">null</span>)
+            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"windsorContainer"</span>, 
+                            <span class="s">"The instance of the container cannot be null."</span>);
+
+        _windsorContainer <span class="o">=</span> windsorContainer;
+    }
+
+    <span class="k">public</span> IHttpController CreateController(HttpControllerContext controllerContext, 
+                                            <span class="k">string</span> controllerName)
+    {
+        <span class="k">var</span> controllerFullName <span class="o">=</span> <span class="k">string</span>.Format(<span class="s">"{0}.{1}{2}"</span>, 
+                   <span class="k">typeof</span>(OrderController).Namespace, 
+                   controllerName, ControllerSuffix);
+        <span class="k">var</span> controllerType <span class="o">=</span> Type.GetType(controllerFullName);
+
+        <span class="k">return</span> _windsorContainer.Resolve(controllerType) <span class="k">as</span> IHttpController;
+    }
+
+    <span class="k">public</span> <span class="k">void</span> ReleaseController(IHttpController controller)
+    {
+        <span class="k">var</span> disposableController <span class="o">=</span> controller <span class="k">as</span> IDisposable;
+        <span class="k">if</span> (disposableController <span class="o">!</span><span class="o">=</span> <span class="k">null</span>)
+            disposableController.Dispose();
+
+        _windsorContainer.Release(controller);
+    }
+}</pre></td></tr></table>
+
+<p>Straightforward implementation that doesn't need any comments. Next step is to register it in the WebApi framework.</p>
+
+<h2>First Fail : Registration</h2>
+
+<p>I really should start from there... Looking into the WebApi's API I can't really find where to register my own implementation into the framework. It seems that there is nothing similar to <code>ControllerBuilder.Current.SetControllerFactory</code>. My current startup code is like this :</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">var</span> config <span class="o">=</span> <span class="k">new</span> HttpSelfHostConfiguration(<span class="s">"http://localhost:6666"</span>);
+config.Routes.MapHttpRoute(<span class="s">"defualt"</span>, <span class="s">"{controller}/{id}"</span>, 
+                                <span class="k">new</span> {id <span class="o">=</span> RouteParameter.Optional});
+<span class="k">var</span> server <span class="o">=</span> <span class="k">new</span> HttpSelfHostServer(config);
+
+server.OpenAsync().Wait();</pre></td></tr></table>
+
+<p>Once again, standard initialization. But there is nothing on the <code>HttpSelfHostConfiguration</code> class that allows defining your own <code>IHttpControllerFactory</code> implementation. The only thing I can see is <code>HttpSelfHostConfiguration.ServiceResolver.SetResolver</code> methods with it's overrides. It seems that there is no way to avoid implementing <code>IDependencyResolver</code> interface. So let's do it.</p>
+
+<h2>Rolling out my own Dependency Resolver</h2>
+
+<p>As my unique solution is to implement my own <code>IDependencyResolver</code> so let's do it :</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> WindsorDependencyResolver <span class="o">:</span> IDependencyResolver
+{
+    <span class="k">private</span> <span class="k">readonly</span> WindsorContainer _windsorContainer;
+
+    <span class="k">public</span> WindsorDependencyResolver(WindsorContainer windsorContainer)
+    {
+        <span class="k">if</span> (windsorContainer <span class="o">=</span><span class="o">=</span> <span class="k">null</span>)
+            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"windsorContainer"</span>, 
+                        <span class="s">"The instance of the container cannot be null."</span>);
+
+        _windsorContainer <span class="o">=</span> windsorContainer;
+    }
+
+    <span class="k">public</span> <span class="k">object</span> GetService(Type serviceType)
+    {
+        <span class="k">try</span>
+        {
+            <span class="k">return</span> _windsorContainer.Resolve(serviceType);
+        }
+        <span class="k">catch</span> (ComponentNotFoundException)
+        {
+            <span class="k">return</span> <span class="k">null</span>;
+        }
+    }
+
+    <span class="k">public</span> IEnumerable&lt;<span class="k">object</span>&gt; GetServices(Type serviceType)
+    {
+        <span class="k">try</span>
+        {
+            <span class="k">return</span> _windsorContainer.ResolveAll(serviceType).Cast&lt;<span class="k">object</span>&gt;();
+        }
+        <span class="k">catch</span> (ComponentNotFoundException)
+        {
+            <span class="k">return</span> <span class="k">new</span> List&lt;<span class="k">object</span>&gt;();
+        }
+    }
+}</pre></td></tr></table>
+
+<p>Then we have to register it as follows :</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">static</span> <span class="k">void</span> Main(<span class="k">string</span>[] args)
+{
+    <span class="k">var</span> container <span class="o">=</span> <span class="k">new</span> WindsorContainer();
+    container.Install(FromAssembly.This());
+
+    <span class="k">var</span> config <span class="o">=</span> <span class="k">new</span> HttpSelfHostConfiguration(<span class="s">"http://localhost:6666"</span>);
+    config.ServiceResolver.SetResolver
+                        (<span class="k">new</span> WindsorDependencyResolver(container));
+    config.Routes.MapHttpRoute(<span class="s">"defualt"</span>, 
+               <span class="s">"{controller}/{id}"</span>, <span class="k">new</span> { id <span class="o">=</span> RouteParameter.Optional });
+
+    <span class="k">using</span> (<span class="k">var</span> server <span class="o">=</span> <span class="k">new</span> HttpSelfHostServer(config))
+    {
+        server.OpenAsync().Wait();
+
+        Console.WriteLine(<span class="s">"The server is running."</span>);
+        Console.ReadLine();
+    }
+
+    container.Dispose();
+}</pre></td></tr></table>
+
+<p>This is not sufficient because of the problem described at the beginning of this post (the lack of the "Release" method and thus being unable to release components resolved with Castle.Windsor). The next step is to figure out how to register our implementation of <code>IHttpControllerFactory</code>. The good news is that that framework WebApi calls every time to our implementation of <code>IDependencyResolver</code> in the hope that it could find a service for every seam that is try to resolve. One of that seams is <code>IHttpControllerFactory</code> so it easy to register our own implementation with Castle.Windsor :</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> ControllerFactoryInstaller <span class="o">:</span> IWindsorInstaller
+{
+    <span class="k">public</span> <span class="k">void</span> Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(
+            Component.For&lt;IHttpControllerFactory&gt;().Instance(
+                <span class="k">new</span> WindsorHttpControllerFactory(container)));
+    }
+}</pre></td></tr></table>
+
+<p>Note, that the default liftetime when unspecified is Singleton.</p>
+
+<p>We're ready to test.</p>
+
+<h2>Second Fail : Testing in Fiddler</h2>
+
+<p>To my surprise, when calling my service I end up with the following error (sorry for the French) :</p>
+
+<p><em>{"ExceptionType":"System.NullReferenceException","Message":"La référence d’objet n’est pas définie à une instance d’un objet.","StackTrace":"   à System.Web.Http.ApiController.ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)u000du000a   à System.Web.Http.Dispatcher.HttpControllerDispatcher.SendAsyncInternal(HttpRequestMessage request, CancellationToken cancellationToken)u000du000a   à System.Web.Http.Dispatcher.HttpControllerDispatcher.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)"}</em></p>
+
+<p>For me it brakes the <a href="http://en.wikipedia.org/wiki/Principle_of_least_astonishment">POLA</a>. After wandering on Internet I didn't find anything helpful. I decompiled some WebApi code sources, debugged once again and found that the instance of <code>HttpControllerContext</code> passed to my controller factory was a bit strange. In fact <code>ControllerDescriptor</code> and Controller properties was not assigned. By trial and error I ended up modifying my implementation like this :</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> IHttpController CreateController(HttpControllerContext controllerContext, 
+                                                            <span class="k">string</span> controllerName)
+{
+    <span class="k">var</span> controllerFullName <span class="o">=</span> <span class="k">string</span>.Format(<span class="s">"{0}.{1}{2}"</span>, 
+                                                <span class="k">typeof</span>(OrderController).Namespace, 
+                                                controllerName, ControllerSuffix);
+    <span class="k">var</span> controllerType <span class="o">=</span> Type.GetType(controllerFullName);
+
+    controllerContext.ControllerDescriptor <span class="o">=</span> 
+                <span class="k">new</span> HttpControllerDescriptor(controllerContext.Configuration, 
+                                                    controllerName, controllerType);
+    controllerContext.Controller <span class="o">=</span> 
+                    _windsorContainer.Resolve(controllerType) <span class="k">as</span> IHttpController;
+
+    <span class="k">return</span> controllerContext.Controller;
+}</pre></td></tr></table>
+
+<p>Now everything works as expected. It's a bit weird as these properties seem to be optional from the point of view of the API, or at least they should be provided with the instance of <code>HttpControllerContext</code>.</p>
+
+<h2>In Closing</h2>
+
+<p>As you see, there is no way to get rid of <code>IDependencyResolver</code> in the WebApi compared to MVC. It's a pity because it puts another burden on the developer to implement an interface that doesn't act as a composition root. In fact our composition root is resolved from the implementation of <code>IDependencyResolver</code> so it's a bit confusing. It's understandable from the point of view of ASP.NET team which wanted to make <code>IDependencyResolver</code> a central piece of IoC support in the WebApi framework but for me it presents some design flaws as the API is not clear enough which seams should be used and how exactly implement them.</p>
+
+<p>In the next post I'll do the test implementing it in IIS hosting environment.</p>
+
+
+
+<!-- AddThias -->
+
+	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54bed07b3003b40e" async="async"></script>
+	<div class="addthis_sharing_toolbox"></div>
+
+<!-- END AddThias -->
+
+<!-- Disqus -->
+	<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tjaskula'; // required: replace example with your forum shortname
+	    var disqus_title = 'Web Api (beta) and Castle.Windsor…without IDependencyResolver ?';
+	    var disqus_url = '';
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<!-- Disqus END -->
+        </main>
+        <aside class="col-lg-4">
+              <article>
+                <img class="img-responsive img-circle" src="http://jaskula.fr//img/aside-face200.jpg" />
+                <div class="aside-text">
+                    <blockquote class="small">
+                        <p><cite>Welcome to my blog! F# and functional programming it's what I'm interested in and passionate about at the moment. However, software architecture, software craftsmanship, Domain Driven Design are also topics dear to my heart. So stay tuned! There is more to come...</cite></p>
+                          <footer>Tomasz Jaskuła</footer>
+                    </blockquote>
+                </div>
+                <div class="social">
+                    <a href="https://www.facebook.com/thomas.jaskula" title="facebook"><img src="http://jaskula.fr//img/facebook.jpg" /></a>
+                    <a href="https://github.com/tjaskula" title="github"><img src="http://jaskula.fr//img/github.jpg" /></a>
+                    <a href="https://plus.google.com/u/1/106268061202265370189/about" title="google"><img src="http://jaskula.fr//img/google.jpg" /></a>
+                    <a href="https://twitter.com/tjaskula" title="twitter"><img src="http://jaskula.fr//img/twitter.jpg" /></a>
+                    <a href="http://jaskula.fr//rss.xml" title="rss"><img src="http://jaskula.fr//img/rss.jpg" /></a>
+                </div>
+            </article>
+              <article>
+                   <h2>Recent posts</h2>
+
+                      <ul class="articles-list">
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes/index.html">Beginners quick guide to setup FsBlog and start to blog in 5 minutes</a>
+                                      <span>    <time datetime="2015-01-21T11:55:09" pubdate data-updated="true">Jan 21, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Welcome</a>
+                                      <span>    <time datetime="2015-01-20T11:10:42" pubdate data-updated="true">Jan 20, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2012/03-11-web-api-beta-and-castle-windsor-without-idependencyresolver/index.html">Web Api (beta) and Castle.Windsor…without IDependencyResolver ?</a>
+                                      <span>    <time datetime="2012-03-11T10:58:47" pubdate data-updated="true">Mar 11, 2012</time>
+</span>
+                                  </h3>
+                              </li>
+                      </ul>
+
+              </article>
+        </aside>
+      </div>
+    </div>
+
+      <footer class="bottom">
+          <div class="container">
+              <div class="row">
+                  <div class="col-lg-12">
+                      <p>This site is generated using <a href="https://github.com/fsprojects/FsBlog">FsBlog</a> and hosted on <a href="https://github.com/tjaskula/Blog">GitHub</a></p>
+                      <p><small>By Tomasz Jaskula, 2015 &mdash; Theme by <a href="https://github.com/matjas">matjas</a></small></p>
+                  </div>
+              </div>
+          </div>
+
+      </footer>
+
+    <script src="http://jaskula.fr//javascripts/scale.fix.js"></script>
+  </body>
+</html>
