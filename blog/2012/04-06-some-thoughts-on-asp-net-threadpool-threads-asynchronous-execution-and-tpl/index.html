@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
     <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="Improve signal, reduce noise = use F#" />
+    <meta name="description" content="Some facts about threading, TPL and ASP.NET" />
     <meta name="author" content="Tomasz Jaskuła" />
     <meta name="copyright" content="Tomasz Jaskuła 2015" />
 
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:creator" content="@tjaskula">
-    <meta name="twitter:title" content="Tomasz Jaskula's blog">
-    <meta name="twitter:description" content="Improve signal, reduce noise = use F#">
+    <meta name="twitter:title" content="Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL">
+    <meta name="twitter:description" content="Some facts about threading, TPL and ASP.NET">
     
     <!-- End Twitter cards -->
 
@@ -87,62 +87,9 @@
       <div class="row">
         <main class="col-lg-8">
               
+<h1>Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL</h1>
 
-
-    <h3 class="h2link">
-        <a href="http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes/index.html">Beginners quick guide to setup FsBlog and start to blog in 5 minutes</a>
-    </h3>
-    <h6>
-            <time datetime="2015-01-21T11:55:09" pubdate data-updated="true">21 January 2015</time>
-
-    </h6>
-    <br />
-    <article>
-        <div class="row">
-<div class="medium-8 columns">
-
-<p>If you would like to blog on GitHub pages but you don't want to deep dive to much into documentation and you don't want to waste your time, just keep on reading. In this post you will learn how to set up quickly FsBlog, a static web page generator written in F# for GitHub pages. But, don't be scared. You don't need to know F# in order to use it.</p>
-
-</div>
-</div>
-
-
-
-
-        <a href="http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes/index.html">Read more ...</a>
-    </article>
-    <h3 class="h2link">
-        <a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Welcome</a>
-    </h3>
-    <h6>
-            <time datetime="2015-01-20T11:10:42" pubdate data-updated="true">20 January 2015</time>
-
-    </h6>
-    <br />
-    <article>
-        <div class="row">
-<div class="medium-8 columns">
-
-<p>When I started to think about what title would best fit my new blog, I was stuck. I couldn't find anything that really translated the state of my mind. I wanted it to be short but also communicative. Something, that when you read it you already have an idea of what kind of content you can find on this blog. Still nothing on my mind...</p>
-
-</div>
-</div>
-
-
-
-
-        <a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Read more ...</a>
-    </article>
-    <h3 class="h2link">
-        <a href="http://jaskula.fr//blog/2012/04-06-some-thoughts-on-asp-net-threadpool-threads-asynchronous-execution-and-tpl/index.html">Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL</a>
-    </h3>
-    <h6>
-            <time datetime="2012-04-06T06:01:50" pubdate data-updated="true">6 April 2012</time>
-
-    </h6>
-    <br />
-    <article>
-        <div class="row">
+<div class="row">
 <div class="medium-8 columns">
 
 <p>I've been always confused whenever you should or not implement asynchronous execution for "lengthy" operations when it comes to the ASP.NET platform. It has to be said that there is many factors that come into play. The way ASP.NET concurrent request are handled not only has changed over the different version of Framework .NET but also you have to consider how ASP.NET deals with threads and ThreadPool in general.</p>
@@ -150,34 +97,71 @@
 </div>
 </div>
 
+<!-- more -->
+
+<p>I've been always confused whenever you should or not implement asynchronous execution for "lengthy" operations when it comes to the ASP.NET platform. It has to be said that there is many factors that come into play. The way ASP.NET concurrent request are handled not only has changed over the different version of Framework .NET but also you have to consider how ASP.NET deals with threads and ThreadPool in general. Since the very beginning I hear people saying to make usage of your own threads if you don't want to starve the ThreadPool in ASP.NET process by queuing too many work items. It will prevent ASP.NET from processing further requests. Some confusion has been added with the recent release of TPL library and its usage inside the asynchronous pages/controllers/handlers in regards to the threads and ThreadPool consumption. All the more there is no clear guidance or rather no easy one to find. So let me now sum up all this when it comes to the latest .NET Framework (4/4.5).</p>
+
+<h2>ASP.NET ThreadPool facts</h2>
+
+<ul>
+<li>ASP.NET uses threads from a common language runtime (CLR) thread pool to process requests. As long as there are threads available in the thread pool, ASP.NET has no trouble dispatching incoming requests.</li>
+<li>Async delegates use the threads from ThreadPool.</li>
+</ul>
+
+<h2>When you should start thinking about implementing asynchronous execution?</h2>
+
+<ul>
+<li>When your application performs relatively lengthy I/O operations (database queries, Web service calls, and other I/O operations).</li>
+<li>If you want to do I/O work, then you should be using an I/O thread (I/O Completion Port) and specifically you should be using the async callbacks supported by whatever library class you're using. Theirs names start with the words <code>Begin</code> and <code>End</code>.</li>
+<li>If requests are computationally cheap to process, then parallelism is probably an unnecessary overhead.</li>
+<li>If the incoming request rate is high, then adding more parallelism will likely yield few benefits and could actually decrease performance, since the incoming rate of work may be high enough to keep the CPUs busy.</li>
+</ul>
+
+<h2>Should I create new Threads?</h2>
+
+<ul>
+<li>Avoid creating new threads like you would avoid the plague.</li>
+<li>If you are actually queuing enough work items to prevent ASP.NET from processing further requests, then you should be starving the thread pool! If you are running literally hundreds of CPU-intensive operations at the same time, what good would it do to have another worker thread to serve an ASP.NET request, when the machine is already overloaded.</li>
+</ul>
+
+<h2>What about the TPL and async await? Does it solve my problems?</h2>
+
+<ul>
+<li>TPL can adapt to use available resources within a process. If the server is already loaded, the TPL can use as little as one worker and make forward progress. If the server is mostly free, they can grow to use as many workers as the ThreadPool can spare.</li>
+<li>Tasks use threadpool threads to execute.</li>
+<li>When async/await will not consume an additional ThreadPool thread ? Only in the case you are using BCL Async methods. that uses an IOCP thread to execute the IO bound operation.</li>
+</ul>
+
+<p>If you are trying to <strong>async execute some sync code or your own library code</strong>, that code will probably <strong>use an additional ThreadPool thread</strong> unless you explicitly use the IOCP ThreadPool or your own ThreadPool. But as far as I know you can't chose whatever you want to use a IOCP thread, and making correct implementation of the ThreadPool is not worth the effort. I doubt someone does a better one that already exists.</p>
+
+<p>I scratched only the surface but if you have more suggestions don't hesitate to leave me a comment.</p>
 
 
 
-        <a href="http://jaskula.fr//blog/2012/04-06-some-thoughts-on-asp-net-threadpool-threads-asynchronous-execution-and-tpl/index.html">Read more ...</a>
-    </article>
-    <h3 class="h2link">
-        <a href="http://jaskula.fr//blog/2012/03-11-web-api-beta-and-castle-windsor-without-idependencyresolver/index.html">Web Api (beta) and Castle.Windsor…without IDependencyResolver ?</a>
-    </h3>
-    <h6>
-            <time datetime="2012-03-11T10:58:47" pubdate data-updated="true">11 March 2012</time>
+<!-- AddThias -->
 
-    </h6>
-    <br />
-    <article>
-        <div class="row">
-<div class="medium-8 columns">
+	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54bed07b3003b40e" async="async"></script>
+	<div class="addthis_sharing_toolbox"></div>
 
-<p>I've been reading through several blog post about how people configure DI support in the new <a href="http://www.asp.net/web-api">ASP.NET Web Api</a>. For example you can read about it here :</p>
+<!-- END AddThias -->
 
-</div>
-</div>
+<!-- Disqus -->
+	<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tjaskula'; // required: replace example with your forum shortname
+	    var disqus_title = 'Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL';
+	    var disqus_url = '';
 
-
-
-
-        <a href="http://jaskula.fr//blog/2012/03-11-web-api-beta-and-castle-windsor-without-idependencyresolver/index.html">Read more ...</a>
-    </article>
-
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<!-- Disqus END -->
         </main>
         <aside class="col-lg-4">
               <article>
