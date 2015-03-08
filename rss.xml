@@ -37,6 +37,22 @@
 </description>
     </item>
     <item>
+      <title>Is HTML a valid media-type for building web sites with RESTful API ?</title>
+      <guid>http://jaskula.fr//blog/2012/10-29-is-html-a-valid-media-type-for-building-web-sites-with-restfull-api</guid>
+      <link>http://jaskula.fr//blog/2012/10-29-is-html-a-valid-media-type-for-building-web-sites-with-restfull-api/index.html</link>
+      <pubDate>Mon, 29 Oct 2012 05:01:50 GMT</pubDate>
+      <description>&lt;div class="row"&gt;
+&lt;div class="medium-8 columns"&gt;
+
+&lt;p&gt;This is the question I've been asking myself while confronted to a problem of building a web site and RESTful API at the same time. I've been told that I can't build one and have both. Why? HTML is just another media-type but what is generally used when building web sites is the capacity of &lt;strong&gt;templated view generation&lt;/strong&gt; which is much more then simple HTML resource representation.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+</description>
+    </item>
+    <item>
       <title>Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL</title>
       <guid>http://jaskula.fr//blog/2012/04-06-some-thoughts-on-asp-net-threadpool-threads-asynchronous-execution-and-tpl</guid>
       <link>http://jaskula.fr//blog/2012/04-06-some-thoughts-on-asp-net-threadpool-threads-asynchronous-execution-and-tpl/index.html</link>

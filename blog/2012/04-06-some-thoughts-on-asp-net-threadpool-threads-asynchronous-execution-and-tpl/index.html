@@ -99,7 +99,7 @@
 
 <!-- more -->
 
-<p>I've been always confused whenever you should or not implement asynchronous execution for "lengthy" operations when it comes to the ASP.NET platform. It has to be said that there is many factors that come into play. The way ASP.NET concurrent request are handled not only has changed over the different version of Framework .NET but also you have to consider how ASP.NET deals with threads and ThreadPool in general. Since the very beginning I hear people saying to make usage of your own threads if you don't want to starve the ThreadPool in ASP.NET process by queuing too many work items. It will prevent ASP.NET from processing further requests. Some confusion has been added with the recent release of TPL library and its usage inside the asynchronous pages/controllers/handlers in regards to the threads and ThreadPool consumption. All the more there is no clear guidance or rather no easy one to find. So let me now sum up all this when it comes to the latest .NET Framework (4/4.5).</p>
+<p>Since the very beginning I hear people saying to make usage of your own threads if you don't want to starve the ThreadPool in ASP.NET process by queuing too many work items. It will prevent ASP.NET from processing further requests. Some confusion has been added with the recent release of TPL library and its usage inside the asynchronous pages/controllers/handlers in regards to the threads and ThreadPool consumption. All the more there is no clear guidance or rather no easy one to find. So let me now sum up all this when it comes to the latest .NET Framework (4/4.5).</p>
 
 <h2>ASP.NET ThreadPool facts</h2>
 
@@ -193,6 +193,12 @@
                               <li>
                                   <h3><a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Welcome</a>
                                       <span>    <time datetime="2015-01-20T11:10:42" pubdate data-updated="true">Jan 20, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2012/10-29-is-html-a-valid-media-type-for-building-web-sites-with-restfull-api/index.html">Is HTML a valid media-type for building web sites with RESTful API ?</a>
+                                      <span>    <time datetime="2012-10-29T06:01:50" pubdate data-updated="true">Oct 29, 2012</time>
 </span>
                                   </h3>
                               </li>
