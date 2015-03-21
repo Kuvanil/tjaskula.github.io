@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
     <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="If you want to know more how automatically generate hypermedia links using HyprLinkr, and how to register it with StructureMap DI, please read on" />
+    <meta name="description" content="Integration of the library HyprLinkr for hypermedia link generation with ASP.NET Web Api and AttributeRouting" />
     <meta name="author" content="Tomasz Jaskuła" />
     <meta name="copyright" content="Tomasz Jaskuła 2015" />
 
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:creator" content="@tjaskula">
-    <meta name="twitter:title" content="Configure StructureMap in ASP.NET WebApi to play nicely with HyprLinkr">
-    <meta name="twitter:description" content="If you want to know more how automatically generate hypermedia links using HyprLinkr, and how to register it with StructureMap DI, please read on">
+    <meta name="twitter:title" content="How to integrate ASP.NET WebApi AttributeRouting with HyprLinkr">
+    <meta name="twitter:description" content="Integration of the library HyprLinkr for hypermedia link generation with ASP.NET Web Api and AttributeRouting">
     
     <!-- End Twitter cards -->
 
@@ -87,149 +87,132 @@
       <div class="row">
         <main class="col-lg-8">
               
-<h1>Configure StructureMap in ASP.NET WebApi to play nicely with HyprLinkr</h1>
+<h1>How to integrate ASP.NET WebApi AttributeRouting with HyprLinkr</h1>
 
 <div class="row">
 <div class="medium-8 columns">
 
-<p>There are plenty of blog posts about how to configure StructureMap with ASP.NET WebApi so I won't go into much details about that.</p>
+<p>In my last post, I showed you <a href="http://jaskula.fr//blog/2013/07-26-configure-structuremap-in-asp-net-webapi-to-play-nicely-with-hyprlinkr/index.html">how to configure ASP.NET WebApi, StructureMap and HyprLinkr</a>.</p>
 
 </div>
 </div>
 
 <!-- more -->
 
-<p>The goal of this post is to show you how to configure <a href="https://github.com/ploeh/Hyprlinkr">HyprLinkr</a> to be correctly injected into your web api controllers. For those who don't know what <a href="https://github.com/ploeh/Hyprlinkr">HyprLinkr</a> is, here is a little description taken from the project wiki page <a href="https://github.com/ploeh/Hyprlinkr">https://github.com/ploeh/Hyprlinkr</a></p>
-
-<blockquote>
-  <p>Hyprlinkr is a small and very focused helper library for the ASP.NET Web API. It does one thing only: it creates URIs according to the application's route configuration in a type-safe manner.</p>
-</blockquote>
-
-<p>Let’s set up some context of how HyprLinkr is used.</p>
+<p>Today I would like to show you how to use <a href="https://github.com/ploeh/Hyprlinkr">HyprLinkr</a> with <a href="http://attributerouting.net/">AttributeRouting</a>. HyprLinkr works with the standard route configuration created by the Visual Studio project template (route named "API Default"). If you would like to make it work with another routing framework you have to tweak somehow HyprLinkr. Hopefully, the API is very developer-friendly and Mark Seemann which is the creator of HyprLinkr has provided some means for doing it very easily. For those who don't know AttributeRouting, it allows to define route templates in attributes directly on the controllers and actions. It allows some extra features like hierarchical route definition and so on.</p>
 
 <h2>Usage context</h2>
 
-<p>The main component in HyprLinkr is <code>RouteLinker</code> which implements <code>IResourceLinker</code> interface and that I want to inject inside my web api constructor.</p>
+<p>Once you've downloaded and configured AttributeRouting inside your WebApi application, your controllers might look something like this :</p>
 
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> ItemsController <span class="o">:</span> ApiController
+<table class="pre"><tr><td><pre lang="csharp">[RoutePrefix(<span class="s">"api/rest"</span>)]
+<span class="k">public</span> <span class="k">class</span> ItemsController <span class="o">:</span> ApiController
 {
     <span class="k">private</span> <span class="k">readonly</span> IItemsRepository _itemsRepository;
     <span class="k">private</span> <span class="k">readonly</span> IResourceLinker _resourceLinker;
 
-    <span class="k">public</span> ItemsController(IItemsRepository itemsRepository, IResourceLinker resourceLinker)
+    <span class="k">public</span> ItemsController(IItemsRepository itemsRepository, 
+                            IResourceLinker resourceLinker)
     {
-        <span class="k">if</span> (itemsRepository <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"itemsRepository"</span>);
-        <span class="k">if</span> (resourceLinker <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"resourceLinker"</span>);
+        <span class="k">if</span> (itemsRepository <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"itemsRepository"</span>);
+        <span class="k">if</span> (resourceLinker <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"resourceLinker"</span>);
 
         _itemsRepository <span class="o">=</span> itemsRepository;
         _resourceLinker <span class="o">=</span> resourceLinker;
     }
 
-        <span class="c">// some stuff here</span>
+    [GET(<span class="s">"items/{id}/{config?}"</span>)]
+    <span class="k">public</span> ItemRepresentation GetItem(<span class="k">int</span> id, <span class="k">string</span> config <span class="o">=</span> <span class="s">"small"</span>)
+    {
+        <span class="k">var</span> uri <span class="o">=</span> _resourceLinker.GetUri&lt;ItemsController&gt;(
+                a <span class="o">=</span><span class="o">&gt;</span> a.GetRelatedItems(id, config, 1, 15)).ToString();
+        <span class="k">return</span> _itemsRepository.GetItem(id, config);
+    }
 }</pre></td></tr></table>
 
-<h2>What doesn't work?</h2>
+<h2>Tweaking of HyprLinkr</h2>
 
-<p>If you follow the best practices, the composition root of ASP.NET WebApi would be a custom controller activator (implementation of <code>IHttpControllerActivator</code>). In my case it’s based on StructureMap and is defined as follows :</p>
+<p>If you recall from <a href="http://jaskula.fr/blog/2013/07-26-configure-structuremap-in-asp-net-webapi-to-play-nicely-with-hyprlinkr/index.html">my previous post</a> StructureMap is configured to inject <code>IResourceLinker</code> in order to resolve url for hypermedia links. However with AttributeRouting it won't work. For that we need to implement our own <code>IRouteDispatcher</code> interface and to provide the implementation to the <code>IResourceLinker</code> instance being resolved by StructureMap. Here's the implementation of <code>IRouteDispatcher</code> for AttributeRouting framework :</p>
 
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> StructureMapControllerActivator <span class="o">:</span> IHttpControllerActivator
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> AttributeRoutingRouteDispatcher <span class="o">:</span> IRouteDispatcher
 {
-    <span class="k">private</span> <span class="k">readonly</span> Container _container;
+    <span class="k">private</span> <span class="k">readonly</span> HttpRequestMessage _httpRequestMessage;
 
-    <span class="k">public</span> StructureMapControllerActivator(Container container)
+    <span class="k">public</span> AttributeRoutingRouteDispatcher(
+                HttpRequestMessage httpRequestMessage)
     {
-        <span class="k">if</span> (container <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"container"</span>);
-        _container <span class="o">=</span> container;
+        <span class="k">if</span> (httpRequestMessage <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"httpRequestMessage"</span>);
+
+        _httpRequestMessage <span class="o">=</span> httpRequestMessage;
     }
 
-    <span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
-            HttpControllerDescriptor controllerDescriptor, Type controllerType)
+    <span class="k">public</span> Rouple Dispatch(MethodCallExpression method, 
+                    IDictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt; routeValues)
     {
-        <span class="k">try</span>
+        <span class="k">if</span> (method <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"method"</span>);
+
+        <span class="k">var</span> newRouteValues <span class="o">=</span> 
+                <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;(routeValues);
+
+        <span class="k">var</span> controllerName <span class="o">=</span> method
+            .Object
+            .Type
+            .Name
+            .ToLowerInvariant()
+            .Replace(<span class="s">"controller"</span>, <span class="s">""</span>);
+        newRouteValues[<span class="s">"controller"</span>] <span class="o">=</span> controllerName;
+
+        <span class="k">var</span> attributeRoute <span class="o">=</span> method.Method
+                    .GetCustomAttributes(<span class="k">true</span>)
+                    .Cast&lt;HttpRouteAttribute&gt;()
+                    .FirstOrDefault();
+
+        <span class="k">string</span> routeName <span class="o">=</span> <span class="k">null</span>;
+
+        <span class="k">if</span> (attributeRoute <span class="o">!</span><span class="o">=</span> <span class="k">null</span>)
         {
-            <span class="k">return</span> (IHttpController)_container.GetInstance(controllerType);
+            <span class="k">const</span> <span class="k">string</span> patterToMatch <span class="o">=</span> <span class="s">"(:(.*?)*|(?)*)}"</span>;
+            <span class="k">var</span> strippedFromTokensUrl <span class="o">=</span> 
+                Regex.Replace(attributeRoute.RouteUrl, patterToMatch, <span class="s">"}"</span>);
+            <span class="k">var</span> matchedRoute <span class="o">=</span> 
+                _httpRequestMessage.GetConfiguration()
+                    .Routes.FirstOrDefault(x <span class="o">=</span><span class="o">&gt;</span> 
+                        x.RouteTemplate.Contains(strippedFromTokensUrl)) 
+                        <span class="k">as</span> HttpAttributeRoute;
+            <span class="k">if</span> (matchedRoute <span class="o">!</span><span class="o">=</span> <span class="k">null</span>) 
+                routeName <span class="o">=</span> matchedRoute.RouteName;
         }
-        <span class="k">catch</span> (Exception e)
-        {
-            <span class="c">// TODO : Logging</span>
-            <span class="k">throw</span> e;
-        }
+
+        <span class="k">return</span> <span class="k">new</span> Rouple(routeName, newRouteValues);
     }
 }</pre></td></tr></table>
 
-<p>The registration of <code>IResourceLinker</code> in StructureMap is simple like that :</p>
+<p>We need to return a <code>Rouple</code> object with a routeName and route values in order to allow HyprLinkr to generate the right url. As input we only need an instance of <code>HttpRequestMessage</code>. This is necessary to access the configured routes in the <code>RouteTable</code>. When the application is being run for the first time, the AttributeRouting framework scans all the controllers and extracts url templates from the attributes. Then it adds these to the Route table of WebApi configuration object. We need to match the template url extracted from the controller action attribute to the route configured in the route table and then get its name to construct our <code>Rouple</code> object. In order to match an url to the attribute's template we have to apply a regex that strips some special characters from the template (type definitions like ":int?", optional parameter "?", etc.)</p>
 
-<table class="pre"><tr><td><pre lang="csharp">For&lt;IResourceLinker&gt;().Use&lt;RouteLinker&gt;();</pre></td></tr></table>
+<h2>Configuring all</h2>
 
-<p>The problem is when you run this code and when the first request hits <code>ItemsController</code>,  StructureMap throws an exception saying that the mapping for <code>HttpRequestMessage</code> is not defined and thus the <code>IResourceLinker</code> instance cannot be resolved.</p>
+<p>In order to construct our rouple object in the custom dispatcher, we need to tell to AttributeRouting framework to generate route names for each registered route (by default this is not done and we can't use it with HyprLinkr). The configuration can be done in WebApi registration section. <code>AutoGenerateRouteNames</code> should be set to <code>true</code> :</p>
 
-<p>When you look into the <code>RouteLinker</code> code you understand the error. You have to pass at least an instance of <code>HttpRequestMessage</code> to the constructor of <code>RouteLinker</code>. This is understandable as <code>RouteLinker</code> needs a request context in order to generate urls for the links.</p>
-
-<h2>How to make it work?</h2>
-
-<p>The main issue is that we need to provide an <code>HttpRequestMessage</code> instance before the controller is resolved. The only place where we have an instance of <code>HttpRequestMessage</code> is in the controller activator. So we need to kind of inject the instance of <code>HttpRequestMessage</code> into the StructureMap container before the controller is resolved. Fortunately StrucureMap has such a feature and we could do something like this in the <code>StrucureMapControllerActivator</code> :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
-        HttpControllerDescriptor controllerDescriptor, Type controllerType)
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">var</span> configuration <span class="o">=</span> <span class="k">new</span> HttpWebConfiguration
 {
-    <span class="k">try</span>
-    {
-        _container.Inject(<span class="k">typeof</span>(HttpRequestMessage), request);
-        <span class="k">return</span> (IHttpController)scopedContainer.GetInstance(controllerType);
-    }
-    <span class="k">catch</span> (Exception e)
-    {
-        <span class="c">// TODO : Logging</span>
-        <span class="k">throw</span> e;
-    }
-}</pre></td></tr></table>
+        AutoGenerateRouteNames <span class="o">=</span> <span class="k">true</span>
+};
+configuration.AddRoutesFromAssembly(Assembly.GetExecutingAssembly());
+config.Routes.MapHttpAttributeRoutes(configuration);</pre></td></tr></table>
 
-<p>This might be a good idea at first sight, except that is not…</p>
+<p>The last step consist of configuring StructureMap for passing the right dependencies inside our instance of <code>IResourceLinker</code> :</p>
 
-<p>Do you spot an eventual issue?</p>
+<table class="pre"><tr><td><pre lang="csharp">For&lt;IResourceLinker&gt;()
+    .Use(ctx <span class="o">=</span><span class="o">&gt;</span> <span class="k">new</span> RouteLinker(ctx.GetInstance&lt;HttpRequestMessage&gt;(), 
+                ctx.GetInstance&lt;AttributeRoutingRouteDispatcher&gt;()));</pre></td></tr></table>
 
-<p>What could happen with concurrent requests? The container instance is shared between requests. It means that when an instance of <code>HttpRequestMessage</code> is injected into the container, and before the container resolves the controller, another request could come in and inject HIS instance of <code>HttpRequestMessage</code>. Then when the first controller is resolved, the wrong instance of <code>HttpRequestMessage</code> would be passed into the <code>RouteLinked</code> constructor.</p>
+<h2>In closing</h2>
 
-<p>Another point that I that maybe StructureMap doesn't allow multiple injection of the same instance type. I haven't checked that. But anyways i wouldn't work for the first reason I mentioned.</p>
-
-<h2>StructureMap and nested containers</h2>
-
-<p>One handy feature of StructureMap are nested containers. If you don't know what the nested containers are, please read Jeremy Miller post about it when it was introduced in StructureMap <a href="http://codebetter.com/jeremymiller/2010/02/10/nested-containers-in-structuremap-2-6-1/.">http://codebetter.com/jeremymiller/2010/02/10/nested-containers-in-structuremap-2-6-1/.</a> To sum up we want to create a nested container on each incoming request and to inject there an instance of <code>HttpRequestMessage</code>. Each request will have it's own nested container from which the controller and all dependencies will be pulled. Let's refactor our <code>StructureMapControllerActivator</code> :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
-        HttpControllerDescriptor controllerDescriptor, Type controllerType)
-{
-    <span class="k">try</span>
-    {
-        <span class="k">var</span> scopedContainer <span class="o">=</span> _container.GetNestedContainer();
-        scopedContainer.Inject(<span class="k">typeof</span>(HttpRequestMessage), request);
-        request.RegisterForDispose(scopedContainer);
-        <span class="k">return</span> (IHttpController)scopedContainer.GetInstance(controllerType);
-    }
-    <span class="k">catch</span> (Exception e)
-    {
-        <span class="c">// TODO : Logging</span>
-        <span class="k">throw</span> e;
-    }
-}</pre></td></tr></table>
-
-<p>As you can see, all dependencies are pulled from the nested container. However you might wonder why we need this line?</p>
-
-<table class="pre"><tr><td><pre lang="csharp">request.RegisterForDispose(scopedContainer);</pre></td></tr></table>
-
-<p>In fact nested containers has some feature that you might not be aware of.</p>
-
-<blockquote>
-  <p>The nested container will track all of the transient objects that it creates.  When the nested container itself is disposed, it will call Dispose() on any of the transient objects that it created. A normal StructureMap Container does not track the transient objects that it creates</p>
-</blockquote>
-
-<p>This is important because it means that if you don't dispose of your nested container you may encounter some memory leaks as it track the resolution of all transient components. Fortunately the web api framework allows us to register our nested container for dispose.</p>
-
-<p>There is a last thing to do. We have to change our <code>IResourceLinker</code> registration in StructureMap in order to tell which constructor we want to use when <code>RouteLinker</code> will be constructed. By default StructureMap selects most "greedy" constructor which means with most of the arguments.</p>
-
-<table class="pre"><tr><td><pre lang="csharp">For&lt;IResourceLinker&gt;().Use(ctx <span class="o">=</span><span class="o">&gt;</span> <span class="k">new</span> RouteLinker(ctx.GetInstance&lt;HttpRequestMessage&gt;()));</pre></td></tr></table>
-
-<p>Now when you run the application, everything works as expected.</p>
+<p>As you noticed, it's very straightforward to adapt HyprLinkr to work with other routes definition frameworks in WebApi. AttribouteRouting will be the next important feature of WebApi Next (V2) so it's important to know how to make it work with HyprLinkr if you're using it as your hypermedia links generating framework.</p>
 
 
 
@@ -245,7 +228,7 @@
     <script type="text/javascript">
         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
         var disqus_shortname = 'tjaskula'; // required: replace example with your forum shortname
-	    var disqus_title = 'Configure StructureMap in ASP.NET WebApi to play nicely with HyprLinkr';
+	    var disqus_title = 'How to integrate ASP.NET WebApi AttributeRouting with HyprLinkr';
 	    var disqus_url = '';
 
         /* * * DON'T EDIT BELOW THIS LINE * * */
