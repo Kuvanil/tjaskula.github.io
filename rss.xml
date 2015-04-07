@@ -37,6 +37,22 @@
 </description>
     </item>
     <item>
+      <title>From OOP to FP : About dependency injection and higher-order functions</title>
+      <guid>http://jaskula.fr//blog/2013/08-21-from-oop-to-fp-about-dependency-injection-and-higher-order-functions</guid>
+      <link>http://jaskula.fr//blog/2013/08-21-from-oop-to-fp-about-dependency-injection-and-higher-order-functions/index.html</link>
+      <pubDate>Wed, 21 Aug 2013 06:07:57 GMT</pubDate>
+      <description>&lt;div class="row"&gt;
+&lt;div class="medium-8 columns"&gt;
+
+&lt;p&gt;This is the next part of the series "My 2 weeks trip from OOP to FP"&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+</description>
+    </item>
+    <item>
       <title>Sharing code between C# and F#</title>
       <guid>http://jaskula.fr//blog/2013/08-16-sharing-code-between-c-and-f</guid>
       <link>http://jaskula.fr//blog/2013/08-16-sharing-code-between-c-and-f/index.html</link>
