@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
     <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="I'm learning a lot but I cannot remember everything so this is just my learning notes page." />
+    <meta name="description" content="C# language learning notes. C# (pronounced as see sharp) is a multi-paradigm programming language encompassing strong typing,  imperative, declarative, functional, generic, object-oriented (class-based), and component-oriented programming disciplines. It was developed by Microsoft within its .NET initiative and later approved as a standard by Ecma (ECMA-334) and ISO (ISO/IEC 23270:2006). C# is one of the programming languages designed for the Common Language Infrastructure." />
     <meta name="author" content="Tomasz Jaskuła" />
     <meta name="copyright" content="Tomasz Jaskuła 2015" />
 
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:creator" content="@tjaskula">
-    <meta name="twitter:title" content="My personal learning notes">
-    <meta name="twitter:description" content="I'm learning a lot but I cannot remember everything so this is just my learning notes page.">
+    <meta name="twitter:title" content="C# Language learning notes">
+    <meta name="twitter:description" content="C# language learning notes. C# (pronounced as see sharp) is a multi-paradigm programming language encompassing strong typing,  imperative, declarative, functional, generic, object-oriented (class-based), and component-oriented programming disciplines. It was developed by Microsoft within its .NET initiative and later approved as a standard by Ecma (ECMA-334) and ISO (ISO/IEC 23270:2006). C# is one of the programming languages designed for the Common Language Infrastructure.">
     
     <!-- End Twitter cards -->
 
@@ -88,14 +88,110 @@
         <main class="col-lg-8">
               
 
-<h1>Topics</h1>
+<h1>C# Language</h1>
 
-<p>This is not an exhaustive list of all the topics I've learnt and because I don't have much time to write about all the stuff. This list is still in progress. Not sure everything will be added</p>
-
-<h2>Languages</h2>
+<h2>Polymporphisme</h2>
 
 <ul>
-<li><a href="csharp/">C#</a></li>
+<li>Une instance de type x peut se référer à un object qui souclasse x</li>
+<li>Upcast : => vers la référence de classe de base (Implicit)</li>
+<li>Downcast : => vers la référence dela souclasse (Explicit)</li>
+</ul>
+
+<h2>Object</h2>
+
+<h3>Boxing : value-type => reference</h3>
+
+<p><a href="http://theburningmonk.com/2015/07/beware-of-implicit-boxing-of-value-types/">When does the implicit boxing occurs?</a></p>
+
+<ul>
+<li>When you invoke a virtual method</li>
+</ul>
+
+<p>Value types inherit from the <code>System.ValueType</code>, which itself inherits from <code>System.Object</code>. Amongst other things, <code>System.ValueType</code> provides an override for <code>Equals</code> that gives value types the default compare-by-value behaviour.
+However, a value types is stored in memory without the Method Table Pointer so in order to dispatch a virtual method call it'll first have to be boxed into a reference type first.</p>
+
+<ul>
+<li>When you call <code>List&lt;T&gt;.Contains</code></li>
+</ul>
+
+<p>When you call <code>List&lt;T&gt;.Contains</code>, an instance of <code>EqualityComparer&lt;T&gt;</code> will be used to compare the argument against every element of the list.
+This eventually causes a new <code>EqualityComparer&lt;T&gt;</code> to be created.
+In the default case where the struct doesn't implement the <code>IEquatable&lt;T&gt;</code> interface, the <code>ObjectEqualityComparer&lt;T&gt;</code> will be returned. And it is in here, that the overridden/inherited <code>Equals(object other)</code> method will be used and causes boxing to occur for every comparison!
+If, on the other hand, struct implements the <code>IEquatable&lt;T&gt;</code> interface then the outcome will be very different. This allows some clever logic to kick in and use the overloaded <code>Equals(MyStruct other)</code> instead.</p>
+
+<ul>
+<li>When you invoke an interface method</li>
+</ul>
+
+<p>Like virtual methods, in order to dispatch an interface method you also need the <em>Method Table Pointer</em>, which means boxing is required.
+Fortunately, the CLR is able to short-circuit this by calling the method directly if the compile-time type is resolved to the actual value type (e.g. MyStruct) rather than the interface type.</p>
+
+<ul>
+<li>When <code>Dictionary&lt;T&gt;</code> invokes <code>GetHashCode</code></li>
+</ul>
+
+<p><code>GetHashCode</code> is used by hash-based collection types, the most common being <code>Dictionary&lt;TKey, TValue&gt;</code> and <code>HashSet&lt;T&gt;</code>.
+In both cases, it's invoked through the <code>IEqualityComparer&lt;T&gt;</code> type we talked earlier, and in both cases the comparer is also initialized through <code>EqualityComparer&lt;T&gt;.Default</code> and the <code>CreateComparer</code> method.
+<code>GetHashCode</code> is invoked in many places within <code>Dictionary&lt;TKey, TValue&gt;</code> - on <code>Add</code>, <code>ContainsKey</code>, <code>Remove</code>, etc.</p>
+
+<h3>Unboxing : reference type => value-type</h3>
+
+<h3>Struct : pas de constructeur sans paramètres, peut implémenter les interfaces mais pas hériter des classes</h3>
+
+<h3>Enum : constantes numériques goupées et nommées</h3>
+
+<h3>Nested types : peut accéder aux types privés du type contenant</h3>
+
+<h2>Generics</h2>
+
+<ul>
+<li>templates de types</li>
+<li>type safety et réduction de boxing/unboxing</li>
+<li>covariant for OUT Subclass to Base</li>
+<li>contravarient for IN Base to Subclass</li>
+</ul>
+
+<h2>Delegates</h2>
+
+<ul>
+<li>découple l'appellant de la méthode cible</li>
+<li>delegate type : protocole auquelle la cible et l'appellant vont se conformer</li>
+<li>delegate instance : objet qui references une ou plusieurs methods à invoquer</li>
+<li>immutable</li>
+</ul>
+
+<h2>Events</h2>
+
+<ul>
+<li>subscriber/broadcaster model</li>
+<li>But est de prévenir souscripteurs d'inférer entre eux (suppression d'autres souscripteurs, invocations et breoadcast à d'autre) donc on a le mot clé event</li>
+<li>peuvent $etre virtuel, overridden, abstract, seald</li>
+</ul>
+
+<h2>Lambda</h2>
+
+<ul>
+<li>method sans nom écrite à la place de l'instance du délegué</li>
+<li>Closure : lambda qui capture les variables qui sont évaluées au runtime et non au moment de la capture</li>
+</ul>
+
+<h2>Threading</h2>
+
+<ul>
+<li>Contexte switching 6000 a 8000 cycles processeur. Intérvient quand bcp de threads sont en concurence pour un core pour s'exécuter CPU bound</li>
+<li>APM : Asynchronous Programmming Model (Begin, End, IAsyncResult)</li>
+<li>EAP : Event based Asynchronous pattern (DownloadAsync, DownloadCompleted)</li>
+<li>TAP : Task based asynchrounous model</li>
+<li>async/await</li>
+<li>but d'utiliser threading : responsiveness, handling slow operations</li>
+</ul>
+
+<h2>Collections</h2>
+
+<ul>
+<li>Array : performant cat les éléments stockées dans un bloc continu en mémoire</li>
+<li>Comparaison : <a href="http://geekswithblogs.net/BlackRabbitCoder/archive/2011/06/16/c.net-fundamentals-choosing-the-right-collection-class.aspx">http://geekswithblogs.net/BlackRabbitCoder/archive/2011/06/16/c.net-fundamentals-choosing-the-right-collection-class.aspx</a></li>
 </ul>
 
 
