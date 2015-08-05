@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
     <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="I'm learning a lot but I cannot remember everything so this is just my learning notes page." />
+    <meta name="description" content="API security and the application of standards such as OAuth and OpenID Connect. API Access Control and API Federation and its interaction with enterprise infrastructure, social identity and application developers." />
     <meta name="author" content="Tomasz Jaskuła" />
     <meta name="copyright" content="Tomasz Jaskuła 2015" />
 
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:creator" content="@tjaskula">
-    <meta name="twitter:title" content="My personal learning notes">
-    <meta name="twitter:description" content="I'm learning a lot but I cannot remember everything so this is just my learning notes page.">
+    <meta name="twitter:title" content="API Security">
+    <meta name="twitter:description" content="API security and the application of standards such as OAuth and OpenID Connect. API Access Control and API Federation and its interaction with enterprise infrastructure, social identity and application developers.">
     
     <!-- End Twitter cards -->
 
@@ -88,26 +88,78 @@
         <main class="col-lg-8">
               
 
-<h1>Topics</h1>
+<h1>API Security</h1>
 
-<p>This is not an exhaustive list of all the topics I've learnt and because I don't have much time to write about all the stuff. This list is still in progress. Not sure everything will be added</p>
+<h2>Protocols</h2>
 
-<h2>Languages</h2>
+<h3>OpenId</h3>
+
+<h4>OpenId Connect</h4>
 
 <ul>
-<li><a href="csharp/">C#</a></li>
+<li>Extends OAuth 2.0</li>
+<li>Describes user_info, ID token based on JWT</li>
+<li>Web friendly and modern alternative to SAML web browser SSO</li>
 </ul>
 
-<h2>Security</h2>
+<h2>OAuth</h2>
 
 <ul>
-<li><a href="apisecurity/">API Security</a></li>
+<li><a href="http://tools.ietf.org/wg/oauth/">Resources and specifications</a></li>
 </ul>
 
-<h2>Data mining</h2>
+<h2>Token based authentication</h2>
+
+<p>Why?</p>
 
 <ul>
-<li><a href="machinelearning/">Machine Learning</a></li>
+<li>Stateless and scalable servers</li>
+<li>Mobile application ready</li>
+<li>Pass authentication to other applications</li>
+<li>Extra security</li>
+</ul>
+
+<p>Details about how <a href="https://scotch.io/tutorials/the-ins-and-outs-of-token-based-authentication">tokens came around</a></p>
+
+<p>As web is stateless...</p>
+
+<p>Before we had</p>
+
+<ul>
+<li>a server that had to remeber user details in session and send a cookie</li>
+</ul>
+
+<p>Problems:</p>
+
+<ul>
+<li>Sessions need to be stored by the server (scalability and performance problems)</li>
+<li>Scalability</li>
+<li>CORS: As we want to expand our application to let our data be used across multiple mobile devices, we have to worry about cross-origin resource sharing (CORS). When using AJAX calls to grab resources from another domain (mobile to our API server), we could run into problems with forbidden requests.</li>
+<li>CSRF: We will also have protection against cross-site request forgery (CSRF). Users are susceptible to CSRF attacks since they can already be authenticated with say a banking site and this could be taken advantage of when visiting other sites.</li>
+</ul>
+
+<p><strong>Token based authentication is stateless</strong>. We are not storing any information about our user on the server or in a session.</p>
+
+<p>Benefits of tokens</p>
+
+<ul>
+<li>Stateless and Scalable</li>
+<li>Security</li>
+<li>Extensibility (Friend of A Friend and Permissions)</li>
+<li>Multiple Platforms and Domains by <code>Access-Control-Allow-Origin: *</code></li>
+<li>Standards Based (JSON Web Tokens)</li>
+</ul>
+
+<h3>JSON Web Tokens</h3>
+
+<p><a href="https://scotch.io/tutorials/the-anatomy-of-a-json-web-token">Details</a></p>
+
+<p>Whar are JSON Web Tokens</p>
+
+<ul>
+<li>JSON Web Tokens work across different programming languages</li>
+<li>JWTs are self-contained</li>
+<li>JWTs can be passed around easily</li>
 </ul>
 
 

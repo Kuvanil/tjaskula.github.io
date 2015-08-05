@@ -8,7 +8,7 @@
       <title>Beginners quick guide to setup FsBlog and start to blog in 5 minutes</title>
       <guid>http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes</guid>
       <link>http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes/index.html</link>
-      <pubDate>Wed, 21 Jan 2015 10:55:09 GMT</pubDate>
+      <pubDate>Wed, 21 Jan 2015 09:55:09 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -24,7 +24,7 @@
       <title>Welcome</title>
       <guid>http://jaskula.fr//blog/2015/01-20-welcome</guid>
       <link>http://jaskula.fr//blog/2015/01-20-welcome/index.html</link>
-      <pubDate>Tue, 20 Jan 2015 10:10:42 GMT</pubDate>
+      <pubDate>Tue, 20 Jan 2015 09:10:42 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -40,7 +40,7 @@
       <title>From OOP to FP : About dependency injection and higher-order functions</title>
       <guid>http://jaskula.fr//blog/2013/08-21-from-oop-to-fp-about-dependency-injection-and-higher-order-functions</guid>
       <link>http://jaskula.fr//blog/2013/08-21-from-oop-to-fp-about-dependency-injection-and-higher-order-functions/index.html</link>
-      <pubDate>Wed, 21 Aug 2013 06:07:57 GMT</pubDate>
+      <pubDate>Wed, 21 Aug 2013 07:07:57 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -56,7 +56,7 @@
       <title>Sharing code between C# and F#</title>
       <guid>http://jaskula.fr//blog/2013/08-16-sharing-code-between-c-and-f</guid>
       <link>http://jaskula.fr//blog/2013/08-16-sharing-code-between-c-and-f/index.html</link>
-      <pubDate>Fri, 16 Aug 2013 04:25:13 GMT</pubDate>
+      <pubDate>Fri, 16 Aug 2013 05:25:13 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -72,7 +72,7 @@
       <title>My 2 weeks trip from OOP to FP with F#</title>
       <guid>http://jaskula.fr//blog/2013/08-14-my-2-weeks-trip-from-oop-to-fp-with-f</guid>
       <link>http://jaskula.fr//blog/2013/08-14-my-2-weeks-trip-from-oop-to-fp-with-f/index.html</link>
-      <pubDate>Wed, 14 Aug 2013 02:16:51 GMT</pubDate>
+      <pubDate>Wed, 14 Aug 2013 03:16:51 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -88,7 +88,7 @@
       <title>How to integrate ASP.NET WebApi AttributeRouting with HyprLinkr</title>
       <guid>http://jaskula.fr//blog/2013/08-12-how-to-integrate-asp-net-webapi-attributerouting-with-hyprlinkr</guid>
       <link>http://jaskula.fr//blog/2013/08-12-how-to-integrate-asp-net-webapi-attributerouting-with-hyprlinkr/index.html</link>
-      <pubDate>Mon, 12 Aug 2013 00:02:46 GMT</pubDate>
+      <pubDate>Mon, 12 Aug 2013 01:02:46 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -104,7 +104,7 @@
       <title>Configure StructureMap in ASP.NET WebApi to play nicely with HyprLinkr</title>
       <guid>http://jaskula.fr//blog/2013/07-26-configure-structuremap-in-asp-net-webapi-to-play-nicely-with-hyprlinkr</guid>
       <link>http://jaskula.fr//blog/2013/07-26-configure-structuremap-in-asp-net-webapi-to-play-nicely-with-hyprlinkr/index.html</link>
-      <pubDate>Fri, 26 Jul 2013 08:00:11 GMT</pubDate>
+      <pubDate>Fri, 26 Jul 2013 09:00:11 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -120,7 +120,7 @@
       <title>Is HTML a valid media-type for building web sites with RESTful API ?</title>
       <guid>http://jaskula.fr//blog/2012/10-29-is-html-a-valid-media-type-for-building-web-sites-with-restfull-api</guid>
       <link>http://jaskula.fr//blog/2012/10-29-is-html-a-valid-media-type-for-building-web-sites-with-restfull-api/index.html</link>
-      <pubDate>Mon, 29 Oct 2012 05:01:50 GMT</pubDate>
+      <pubDate>Mon, 29 Oct 2012 04:01:50 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -136,7 +136,7 @@
       <title>Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL</title>
       <guid>http://jaskula.fr//blog/2012/04-06-some-thoughts-on-asp-net-threadpool-threads-asynchronous-execution-and-tpl</guid>
       <link>http://jaskula.fr//blog/2012/04-06-some-thoughts-on-asp-net-threadpool-threads-asynchronous-execution-and-tpl/index.html</link>
-      <pubDate>Fri, 06 Apr 2012 04:01:50 GMT</pubDate>
+      <pubDate>Fri, 06 Apr 2012 05:01:50 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
@@ -152,7 +152,7 @@
       <title>Web Api (beta) and Castle.Windsor…without IDependencyResolver ?</title>
       <guid>http://jaskula.fr//blog/2012/03-11-web-api-beta-and-castle-windsor-without-idependencyresolver</guid>
       <link>http://jaskula.fr//blog/2012/03-11-web-api-beta-and-castle-windsor-without-idependencyresolver/index.html</link>
-      <pubDate>Sun, 11 Mar 2012 09:58:47 GMT</pubDate>
+      <pubDate>Sun, 11 Mar 2012 08:58:47 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
 
