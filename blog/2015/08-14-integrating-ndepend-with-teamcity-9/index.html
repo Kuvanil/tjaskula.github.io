@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
     <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="I'm learning a lot but I cannot remember everything so this is just my learning notes page." />
+    <meta name="description" content="The goal of this post is to check how easy is the integration of NDepend plugin into the TeamCity 9 build server." />
     <meta name="author" content="Tomasz Jaskuła" />
     <meta name="copyright" content="Tomasz Jaskuła 2015" />
 
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:creator" content="@tjaskula">
-    <meta name="twitter:title" content="My personal learning notes">
-    <meta name="twitter:description" content="I'm learning a lot but I cannot remember everything so this is just my learning notes page.">
+    <meta name="twitter:title" content="Integrating NDepend with TeamCity 9">
+    <meta name="twitter:description" content="The goal of this post is to check how easy is the integration of NDepend plugin into the TeamCity 9 build server.">
     
     <!-- End Twitter cards -->
 
@@ -87,30 +87,113 @@
       <div class="row">
         <main class="col-lg-8">
               
+<h1>Integrating NDepend with TeamCity 9</h1>
 
-<h1>Topics</h1>
+<div class="row">
+<div class="medium-8 columns">
 
-<p>This is not an exhaustive list of all the topics I've learnt and because I don't have much time to write about all the stuff. This list is still in progress. Not sure everything will be added</p>
+<p>The <a href="http://www.ndepend.com">NDepend 6</a> was released a couple of weeks ago. It comes along with really exciting new features like for example Visual Studio 2015 integration, analysis enhancements, async support, etc. Take a look at NDepend website to have a full list of new features. The feature I'm interested in is the <a href="https://www.jetbrains.com/teamcity/">TeamCity</a> integration which should be very easy to do according to NDepend's team.</p>
 
-<h2>Languages</h2>
+</div>
+</div>
 
-<ul>
-<li><a href="csharp/">C#</a></li>
-</ul>
+<!-- more -->
 
-<h2>Security</h2>
+<p>If you use C# as your main programming language and you have already worked on a quite big project you know how painful is to enforce coding rules and to query about dependencies if you don't have right tool. NDepend is a static analysis tool that helps you digging into your code in a very easy and efficient way to carry-out code rules checks, code quality checks, comparing two versions of code base, browsing for differences and many more. This is something that you should have in your tool belt. If you're working on medium to large project you are supposed to have a build server and a sort of Continous Integration process. I'm using TeamCity 9 for my projects. It would be nice to take advantage of NDepend static code base analysis inside your CI build. It was always possible to integrate NDepend into your build process in TeamCity but it was quite tedious. NDepend 6 comes with this new shiny TeamCity plugin (for TeamCity 8 and 9) and I decided to give it a shot. Let's try it out and check if this is easier to do than before.</p>
 
-<ul>
-<li><a href="apisecurity/">API Security</a></li>
-</ul>
+<h2>NDepend TeamCity plugin installation</h2>
 
-<h2>Data mining</h2>
+<p>I have followed the installation steps described at <a href="http://www.ndepend.com/docs/teamcity-integration-ndepend">NDepend documentation</a> so there is no need to rewrite it here. However, <strong>I'll highlight some of the differences</strong> in the process that I found on my specific environment compared to the official documentation.</p>
 
-<ul>
-<li><a href="machinelearning/">Machine Learning</a></li>
-</ul>
+<p>First of all, finding the TeamCity plugin folder was not straightforward as my environment variable <strong>TEAMCITY_DATA_PATH</strong> was not definied. After checking the official <a href="https://confluence.jetbrains.com/display/TCD9/TeamCity+Data+Directory">TeamCity documentation</a> we can read the following:</p>
+
+<blockquote>
+  <p><strong>Before TeamCity 9.1</strong>, the TeamCity Windows installer configured the TeamCity data directory during installation by setting the <strong>TEAMCITY_DATA_PATH</strong> environment variable. The default path suggested for the directory is: <em>%ALLUSERSPROFILE%\JetBrains\TeamCity</em>. 
+<br />
+<strong>Since TeamCity 9.1</strong>, installer does not ask for the TeamCity data directory and it can be configured on the first TeamCity start.</p>
+</blockquote>
+
+<p>Obviously I have installed the TeamCity server v9.1 and I don't have the <strong>TEAMCITY_DATA_PATH</strong> set. The best way to check where your data directory is located, is to check it directly in the TeamCity web interface. Browse to <strong>Administration -> Global Settings</strong> and check the value of <strong>Data directory:</strong>. The mine is located in <em>C:\TeamCity.BuildServer</em>. You can now copy/paste the NDepend plugin and follow the instructions at <a href="http://www.ndepend.com/docs/teamcity-integration-ndepend">NDepend documentation</a>. At the end, you should be able to display NDepend step in the TeamCity server.</p>
+
+<p><img src="http://www.ndepend.com/Doc/CI_TeamCity/NDependBuildStep.png" alt="NDepend step in TeamCity" /></p>
+
+<h2>NDepend TeamCity plugin configuration</h2>
+
+<p>If you follow <a href="http://www.ndepend.com/docs/teamcity-integration-ndepend">NDepend documentation</a> setting up the NDepend build step is rather strightforward. Don't forget to change paths inside your NDepend project from absolute to relative. Remember that your build server may have different paths than those definied on your development machine. That's why relative paths are very handy. You can achieve it very easily, by going to your Ndepend project properties, clicking on the <strong>Paths Referenced</strong> tab and then right clicking on the listed paths and selecting <strong>Set as Path Relative</strong> option from the menu.</p>
+
+<p><img src="img/NDependMenuAbsToRelPath.png" alt="NDepend menu" /></p>
+
+<p>Once the change is done and commited, I've add NDepend build step to my build process</p>
+
+<a href="img/TeamCityNDependBuildStep.png"><img alt="TeamCity NDepend build step" src="img/TeamCityNDependBuildStep.png" width="600"></a>
+
+<h2>Running the first build</h2>
+
+<p>We're are finaly ready to run our first build with NDepend step. The whole <strong>NDepend plugin configuration step inside TeamCity took me something like 10 min!</strong> It's really a pice of cake!</p>
+
+<p>Let's check the output of the first run:</p>
+
+<a href="img/TeamCityBuildwithNDependDefaults.png"><img alt="TeamCity result of build run with NDepend plugin" src="img/TeamCityBuildwithNDependDefaults.png" width="600"></a>
+
+<ol>
+<li>The build has failed because of NDepend exception. When the static analysis detects that critical rules are violated then the build fails. NDepend plugin maps rules violations to the TeamCity code inspections and errors. Rules violations are mapped as TeamCity code inspections and critical rules violations are mapped as errors.</li>
+<li>Total number of problems detected during the NDepend analysis. These are visible in the TeamCity code insepctions tab (step number 3).</li>
+<li>The list of code inspections as a result of NDepend analysis. You can browse through all the problems detected by NDepend. Clicking on the details of the problem it brings you directly to opened Visual Studio solution.
+<a href="img/TeamCityNDependCodeIns.png"><img alt="TeamCity Code Inspections NDepend" src="img/TeamCityNDependCodeIns.png" width="600"></a></li>
+<li>NDepend report is accessible in it's own tab! Awesome!
+<a href="img/TeamCityNDependReport.png"><img alt="TeamCity NDepend report" src="img/TeamCityNDependReport.png" width="600"></a></li>
+</ol>
+
+<p>As a bonus, NDepend output is available as a TeamCity artifact so you can download it if needed.</p>
+
+<a href="img/NDependArtifact.png"><img alt="NDepend output artifact" src="img/NDependArtifact.png" width="600"></a>
+
+<p>In the Build Configuration settings, you can also set build failure upon rules and critical rules violations values. This may be usefull if you want the build fail because of the evolution of the NDepend metric change.</p>
+
+<h2>More NDepend features for free</h2>
+
+<p>Of course you don't need to work that hard to get others usefull NDepend feature for free. I'm talking about comparison of differences between two different NDepend analysis and code coverage. For the code coverage all you need to do is to configure it in the NDepend project properties. For the code comparison you have to chose a value in the NDepend build step on TeamCity for "baseline for comparison". I've selected "The last successful build" so the effect will be the comparison between the current build and the last successful one. You have to set also the right value in the NDepend project properties like below:</p>
+
+<a href="img/NDependProjectConf.png"><img alt="Configuring NDepend project properties" src="img/NDependProjectConf.png" width="600"></a>
+
+<p>Once it's done, you run the build and check the build output. You should see baseline for comparison and code coverage picked up by the build like on the picture below:</p>
+
+<a href="img/NDependBaselinePlusCoverage.png"><img alt="NDepend build output with baseline comparison" src="img/NDependBaselinePlusCoverage.png" width="600"></a>
+
+<p>You should also see on the NDepend tab, the code metrics of the current build (brown letters) and how it compares to the previous analysis (grey letters).</p>
+
+<a href="img/NDependMetrics.png"><img alt="NDepend build output metrics" src="img/NDependMetrics.png" width="600"></a>
+
+<h2>Summary</h2>
+
+<p>What to say? The NDepend plugin is just so easy to install compared to the manual process I had to do with the previous versions. This is a really nice feature to have on your CI server. TeamCity NDepend plugin test: PASSED!</p>
 
 
+
+<!-- AddThias -->
+
+	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54bed07b3003b40e" async="async"></script>
+	<div class="addthis_sharing_toolbox"></div>
+
+<!-- END AddThias -->
+
+<!-- Disqus -->
+	<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tjaskula'; // required: replace example with your forum shortname
+	    var disqus_title = 'Integrating NDepend with TeamCity 9';
+	    var disqus_url = '';
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<!-- Disqus END -->
         </main>
         <aside class="col-lg-4">
               <article>
