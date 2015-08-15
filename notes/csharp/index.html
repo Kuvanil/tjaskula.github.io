@@ -90,7 +90,21 @@
 
 <h1>C# Language</h1>
 
-<h2>Polymporphisme</h2>
+<h2>Object Orientation</h2>
+
+<p>Object-orientation paradigm, includes:</p>
+
+<ul>
+<li>encapsulation</li>
+<li>inheritance</li>
+<li>polymorphisme</li>
+</ul>
+
+<h3>Encapsulation</h3>
+
+<p>Means creating a boundary around <em>object</em>, to separate external (public) behavior from its internal (private) implementation details.</p>
+
+<h3>Polymporphisme</h3>
 
 <ul>
 <li>Une instance de type x peut se référer à un object qui souclasse x</li>
@@ -98,7 +112,45 @@
 <li>Downcast : => vers la référence dela souclasse (Explicit)</li>
 </ul>
 
+<h2>Characteristics of C#</h2>
+
+<p>C# is:</p>
+
+<ul>
+<li>Type-safe : cannot interact with <code>string</code> as it was an <code>integer</code></li>
+<li>Staticly-typed : language enforces type safety at compile time</li>
+<li>Strongly-types : cannot get around the restrictions the constraints of the type system like for example calling a function that's designed to accept an integer with a floating-point number, unless you first <em>explicitly</em> convert floating-point number to an integer.</li>
+</ul>
+
 <h2>Object</h2>
+
+<h3>Value and Reference Types</h3>
+
+<p><em>Value types</em> : numeric types, <code>char</code> type, <code>bool</code> type, <code>struc</code> and <code>enum</code> types.</p>
+
+<p><em>Reference types</em> : all class, array, delegate and interface types.</p>
+
+<h4>Value types</h4>
+
+<p>The content of a <em>value type</em> variable or constant is simply a value.</p>
+
+<p>Numeric types</p>
+
+<ul>
+<li>Integral : <code>sbyte</code> (8bits), <code>short</code> (16 bits), <code>int</code> (32 bits), <code>long</code> (64 bits).</li>
+<li>Real : <code>float</code> (32 bits, <span class="math">\(10^{-45}\)</span> to <span class="math">\(10^{38}\)</span>), <code>double</code> (64 bits, <span class="math">\(10^{-324}\)</span> to <span class="math">\(10^{308}\)</span>), <code>decimal</code> (128 bits, <span class="math">\(10^{-28}\)</span> to <span class="math">\(10^{28}\)</span>)</li>
+</ul>
+
+<p><code>decimal</code> is non-native to processor (about 10 times slower than <code>double</code>)</p>
+
+<blockquote>
+  <p>The arithmetic operators (+, -, *, /, %) are definied for all numeric types except the 8- and 16-bit integral types. So C# converts them to larger types as required.</p>
+</blockquote>
+
+<h4>Reference types</h4>
+
+<p>Reference types have two parts: an <em>object</em> and the <em>reference</em> to that object. The content of a reference-type variable or constant is a reference to an object that contains the value.
+Reference types requires spearate allocations of membory for the reference and the object. The object consumes as many bytes as its fields plus aditional administrative overhead.</p>
 
 <h3>Boxing : value-type => reference</h3>
 
