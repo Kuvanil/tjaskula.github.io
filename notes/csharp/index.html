@@ -15,7 +15,7 @@
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:creator" content="@tjaskula">
-    <meta name="twitter:title" content="C# Language learning notes">
+    <meta name="twitter:title" content="C# Language learning notes. Only things I have to remember.">
     <meta name="twitter:description" content="C# language learning notes. C# (pronounced as see sharp) is a multi-paradigm programming language encompassing strong typing,  imperative, declarative, functional, generic, object-oriented (class-based), and component-oriented programming disciplines. It was developed by Microsoft within its .NET initiative and later approved as a standard by Ecma (ECMA-334) and ISO (ISO/IEC 23270:2006). C# is one of the programming languages designed for the Common Language Infrastructure.">
     
     <!-- End Twitter cards -->
@@ -100,6 +100,10 @@
 <li>polymorphisme</li>
 </ul>
 
+<h3>Inheritance</h3>
+
+<p>A class can <em>inherit</em> from another class to extend or customize the original class.</p>
+
 <h3>Encapsulation</h3>
 
 <p>Means creating a boundary around <em>object</em>, to separate external (public) behavior from its internal (private) implementation details.</p>
@@ -107,9 +111,9 @@
 <h3>Polymporphisme</h3>
 
 <ul>
-<li>Une instance de type x peut se référer à un object qui souclasse x</li>
-<li>Upcast : => vers la référence de classe de base (Implicit)</li>
-<li>Downcast : => vers la référence dela souclasse (Explicit)</li>
+<li>An instance of type x can refer to the object that subclasses x</li>
+<li>Upcast : => to the reference of the base class (Implicit)</li>
+<li>Downcast : => to the reference of the subclass (Explicit)</li>
 </ul>
 
 <h2>Characteristics of C#</h2>
@@ -152,6 +156,12 @@
 <p>Reference types have two parts: an <em>object</em> and the <em>reference</em> to that object. The content of a reference-type variable or constant is a reference to an object that contains the value.
 Reference types requires spearate allocations of membory for the reference and the object. The object consumes as many bytes as its fields plus aditional administrative overhead.</p>
 
+<h4>The Stack and the Heap</h4>
+
+<p><em>Stack</em> is a block of memory for storing local variables and parameters. the stack logically grows and shrinks as a function is entered and exited.</p>
+
+<p><em>Heap</em> is a block of memory where <code>objects</code> (i.e., reference-type instances) reside. GC scans only heap.</p>
+
 <h3>Boxing : value-type => reference</h3>
 
 <p><a href="http://theburningmonk.com/2015/07/beware-of-implicit-boxing-of-value-types/">When does the implicit boxing occurs?</a></p>
@@ -187,21 +197,79 @@ Fortunately, the CLR is able to short-circuit this by calling the method directl
 In both cases, it's invoked through the <code>IEqualityComparer&lt;T&gt;</code> type we talked earlier, and in both cases the comparer is also initialized through <code>EqualityComparer&lt;T&gt;.Default</code> and the <code>CreateComparer</code> method.
 <code>GetHashCode</code> is invoked in many places within <code>Dictionary&lt;TKey, TValue&gt;</code> - on <code>Add</code>, <code>ContainsKey</code>, <code>Remove</code>, etc.</p>
 
+<ul>
+<li>Interfaces and Boxing</li>
+</ul>
+
+<p>Casting a struct to an interface causes boxing. Callin an implicitly implemented member on a struct des not cause boxing.</p>
+
 <h3>Unboxing : reference type => value-type</h3>
 
-<h3>Struct : pas de constructeur sans paramètres, peut implémenter les interfaces mais pas hériter des classes</h3>
+<h2>Creating types</h2>
 
-<h3>Enum : constantes numériques goupées et nommées</h3>
+<h3>Constructors</h3>
 
-<h3>Nested types : peut accéder aux types privés du type contenant</h3>
+<p>Constructor with optional parameters may be problematic if it is instantiated from another assemblie. If we add another optional parameter we have to recompile all consuming assemblies because they will continue to call the non existing constructor and fail at runtime. the subtler problem is when we change a value of one of the optional parameters, the callers will continue to call with the old value until they are recompiled. Hence <strong>avoid optional parameters in public functions</strong>.</p>
 
-<h2>Generics</h2>
+<p>A static constructor executes once per <em>type</em>, rather than once per <em>instance</em>. A type can define only one static constructor, and it must be parameterless and have the same name as thr type. The constructor is triggerted either by:</p>
 
 <ul>
-<li>templates de types</li>
-<li>type safety et réduction de boxing/unboxing</li>
-<li>covariant for OUT Subclass to Base</li>
-<li>contravarient for IN Base to Subclass</li>
+<li>Instantiating the type</li>
+<li>Accessing a static member in the type</li>
+</ul>
+
+<p>If type has static fields, they will be initialized <em>before</em> the static constructor.</p>
+
+<h3>Abstract classes</h3>
+
+<p>A class declared as <em>abstract</em> can never be instantiated. Instead, only its concrete <em>subclasses</em> can be instantiated.</p>
+
+<h3>Structs</h3>
+
+<p>A <code>struct</code> is similar to a class with the following key differences:</p>
+
+<ul>
+<li>A struct is a value type, whereas a class is a reference type.</li>
+<li>A struct does not support inheritance (other than implicitly deriving from <code>object</code>, or more precisely, <code>System.ValueType</code>).</li>
+</ul>
+
+<p>A struct can have all the mebers a class can, except the following:</p>
+
+<ul>
+<li>A parameterless constructor</li>
+<li>A finalizer</li>
+<li>Virtual members</li>
+</ul>
+
+<p>Struct can implement interfaces.</p>
+
+<h3>Constants</h3>
+
+<p>Difference between <code>consts</code> and <code>static readonly</code>: A <code>static readonly</code> field is avantageous when exposing to other assemblies a value that might change in a later version. For instance, suppose assembly X exposes a constant as follows: <code>public const int MaximumThreads = 20;</code>. If assembly Y references X and uses this constant, the value 20 will be baked into the assembly Y when compiled. This means that if X is later recompiled with the constant set to 50, Y will still use the old value <em>until</em> Y is <em>recompiled</em>. A <code>static readonly</code> field avoids this problem.</p>
+
+<h3>Enums</h3>
+
+<p>Numeric constants grouped and named. By default its underlying values are of type <code>int</code>. You may specify an alternative integral type (<code>byte</code>, <code>long</code>, etc.)
+<code>[Flag]</code> enums can combine enum members. To prevent ambiguities, members of a combinable enum require explicitly assigned values, typically in powers of two.</p>
+
+<h3>Nested types</h3>
+
+<p>Can access the private members of containing type.</p>
+
+<h3>Generics</h3>
+
+<ul>
+<li>Types templates</li>
+<li>type safety and reduction of boxing/unboxing</li>
+</ul>
+
+<h4>Covariance and Contravariance</h4>
+
+<p>As of C# 4.0 generic interfaces permit covariance (as do generic delegates), but generic classes do not. Arrays also support covariance. Contravariance is only supported with the generic interfaces.</p>
+
+<ul>
+<li>Covariant for OUT Subclass to Base</li>
+<li>Contravarient for IN Base to Subclass</li>
 </ul>
 
 <h2>Delegates</h2>
