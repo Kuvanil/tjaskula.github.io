@@ -207,6 +207,15 @@ In both cases, it's invoked through the <code>IEqualityComparer&lt;T&gt;</code> 
 
 <h2>Creating types</h2>
 
+<h3>Writing a Class Versus an Interface</h3>
+
+<p>As a guideline:</p>
+
+<ul>
+<li>Use classes and subclasses for types that naturally share an implementation.</li>
+<li>Use interfaces for types that have independent implementations.</li>
+</ul>
+
 <h3>Constructors</h3>
 
 <p>Constructor with optional parameters may be problematic if it is instantiated from another assemblie. If we add another optional parameter we have to recompile all consuming assemblies because they will continue to call the non existing constructor and fail at runtime. the subtler problem is when we change a value of one of the optional parameters, the callers will continue to call with the old value until they are recompiled. Hence <strong>avoid optional parameters in public functions</strong>.</p>
@@ -219,6 +228,31 @@ In both cases, it's invoked through the <code>IEqualityComparer&lt;T&gt;</code> 
 </ul>
 
 <p>If type has static fields, they will be initialized <em>before</em> the static constructor.</p>
+
+<h3>Method overloading</h3>
+
+<p>Inheritance has an interesting impact on method overloading. Consider the following two overloads:</p>
+
+<table class="pre"><tr><td><pre lang="csharp"><span class="k">static</span> <span class="k">void</span> Foo (Asset a) { }
+<span class="k">static</span> <span class="k">void</span> Foo (House h) { }</pre></td></tr></table>
+
+<p>When an overload is called, the most specific type has precedence:</p>
+
+<table class="pre"><tr><td><pre lang="csharp">House h <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
+Foo(h); <span class="o">/</span><span class="o">/</span> Calls Foo(House)</pre></td></tr></table>
+
+<p>The particular overload to call is <strong>determined statically (at compile time)</strong> rather than at runtime.
+The following code calls Foo(Asset), even though the runtime type of a is House:</p>
+
+<table class="pre"><tr><td><pre lang="csharp">Asset a <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
+Foo(a); <span class="o">/</span><span class="o">/</span> Calls Foo(Asset)</pre></td></tr></table>
+
+<blockquote>
+  <p>If you cast Asset to dynamic , the decision as to which overload to call is deferred until runtime, and is then based on the object’s actual type:</p>
+</blockquote>
+
+<table class="pre"><tr><td><pre lang="csharp">Asset a <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
+Foo ((<span class="k">dynamic</span>)a); <span class="o">/</span><span class="o">/</span> Calls Foo(House)</pre></td></tr></table>
 
 <h3>Abstract classes</h3>
 
