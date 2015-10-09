@@ -206,6 +206,232 @@ We could turn this example into a classification problem by instead making our o
 
 <p>where m is the size of the training set, <span class="math">\(\theta_0\)</span> a constant that will be changing simultaneously with <span class="math">\(\theta_1\)</span> and <span class="math">\(x_{i}, y_{i}\)</span> are values of the given training set (data).</p>
 
+<h4>Linear Regression with Multiple Variables</h4>
+
+<p>For more information, please refer to the Coursera wiki (login required): <a href="https://share.coursera.org/wiki/index.php/ML:Linear_Regression_with_Multiple_Variables">https://share.coursera.org/wiki/index.php/ML:Linear_Regression_with_Multiple_Variables</a></p>
+
+<ul>
+<li><strong>Multiple Features</strong></li>
+</ul>
+
+<p>Linear regression with multiple variables is also known as "multivariable linear regression."</p>
+
+<p>the multivariable form of the hypothesis function as follows, accomodating these multiple features:</p>
+
+<p><span class="math">\[h_\theta (x) = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \theta_3 x_3 + \cdots + \theta_n x_n\]</span></p>
+
+<p>Using the definition of matrix multiplication, our multivariable hypothesis function can be concisely represented as:</p>
+
+<p><span class="math">\[\begin{align*}
+h_\theta(x) =
+\begin{bmatrix}
+\theta_0 \hspace{2em}  \theta_1 \hspace{2em}  ...  \hspace{2em}  \theta_n
+\end{bmatrix}
+\begin{bmatrix}
+x_0 \newline
+x_1 \newline
+\vdots \newline
+x_n
+\end{bmatrix}
+= \theta^T x
+\end{align*}\]</span></p>
+
+<p>Now we can collect all <span class="math">\(m\)</span> training examples each with <span class="math">\(n\)</span> features and record them in an <span class="math">\(n+1\)</span> by <span class="math">\(m\)</span> matrix.</p>
+
+<p><span class="math">\[\begin{align*}
+X =
+\begin{bmatrix}
+x^{(1)}_0 \hspace{2em} x^{(2)}_0\hspace{2em}  ... \hspace{2em} x^{(m)}_0 \newline
+x^{(1)}_1 \hspace{2em} x^{(2)}_1 \hspace{2em} ... \hspace{2em} x^{(m)}_1 \newline
+\vdots \newline
+x^{(1)}_n \hspace{2em} x^{(2)}_n \hspace{2em} ... \hspace{2em} x^{(m)}_n \newline
+\end{bmatrix} 
+&amp;=
+\begin{bmatrix}
+1 &amp; 1 &amp;  ... &amp; 1 \newline
+x^{(1)}_1 &amp; x^{(2)}_1 &amp;... &amp; x^{(m)}_1 \newline
+\vdots \newline
+x^{(1)}_n &amp; x^{(2)}_n &amp; ... &amp; x^{(m)}_n \newline
+\end{bmatrix} 
+\end{align*}\]</span></p>
+
+<p>Notice above that the first column is the first training example (like the vector above), the second column is the second training example, and so forth.</p>
+
+<p>Now we can define <span class="math">\(h_\theta(X)\)</span> as a row vector that gives the value of <span class="math">\(h_\theta(x)\)</span> at each of the <span class="math">\(m\)</span> training examples:</p>
+
+<p><span class="math">\[\begin{align*}
+h_\theta(X) =
+\begin{bmatrix}
+\theta_0 x^{(1)}_0 + \theta_1 x^{(1)}_1 + ... + \theta_n x^{(1)}_n \hspace{3em}
+\theta_0 x^{(2)}_0 + \theta_1 x^{(2)}_1 + ... + \theta_n x^{(2)}_n \hspace{3em} ... \hspace{3em}
+\theta_0  x^{(m)}_0 + \theta_1 x^{(m)}_1 + ... + \theta_n x^{(m)}_n \newline
+\end{bmatrix}
+\end{align*}\]</span></p>
+
+<p>But again using the definition of matrix multiplication, we can represent this more concisely:</p>
+
+<p><span class="math">\[\begin{align*}
+h_\theta(X) =
+\begin{bmatrix}
+\theta_0 \hspace{2em}  \theta_1 \hspace{2em} ... \hspace{2em} \theta_n
+\end{bmatrix}
+\begin{bmatrix}
+x^{(1)}_0 \hspace{2em} x^{(2)}_0\hspace{2em}  ... \hspace{2em} x^{(m)}_0 \newline
+x^{(1)}_1 \hspace{2em} x^{(2)}_1 \hspace{2em} ... \hspace{2em} x^{(m)}_1 \newline
+\vdots \newline
+x^{(1)}_n \hspace{2em} x^{(2)}_n \hspace{2em} ... \hspace{2em} x^{(m)}_n \newline
+\end{bmatrix}=
+\theta^T X
+\end{align*}\]</span></p>
+
+<p>Note: this version of the hypothesis function assumes the matrix <span class="math">\(X\)</span> and vector <span class="math">\(\theta\)</span> store their values as follows:</p>
+
+<p><span class="math">\[\begin{align*}
+X = 
+\begin{bmatrix}
+x^{(1)}_0 &amp; x^{(2)}_0 &amp; x^{(3)}_0  \newline
+x^{(1)}_1 &amp; x^{(2)}_1 &amp; x^{(3)}_1 
+\end{bmatrix}
+&amp;
+,\theta = 
+\begin{bmatrix}
+\theta_0 \newline
+\theta_1 \newline
+\end{bmatrix}
+\end{align*}\]</span></p>
+
+<p>You might instead store the training examples in <span class="math">\(X\)</span> row-wise, like such:</p>
+
+<p><span class="math">\[\begin{align*}
+X = 
+\begin{bmatrix}
+x^{(1)}_0 &amp; x^{(1)}_1  \newline
+x^{(2)}_0 &amp; x^{(2)}_1  \newline
+x^{(3)}_0 &amp; x^{(3)}_1 
+\end{bmatrix}
+&amp;
+,\theta = 
+\begin{bmatrix}
+\theta_0 \newline
+\theta_1 \newline
+\end{bmatrix}
+\end{align*}\]</span></p>
+
+<p>In which case you would calculate the hypothesis function with:</p>
+
+<p><span class="math">\[h_\theta(X) = X \theta\]</span></p>
+
+<ul>
+<li><strong>Cost function</strong></li>
+</ul>
+
+<p><span class="math">\[J(\theta) = \dfrac {1}{2m} \displaystyle \sum_{i=1}^m \left (h_\theta (x^{(i)}) - y^{(i)} \right)^2\]</span></p>
+
+<p>The vectorized version is:</p>
+
+<p><span class="math">\[J(\theta) = \dfrac {1}{2m} (X\theta - \vec{y})^{T} (X\theta - \vec{y})\]</span></p>
+
+<ul>
+<li><strong>Gradient Descent for Multiple Variables</strong></li>
+</ul>
+
+<p>The gradient descent equation itself is generally the same form; we just have to repeat it for our 'n' features:</p>
+
+<p><span class="math">\[\begin{align*}
+&amp; \text{repeat until convergence:} \; \lbrace \newline 
+\; &amp; \theta_0 := \theta_0 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_0^{(i)}\newline
+\; &amp; \theta_1 := \theta_1 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_1^{(i)} \newline
+\; &amp; \theta_2 := \theta_2 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_2^{(i)} \newline
+&amp; \cdots
+\newline \rbrace
+\end{align*}\]</span></p>
+
+<p>In other words:</p>
+
+<p><span class="math">\[\begin{align*}
+&amp; \text{repeat until convergence:} \; \lbrace \newline 
+\; &amp; \theta_j := \theta_j - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_j^{(i)} \;  &amp; \text{for j := 0..n}
+\newline \rbrace
+\end{align*}\]</span></p>
+
+<p>Finally, the matrix notation (vectorized) of the Gradient Descent rule is:</p>
+
+<p><span class="math">\[\large
+\theta := \theta - \frac{\alpha}{m} X^{T} (X\theta - \vec{y})\]</span></p>
+
+<ul>
+<li><strong>Gradient Descent in Practice</strong></li>
+</ul>
+
+<p>We can speed up gradient descent by having each of our input values in roughly the same range. This is because <span class="math">\(\theta\)</span> will descend quickly on small ranges and slowly on large ranges, and so will oscillate inefficiently down to the optimum when the variables are very uneven.</p>
+
+<p>The way to prevent this is to modify the ranges of our input variables so that they are all roughly the same. Ideally:</p>
+
+<p><span class="math">\[-1 \le x_i \le 1\]</span></p>
+
+<p>or:</p>
+
+<p><span class="math">\[-0.5 \le x_i \le 0.5\]</span></p>
+
+<p>These aren't exact requirements; we are only trying to speed things up. The goal is to get all input variables into roughly one of these ranges, give or take a few.</p>
+
+<p>Two techniques to help with this are <strong>feature scaling</strong> and <strong>mean normalization</strong>. Feature scaling involves dividing the input values by the range (i.e. the maximum value minus the minimum value) of the input variable, resulting in a new range of just 1. Mean normalization involves subtracting the average value for an input variable from the values for that input variable, resulting in a new average value for the input variable of just zero. To implement both of these techniques, adjust your input values as shown in this formula:</p>
+
+<p><span class="math">\[x_i := \dfrac{x_i - \mu_i}{s_i}\]</span></p>
+
+<p>Example: xi is housing prices in range 100-2000. Then, <span class="math">\(x_i := \dfrac{price-1000}{1900}\)</span>, where 1000 is the average price and 1900 is the maximum (2000) minus the minimum (100).</p>
+
+<ul>
+<li><strong>Features and Polynomial Regression</strong></li>
+</ul>
+
+<p>We can improve our features and the form of our hypothesis function in a couple different ways.</p>
+
+<p>We can combine multiple features into one. For example, we can combine <span class="math">\(x_1\)</span> and <span class="math">\(x_2\)</span> into a new feature <span class="math">\(x_3\)</span> by taking <span class="math">\(x_1 \cdot x_2\)</span>.</p>
+
+<p><strong>Polynomial Regression</strong></p>
+
+<p>Our hypothesis function need not be linear (a straight line) if that does not fit the data well.</p>
+
+<p>We <strong>can change the behavior or curve</strong> of our hypothesis function by making it a quadratic, cubic or square root function (or any other form).</p>
+
+<ul>
+<li><strong>Normal Equation</strong></li>
+</ul>
+
+<p>The "normal equation" is a version of finding the optimum <strong>without iteration</strong>.</p>
+
+<p><span class="math">\[\large
+\theta = (X^T X)^{-1}X^T y\]</span></p>
+
+<p>There is <strong>no need to do feature scaling</strong> with the normal equation.</p>
+
+<table>
+<thead>
+<tr class="header">
+<th><p><strong>Gradient Descent</strong></p></th>
+<th align="center"><p><strong>Normal Equation</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><p>Need to choose alpha</p></td>
+<td align="center"><p>No need to choose alpha</p></td>
+</tr>
+<tr class="even">
+<td><p>Needs many iterations</p></td>
+<td align="center"><p>No need to iterate</p></td>
+</tr>
+<tr class="odd">
+<td><p>Works well when n is large</p></td>
+<td align="center"><p>Slow if n is very large</p></td>
+</tr>
+</tbody>
+</table>
+
+
+<p>With the normal equation, computing the inversion has complexity <span class="math">\(\mathcal{O}(n^3)\)</span>. So if we have a very large number of features, the normal equation will be slow. In practice, according to A. Ng, when <span class="math">\(n\)</span> exceeds 10,000 it might be a good time to go from a normal solution to an iterative process.</p>
+
 <h3>Unsupervised Learning</h3>
 
 <p>Unsupervised learning, on the other hand, allows us to approach problems with little or no idea what our results should look like. We can derive structure from data where we don't necessarily know the effect of the variables.
