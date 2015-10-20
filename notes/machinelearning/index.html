@@ -972,6 +972,93 @@ J(\Theta) = - \frac{1}{m} \left[ \sum_{i=1}^m \sum_{k=1}^K y^{(i)}_k \log ((h_\T
 
 <p><span class="math">\[\delta^{(l)} = ((\Theta^{(l)})^T \delta^{(l+1)})\ .*\ a^{(l)}\ .*\ (1 - a^{(l)})\]</span></p>
 
+<ul>
+<li><strong>Backpropagation Intuition</strong></li>
+</ul>
+
+<p>The cost function is:</p>
+
+<p><span class="math">\[\begin{gather*}
+J(\theta) = - \frac{1}{m} \left[ \sum_{t=1}^m \sum_{k=1}^K y^{(t)}_k \ \log (h_\theta (x^{(t)}))_k + (1 - y^{(t)}_k)\ \log (1 - h_\theta(x^{(t)})_k)\right] + \frac{\lambda}{2m}\sum_{l=1}^{L-1} \sum_{i=1}^{s_l} \sum_{j=1}^{s_l+1} ( \theta_{j,i}^{(l)})^2
+\end{gather*}\]</span></p>
+
+<p>If we consider simple non-multiclass classification (k = 1) and disregard regularization, the cost is computed with:</p>
+
+<p><span class="math">\[cost(t) =y^{(t)} \ \log (h_\theta (x^{(t)})) + (1 - y^{(t)})\ \log (1 - h_\theta(x^{(t)}))\]</span></p>
+
+<p>More intuitively you can think of that equation roughly as:</p>
+
+<p><span class="math">\[cost(t) \approx (h_\theta(x^{(t)})-y^{(t)})^2\]</span></p>
+
+<p>Intuitively, <span class="math">\(\delta_j^{(l)}\)</span> is the "error" for <span class="math">\(a^{(l)}_j\)</span> (unit <span class="math">\(j\)</span> in layer <span class="math">\(l\)</span>)</p>
+
+<p>More formally, the delta values are actually the derivative of the cost function:</p>
+
+<p><span class="math">\[\delta_j^{(l)} = \dfrac{\partial}{\partial z_j^{(l)}} cost(t)\]</span></p>
+
+<p>Recall that our derivative is the slope of a line tangent to the cost function, so the steeper the slope the more incorrect we are.</p>
+
+<ul>
+<li><strong>Gradient Checking</strong></li>
+</ul>
+
+<p>Gradient checking will assure that our backpropagation works as intended.</p>
+
+<p>We can approximate the derivative of our cost function with:</p>
+
+<p><span class="math">\[\dfrac{\partial}{\partial\Theta}J(\Theta) \approx \dfrac{J(\Theta + \epsilon) - J(\Theta - \epsilon)}{2\epsilon}\]</span></p>
+
+<p>With multiple theta matrices, we can approximate the derivative <strong>with respect to</strong> <span class="math">\(\Theta_j\)</span> as follows:</p>
+
+<p><span class="math">\[\dfrac{\partial}{\partial\Theta_j}J(\Theta) \approx \dfrac{J(\Theta_1, \dots, \Theta_j + \epsilon, \dots, \Theta_n) - J(\Theta_1, \dots, \Theta_j - \epsilon, \dots, \Theta_n)}{2\epsilon}\]</span></p>
+
+<p>A good small value for <span class="math">\({\epsilon}\)</span> (epsilon), garantee the math above to become true. If the value be much smaller, may we will end up with numerical problems. Proposed value would be <span class="math">\({\epsilon = 10^{-4}}\)</span></p>
+
+<p>We are only adding or subtracting epsilon to the <span class="math">\(\Theta_j\)</span> matrix.</p>
+
+<p>Once you've verified <strong>once</strong> that your backpropagation algorithm is correct, then you don't need to compute gradApprox again. The code to compute gradApprox is very slow.</p>
+
+<ul>
+<li><strong>Random Initialization</strong></li>
+</ul>
+
+<p>Initializing all theta weights to zero does not work with neural networks. When we backpropagate, all nodes will update to the same value repeatedly.</p>
+
+<p>Instead we can randomly initialize our weights:</p>
+
+<p>Initialize each <span class="math">\(\Theta^{(l)}_{ij}\)</span> to a random value between <span class="math">\([-\epsilon,\epsilon]\)</span>:</p>
+
+<p><span class="math">\[\epsilon = \dfrac{\sqrt{6}}{\sqrt{\mathrm{Loutput} + \mathrm{Linput}}}
+\Theta^{(l)} =  2 \epsilon \; \mathrm{rand}(\mathrm{Loutput}, \mathrm{Linput} + 1) - \epsilon\]</span></p>
+
+<p>Note: this epsilon is unrelated to the epsilon from Gradient Checking</p>
+
+<ul>
+<li><strong>Putting it Together</strong></li>
+</ul>
+
+<p>First, pick a network architecture; choose the layout of your neural network, including how many hidden units in each layer and how many layers total.</p>
+
+<ul>
+<li>Number of input units = dimension of features <span class="math">\(x^{(i)}\)</span></li>
+<li>Number of output units = number of classes</li>
+<li>Number of hidden units per layer = usually more the better (must balance with cost of computation as it increases with more hidden units)</li>
+<li>Defaults: 1 hidden layer. If more than 1 hidden layer, then the same number of units in every hidden layer.</li>
+</ul>
+
+<p><strong>Training a Neural Network</strong></p>
+
+<ol>
+<li>Randomly initialize the weights</li>
+<li>Implement forward propagation to get <span class="math">\(h_\theta(x^{(i)})\)</span></li>
+<li>Implement the cost function</li>
+<li>Implement backpropagation to compute partial derivatives</li>
+<li>Use gradient checking to confirm that your backpropagation works. Then disable gradient checking.</li>
+<li>Use gradient descent or a built-in optimization function to minimize the cost function with the weights in theta.</li>
+</ol>
+
+<p>When we perform forward and back propagation, we loop on every training example.</p>
+
 <h3>Unsupervised Learning</h3>
 
 <p>Unsupervised learning, on the other hand, allows us to approach problems with little or no idea what our results should look like. We can derive structure from data where we don't necessarily know the effect of the variables.
