@@ -177,13 +177,13 @@
 </tr>
 </table>
 
-<p>The code is really strightforward. You can customize titles, markers' styles, axis scales, etc. A great tool accessible from inside the F# interactive.</p>
+<p>It is really strightforward. You can customize titles, markers' styles, axis scales, etc. A great tool accessible from inside the F# interactive.</p>
 
 <p>But before we could plot we had to get the data points from somewhere.</p>
 
 <h3>Reading data</h3>
 
-<p>I could read data points passed to the scatter plot using standard .NET IO functions. But there is a better way. I took <a href="http://numerics.mathdotnet.com/">Math.NET Numerics</a> for calculations that follows. This excellent library already knows how to read data from <code>.csv</code> file:</p>
+<p>I could read data points passed to the scatter plot using standard .NET IO functions. But there is a better way. I took <a href="http://numerics.mathdotnet.com/">Math.NET Numerics</a> for calculations that follows in the next part. This excellent library already knows how to read data from <code>.csv</code> file:</p>
 
 <table class="pre"><tr><td class="lines"><pre class="fssnip">
 <span class="l">1: </span>
@@ -229,11 +229,11 @@
 
 <p>where the hypothesis <span class="math">\(h_\theta (x)\)</span> is given by the linear model:</p>
 
-<p><span class="math">\[$h_\theta(x) = \theta_0 + \theta_1 x$\]</span></p>
+<p><span class="math">\[h_\theta(x) = \theta_0 + \theta_1 x\]</span></p>
 
 <p>The cost function measures the accuracy of our hypothesis. This takes an average (actually a fancier version of an average) of all the results of the hypothesis with inputs from x's compared to the actual output y's</p>
 
-<p>For this task I need a powerfull library that will allow to work with vectors and matrices. All the <span class="math">\(\theta\)</span> parameter should be updated at once and using matrices is very strighforward instead of loops. <a href="http://numerics.mathdotnet.com/">Math.NET Numerics</a> library is an excellent choice. It works well on <code>mono</code> too.</p>
+<p>For this task I need a powerfull library that will allow me to work with vectors and matrices. All the <span class="math">\(\theta\)</span> parameter should be updated at once and using matrices is very strighforward instead of loops. <a href="http://numerics.mathdotnet.com/">Math.NET Numerics</a> library is an excellent choice. It works well on <code>mono</code> and mac too.</p>
 
 <p>To calculate the cost function <code>j</code> we can simply do this:</p>
 
