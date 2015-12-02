@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
     <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="Some facts about threading, TPL and ASP.NET" />
+    <meta name="description" content="Improve signal, reduce noise = use F#" />
     <meta name="author" content="Tomasz Jaskuła" />
     <meta name="copyright" content="Tomasz Jaskuła 2015" />
 
     <!-- Twitter cards -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:creator" content="@tjaskula">
-    <meta name="twitter:title" content="Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL">
-    <meta name="twitter:description" content="Some facts about threading, TPL and ASP.NET">
+    <meta name="twitter:title" content="Tomasz Jaskula's blog">
+    <meta name="twitter:description" content="Improve signal, reduce noise = use F#">
     
     <!-- End Twitter cards -->
 
@@ -87,81 +87,32 @@
       <div class="row">
         <main class="col-lg-8">
               
-<h1>Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL</h1>
 
-<div class="row">
+    <h3 class="h2link">
+        <a href="http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression/index.html">Data Science tools in F# through univariante linear regression</a>
+    </h3>
+    <h6>
+            <time datetime="2015-12-02T03:18:24" pubdate data-updated="true">2 December 2015</time>
+
+    </h6>
+    <br />
+    <article>
+        <div class="row">
 <div class="medium-8 columns">
 
-<p>I've been always confused whenever you should or not implement asynchronous execution for "lengthy" operations when it comes to the ASP.NET platform. It has to be said that there is many factors that come into play. The way ASP.NET concurrent request are handled not only has changed over the different version of Framework .NET but also you have to consider how ASP.NET deals with threads and ThreadPool in general.</p>
+<p>This post is part of the <a href="https://sergeytihon.wordpress.com/tag/fsadvent/">F# Advent Calendar in English 2015</a>. Be sure to check out the other posts!</p>
+
+<p>Machine Learning is very interesting and inspiring filed. I've been interested in this topic for several years now, mainly focusing on theory (although I was able to implement a poor recommeder system for my startup) and having a little experience from the real-world problems. But several months ago I started a real hardcore learning in Machine Learning, reading many books and following almost every course on Coursera and other MOOC portals. I know that those courses are aimed towards the newcomers like me and don't give you a solid knowledge as if you had a PhD in the field. However with a lot of practice, you can do many usefull things.</p>
 
 </div>
 </div>
 
-<!-- more -->
-
-<p>Since the very beginning I hear people saying to make usage of your own threads if you don't want to starve the ThreadPool in ASP.NET process by queuing too many work items. It will prevent ASP.NET from processing further requests. Some confusion has been added with the recent release of TPL library and its usage inside the asynchronous pages/controllers/handlers in regards to the threads and ThreadPool consumption. All the more there is no clear guidance or rather no easy one to find. So let me now sum up all this when it comes to the latest .NET Framework (4/4.5).</p>
-
-<h2>ASP.NET ThreadPool facts</h2>
-
-<ul>
-<li>ASP.NET uses threads from a common language runtime (CLR) thread pool to process requests. As long as there are threads available in the thread pool, ASP.NET has no trouble dispatching incoming requests.</li>
-<li>Async delegates use the threads from ThreadPool.</li>
-</ul>
-
-<h2>When you should start thinking about implementing asynchronous execution?</h2>
-
-<ul>
-<li>When your application performs relatively lengthy I/O operations (database queries, Web service calls, and other I/O operations).</li>
-<li>If you want to do I/O work, then you should be using an I/O thread (I/O Completion Port) and specifically you should be using the async callbacks supported by whatever library class you're using. Theirs names start with the words <code>Begin</code> and <code>End</code>.</li>
-<li>If requests are computationally cheap to process, then parallelism is probably an unnecessary overhead.</li>
-<li>If the incoming request rate is high, then adding more parallelism will likely yield few benefits and could actually decrease performance, since the incoming rate of work may be high enough to keep the CPUs busy.</li>
-</ul>
-
-<h2>Should I create new Threads?</h2>
-
-<ul>
-<li>Avoid creating new threads like you would avoid the plague.</li>
-<li>If you are actually queuing enough work items to prevent ASP.NET from processing further requests, then you should be starving the thread pool! If you are running literally hundreds of CPU-intensive operations at the same time, what good would it do to have another worker thread to serve an ASP.NET request, when the machine is already overloaded.</li>
-</ul>
-
-<h2>What about the TPL and async await? Does it solve my problems?</h2>
-
-<ul>
-<li>TPL can adapt to use available resources within a process. If the server is already loaded, the TPL can use as little as one worker and make forward progress. If the server is mostly free, they can grow to use as many workers as the ThreadPool can spare.</li>
-<li>Tasks use threadpool threads to execute.</li>
-<li>When async/await will not consume an additional ThreadPool thread ? Only in the case you are using BCL Async methods. that uses an IOCP thread to execute the IO bound operation.</li>
-</ul>
-
-<p>If you are trying to <strong>async execute some sync code or your own library code</strong>, that code will probably <strong>use an additional ThreadPool thread</strong> unless you explicitly use the IOCP ThreadPool or your own ThreadPool. But as far as I know you can't chose whatever you want to use a IOCP thread, and making correct implementation of the ThreadPool is not worth the effort. I doubt someone does a better one that already exists.</p>
-
-<p>I scratched only the surface but if you have more suggestions don't hesitate to leave me a comment.</p>
 
 
 
-<!-- AddThias -->
+        <a href="http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression/index.html">Read more ...</a>
+    </article>
 
-	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54bed07b3003b40e" async="async"></script>
-	<div class="addthis_sharing_toolbox"></div>
-
-<!-- END AddThias -->
-
-<!-- Disqus -->
-	<div id="disqus_thread"></div>
-    <script type="text/javascript">
-        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-        var disqus_shortname = 'tjaskula'; // required: replace example with your forum shortname
-	    var disqus_title = 'Some thoughts on ASP.NET ThreadPool Threads, asynchronous execution and TPL';
-	    var disqus_url = '';
-
-        /* * * DON'T EDIT BELOW THIS LINE * * */
-        (function() {
-            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-        })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<!-- Disqus END -->
         </main>
         <aside class="col-lg-4">
               <article>
@@ -187,30 +138,6 @@
                               <li>
                                   <h3><a href="http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression/index.html">Data Science tools in F# through univariante linear regression</a>
                                       <span>    <time datetime="2015-12-02T03:18:24" pubdate data-updated="true">Dec 2, 2015</time>
-</span>
-                                  </h3>
-                              </li>
-                              <li>
-                                  <h3><a href="http://jaskula.fr//blog/2015/08-14-integrating-ndepend-with-teamcity-9/index.html">Integrating NDepend with TeamCity 9</a>
-                                      <span>    <time datetime="2015-08-14T00:10:22" pubdate data-updated="true">Aug 14, 2015</time>
-</span>
-                                  </h3>
-                              </li>
-                              <li>
-                                  <h3><a href="http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes/index.html">Beginners quick guide to setup FsBlog and start to blog in 5 minutes</a>
-                                      <span>    <time datetime="2015-01-21T11:55:09" pubdate data-updated="true">Jan 21, 2015</time>
-</span>
-                                  </h3>
-                              </li>
-                              <li>
-                                  <h3><a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Welcome</a>
-                                      <span>    <time datetime="2015-01-20T11:10:42" pubdate data-updated="true">Jan 20, 2015</time>
-</span>
-                                  </h3>
-                              </li>
-                              <li>
-                                  <h3><a href="http://jaskula.fr//blog/2013/08-21-from-oop-to-fp-about-dependency-injection-and-higher-order-functions/index.html">From OOP to FP : About dependency injection and higher-order functions</a>
-                                      <span>    <time datetime="2013-08-21T08:07:57" pubdate data-updated="true">Aug 21, 2013</time>
 </span>
                                   </h3>
                               </li>

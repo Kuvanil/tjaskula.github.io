@@ -5,6 +5,24 @@
     <description>F# and functional programming is the topic I'm interested in and passionate about at the moment. However, software architecture, software craftsmanship, Domain Driven Design are also topics dear to my heart. So stay tuned! There is more to come...
 </description>
     <item>
+      <title>Data Science tools in F# through univariante linear regression</title>
+      <guid>http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression</guid>
+      <link>http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression/index.html</link>
+      <pubDate>Wed, 02 Dec 2015 02:18:24 GMT</pubDate>
+      <description>&lt;div class="row"&gt;
+&lt;div class="medium-8 columns"&gt;
+
+&lt;p&gt;This post is part of the &lt;a href="https://sergeytihon.wordpress.com/tag/fsadvent/"&gt;F# Advent Calendar in English 2015&lt;/a&gt;. Be sure to check out the other posts!&lt;/p&gt;
+
+&lt;p&gt;Machine Learning is very interesting and inspiring filed. I've been interested in this topic for several years now, mainly focusing on theory (although I was able to implement a poor recommeder system for my startup) and having a little experience from the real-world problems. But several months ago I started a real hardcore learning in Machine Learning, reading many books and following almost every course on Coursera and other MOOC portals. I know that those courses are aimed towards the newcomers like me and don't give you a solid knowledge as if you had a PhD in the field. However with a lot of practice, you can do many usefull things.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+</description>
+    </item>
+    <item>
       <title>Integrating NDepend with TeamCity 9</title>
       <guid>http://jaskula.fr//blog/2015/08-14-integrating-ndepend-with-teamcity-9</guid>
       <link>http://jaskula.fr//blog/2015/08-14-integrating-ndepend-with-teamcity-9/index.html</link>
