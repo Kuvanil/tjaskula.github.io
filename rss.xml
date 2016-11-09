@@ -5,6 +5,22 @@
     <description>F# and functional programming is the topic I'm interested in and passionate about at the moment. However, software architecture, software craftsmanship, Domain Driven Design are also topics dear to my heart. So stay tuned! There is more to come...
 </description>
     <item>
+      <title>Back to basics: Algorithms - finding the max pairwise product</title>
+      <guid>http://jaskula.fr//blog/2016/11-09-back-to-basics-algorithms-finding-the-max-pairwise-product</guid>
+      <link>http://jaskula.fr//blog/2016/11-09-back-to-basics-algorithms-finding-the-max-pairwise-product/index.html</link>
+      <pubDate>Wed, 09 Nov 2016 07:05:56 GMT</pubDate>
+      <description>&lt;div class="row"&gt;
+&lt;div class="medium-8 columns"&gt;
+
+&lt;p&gt;Once you've acquired some experience using your favorite programming language, doing somme cool apps, even if they are complicated, I think it's always good to go back to the roots and start implementing some algorithms. Why is that? Algorithms have some interesting properties that will require to look at the problem at hand from a different point of view. They will force you to use your language in a different way because you'll need to fulfill those properties. So what are the properties I'm talking about?&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+</description>
+    </item>
+    <item>
       <title>Data Science tools in F# through univariante linear regression</title>
       <guid>http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression</guid>
       <link>http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression/index.html</link>

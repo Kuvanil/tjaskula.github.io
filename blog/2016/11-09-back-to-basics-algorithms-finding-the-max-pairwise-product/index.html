@@ -1,0 +1,697 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Tomasz Jaskula's blog</title>
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/bootstrap/less/bootstrap.css">
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
+    <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="Learning F# through the implementaton of basic algorithms" />
+    <meta name="author" content="Tomasz Jaskuła" />
+    <meta name="copyright" content="Tomasz Jaskuła 2015" />
+
+    <!-- Twitter cards -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:creator" content="@tjaskula">
+    <meta name="twitter:title" content="Back to basics: Algorithms - finding the max pairwise product">
+    <meta name="twitter:description" content="Learning F# through the implementaton of basic algorithms">
+    
+    <!-- End Twitter cards -->
+
+    <link rel="alternate" type="application/rss+xml" title="Tomasz Jaskula's blog" href="http://jaskula.fr/rss.xml" />
+
+      <script>
+          (function(d) {
+              var config = {
+                          kitId: 'xfo7ulp',
+                          scriptTimeout: 3000
+                      },
+                      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='//use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+          })(document);
+      </script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- FSharp.Formatting Styles --> 
+    <link rel="stylesheet" type="text/css" media="screen" href="http://jaskula.fr//fsharp.formatting/tooltips.css" />
+  	<script type="text/javascript" src="http://jaskula.fr//fsharp.formatting/tooltips.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-58152976-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+
+  </head>
+  <body>
+
+	  <header>
+
+        <div class="navbar-header">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <h1><a class="" href="http://jaskula.fr//index.html">Tomasz Jaskula's blog</a>
+                <small>Improve signal, reduce noise = use F#</small>
+            </h1>
+        </div>
+
+        <nav class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+              <li>
+                  <a href="http://jaskula.fr//blog/">Blog</a>
+              </li>
+              <li>
+                  <A HREF="http://jaskula.fr//talks/">Talks</A>
+              </li>
+              <!-- <li class="active">
+                    <a href="http://jaskula.fr//talks/">Talks</a>
+              </li> -->
+          </ul>
+        </nav>
+
+    </header>
+
+    <div class="container">
+      <div class="row">
+        <main class="col-lg-8">
+              
+<h1>Back to basics: Algorithms - finding the max pairwise product</h1>
+
+<div class="row">
+<div class="medium-8 columns">
+
+<p>Once you've acquired some experience using your favorite programming language, doing somme cool apps, even if they are complicated, I think it's always good to go back to the roots and start implementing some algorithms. Why is that? Algorithms have some interesting properties that will require to look at the problem at hand from a different point of view. They will force you to use your language in a different way because you'll need to fulfill those properties. So what are the properties I'm talking about?</p>
+
+</div>
+</div>
+
+<!-- more -->
+
+<p>It depends, on the problem at hand, on the algorithm, on the data structure. But generally speaking it's about time and space complexity expressed as Big-O. So sometimes you'll give up on nice recursive structure, because the iterative one is faster. Another time you'll use a mutable array instead of immutable list and so on and so forth.</p>
+
+<p>The goal is to start with a very simple problems and learn how it can be solved with F#. Let's try with the first problem.</p>
+
+<h2>Problem: Maximum Pairwise Product</h2>
+
+<p>Given a sequence of non-negative integers <span class="math">\(a_0, \dots, a_{n-1}\)</span>, find the maximum pairwise product, that is, the largest integer that can be obtained by multiplying two different elements from the sequence.</p>
+
+<h3>Input Constraints</h3>
+
+<p>The number of elements <span class="math">\(n\)</span> of the input is <span class="math">\(2 \le n \le 2\cdot10^5\)</span> and the range of elements spread from <span class="math">\(0 \le a_0, \dots, a_{n-1} \le 10^5\)</span></p>
+
+<h3>Output</h3>
+
+<p>Single number - the maximum pairwise product</p>
+
+<h3>Samples</h3>
+
+<p><strong>Input 1:</strong></p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+[<span class="n">7</span>; <span class="n">5</span>; <span class="n">14</span>; <span class="n">2</span>; <span class="n">8</span>; <span class="n">8</span>; <span class="n">10</span>; <span class="n">1</span>; <span class="n">2</span>; <span class="n">3</span>]</pre>
+</td>
+</tr>
+</table>
+
+<p><strong>Output 1:</strong></p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="n">140</span> <span class="c">// (14 * 10)</span></pre>
+</td>
+</tr>
+</table>
+
+<p><strong>Input 2:</strong></p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+[<span class="n">7</span>; <span class="n">5</span>; <span class="n">14</span>; <span class="n">2</span>; <span class="n">15</span>; <span class="n">15</span>; <span class="n">10</span>; <span class="n">1</span>; <span class="n">2</span>; <span class="n">3</span>]</pre>
+</td>
+</tr>
+</table>
+
+<p><strong>Output 2:</strong></p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="n">225</span> <span class="c">// (15 * 15)</span></pre>
+</td>
+</tr>
+</table>
+
+<p><strong>Input 3:</strong></p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+[<span class="n">100000</span>; <span class="n">90000</span>]</pre>
+</td>
+</tr>
+</table>
+
+<p><strong>Output 3:</strong></p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="n">9000000000</span> <span class="c">// (100000 * 90000)</span></pre>
+</td>
+</tr>
+</table>
+
+<blockquote>
+  <p>Hint: Watch out the Integer overflow when multiplying two numbers together.</p>
+</blockquote>
+
+<p>This is a very simple problem so many of us would go stright to the right solution but in many more complicated cases it is worth to consider writing <em>brute force</em> algorithm that is sure to work correctly and to give us the right answer. This algorithm will also help us in the debug process where the results of different implementations can be compared.</p>
+
+<h3>Brut Force</h3>
+
+<p>What the Brute Force would be for this problem? The easiest thing would be to solve it iteratively with two nested loops. The outer loop would go from <span class="math">\(i = 0\)</span> to <span class="math">\(n - 1\)</span> while the inner loop would go from <span class="math">\(i + 1\)</span> to <span class="math">\(n - 1\)</span>. This way we can compare the product of every pair of numbers to the last highest product and if its larger, we set the last highest product as the current product, if not we continue until the end of the list. The implementation would look something along these lines:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+<span class="l">9: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">getMaxPariwiseProduct</span> (<span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">numbers</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">int</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="i">array</span>)<span class="o">:</span> <span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="i">int64</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="k">mutable</span> <span onmouseout="hideTip(event, 'fs6', 6)" onmouseover="showTip(event, 'fs6', 6)" class="i">result</span> <span class="o">=</span> <span class="n">0L</span>
+    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 7)" onmouseover="showTip(event, 'fs7', 7)" class="i">n</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs2', 8)" onmouseover="showTip(event, 'fs2', 8)" class="i">numbers</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs8', 9)" onmouseover="showTip(event, 'fs8', 9)" class="i">Length</span>
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs9', 10)" onmouseover="showTip(event, 'fs9', 10)" class="i">i</span> <span class="k">in</span> <span class="n">0..</span>(<span onmouseout="hideTip(event, 'fs7', 11)" onmouseover="showTip(event, 'fs7', 11)" class="i">n</span> <span class="o">-</span> <span class="n">1</span>) <span class="k">do</span>
+        <span class="k">for</span> <span onmouseout="hideTip(event, 'fs10', 12)" onmouseover="showTip(event, 'fs10', 12)" class="i">j</span> <span class="k">in</span> (<span onmouseout="hideTip(event, 'fs9', 13)" onmouseover="showTip(event, 'fs9', 13)" class="i">i</span> <span class="o">+</span> <span class="n">1</span>)<span class="o">..</span>(<span onmouseout="hideTip(event, 'fs7', 14)" onmouseover="showTip(event, 'fs7', 14)" class="i">n</span> <span class="o">-</span> <span class="n">1</span>) <span class="k">do</span>
+            <span class="k">if</span> <span onmouseout="hideTip(event, 'fs5', 15)" onmouseover="showTip(event, 'fs5', 15)" class="i">int64</span>(<span onmouseout="hideTip(event, 'fs2', 16)" onmouseover="showTip(event, 'fs2', 16)" class="i">numbers</span><span class="o">.</span>[<span onmouseout="hideTip(event, 'fs9', 17)" onmouseover="showTip(event, 'fs9', 17)" class="i">i</span>]) <span class="o">*</span> <span onmouseout="hideTip(event, 'fs5', 18)" onmouseover="showTip(event, 'fs5', 18)" class="i">int64</span>(<span onmouseout="hideTip(event, 'fs2', 19)" onmouseover="showTip(event, 'fs2', 19)" class="i">numbers</span><span class="o">.</span>[<span onmouseout="hideTip(event, 'fs10', 20)" onmouseover="showTip(event, 'fs10', 20)" class="i">j</span>]) <span class="o">&gt;</span> <span onmouseout="hideTip(event, 'fs6', 21)" onmouseover="showTip(event, 'fs6', 21)" class="i">result</span> <span class="k">then</span>
+                <span onmouseout="hideTip(event, 'fs6', 22)" onmouseover="showTip(event, 'fs6', 22)" class="i">result</span> <span class="o">&lt;-</span> <span onmouseout="hideTip(event, 'fs5', 23)" onmouseover="showTip(event, 'fs5', 23)" class="i">int64</span>(<span onmouseout="hideTip(event, 'fs2', 24)" onmouseover="showTip(event, 'fs2', 24)" class="i">numbers</span><span class="o">.</span>[<span onmouseout="hideTip(event, 'fs9', 25)" onmouseover="showTip(event, 'fs9', 25)" class="i">i</span>]) <span class="o">*</span> <span onmouseout="hideTip(event, 'fs5', 26)" onmouseover="showTip(event, 'fs5', 26)" class="i">int64</span>(<span onmouseout="hideTip(event, 'fs2', 27)" onmouseover="showTip(event, 'fs2', 27)" class="i">numbers</span><span class="o">.</span>[<span onmouseout="hideTip(event, 'fs10', 28)" onmouseover="showTip(event, 'fs10', 28)" class="i">j</span>])
+            <span class="k">else</span> ()
+    <span onmouseout="hideTip(event, 'fs6', 29)" onmouseover="showTip(event, 'fs6', 29)" class="i">result</span></pre>
+</td>
+</tr>
+</table>
+
+<p>This is not at all idiomatic to the functional approach but at least it works. The results are as expected for Input 1, 2 and 3 respectively:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="n">140L</span>
+<span class="n">225L</span>
+<span class="n">9000000000L</span></pre>
+</td>
+</tr>
+</table>
+
+<p>Unfortunatelly the time complexity is <span class="math">\(\theta(n^2)\)</span> which is not great at all. But we can do better.</p>
+
+<h3>Recursive approach</h3>
+
+<p>Instead of using nested loops we may want to test another approach. We can iterate recursively throught the list, taking a maximum number and append it to the empty list that will contain only two maximum elements. Once the maximum number is found in the list, we have to remove it from the list and to iterate again on it until we find another maximum number that we will append to the list containing the first maximum number. The code looks like that:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="k">let</span> <span class="k">rec</span> <span onmouseout="hideTip(event, 'fs11', 30)" onmouseover="showTip(event, 'fs11', 30)" class="i">removeFirst</span> <span onmouseout="hideTip(event, 'fs12', 31)" onmouseover="showTip(event, 'fs12', 31)" class="i">pred</span> <span onmouseout="hideTip(event, 'fs13', 32)" onmouseover="showTip(event, 'fs13', 32)" class="i">lst</span> <span class="o">=</span>
+    <span class="k">match</span> <span onmouseout="hideTip(event, 'fs13', 33)" onmouseover="showTip(event, 'fs13', 33)" class="i">lst</span> <span class="k">with</span>
+    | <span onmouseout="hideTip(event, 'fs14', 34)" onmouseover="showTip(event, 'fs14', 34)" class="i">h</span><span class="o">::</span><span onmouseout="hideTip(event, 'fs15', 35)" onmouseover="showTip(event, 'fs15', 35)" class="i">t</span> <span class="k">when</span> <span onmouseout="hideTip(event, 'fs12', 36)" onmouseover="showTip(event, 'fs12', 36)" class="i">pred</span> <span onmouseout="hideTip(event, 'fs14', 37)" onmouseover="showTip(event, 'fs14', 37)" class="i">h</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs15', 38)" onmouseover="showTip(event, 'fs15', 38)" class="i">t</span>
+    | <span onmouseout="hideTip(event, 'fs14', 39)" onmouseover="showTip(event, 'fs14', 39)" class="i">h</span><span class="o">::</span><span onmouseout="hideTip(event, 'fs15', 40)" onmouseover="showTip(event, 'fs15', 40)" class="i">t</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs14', 41)" onmouseover="showTip(event, 'fs14', 41)" class="i">h</span><span class="o">::</span><span onmouseout="hideTip(event, 'fs11', 42)" onmouseover="showTip(event, 'fs11', 42)" class="i">removeFirst</span> <span onmouseout="hideTip(event, 'fs12', 43)" onmouseover="showTip(event, 'fs12', 43)" class="i">pred</span> <span onmouseout="hideTip(event, 'fs15', 44)" onmouseover="showTip(event, 'fs15', 44)" class="i">t</span>
+    | _ <span class="k">-&gt;</span> []
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs16', 45)" onmouseover="showTip(event, 'fs16', 45)" class="i">findTwoMax</span> <span onmouseout="hideTip(event, 'fs17', 46)" onmouseover="showTip(event, 'fs17', 46)" class="i">l</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="k">rec</span> <span onmouseout="hideTip(event, 'fs18', 47)" onmouseover="showTip(event, 'fs18', 47)" class="i">twoMaxIter</span> <span onmouseout="hideTip(event, 'fs19', 48)" onmouseover="showTip(event, 'fs19', 48)" class="i">o</span> <span onmouseout="hideTip(event, 'fs20', 49)" onmouseover="showTip(event, 'fs20', 49)" class="i">l&#39;</span> <span class="o">=</span>
+        <span class="k">match</span> <span onmouseout="hideTip(event, 'fs19', 50)" onmouseover="showTip(event, 'fs19', 50)" class="i">o</span> <span class="k">with</span>
+        | _ <span class="k">when</span> <span onmouseout="hideTip(event, 'fs21', 51)" onmouseover="showTip(event, 'fs21', 51)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs22', 52)" onmouseover="showTip(event, 'fs22', 52)" class="i">isEmpty</span>(<span onmouseout="hideTip(event, 'fs20', 53)" onmouseover="showTip(event, 'fs20', 53)" class="i">l&#39;</span>) <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs19', 54)" onmouseover="showTip(event, 'fs19', 54)" class="i">o</span>
+        | [<span onmouseout="hideTip(event, 'fs23', 55)" onmouseover="showTip(event, 'fs23', 55)" class="i">x</span>; <span onmouseout="hideTip(event, 'fs24', 56)" onmouseover="showTip(event, 'fs24', 56)" class="i">y</span>] <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs19', 57)" onmouseover="showTip(event, 'fs19', 57)" class="i">o</span>
+        | _ <span class="k">-&gt;</span> 
+            <span class="k">let</span> <span onmouseout="hideTip(event, 'fs25', 58)" onmouseover="showTip(event, 'fs25', 58)" class="i">m</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs21', 59)" onmouseover="showTip(event, 'fs21', 59)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs26', 60)" onmouseover="showTip(event, 'fs26', 60)" class="i">max</span> <span onmouseout="hideTip(event, 'fs20', 61)" onmouseover="showTip(event, 'fs20', 61)" class="i">l&#39;</span>
+            <span onmouseout="hideTip(event, 'fs20', 62)" onmouseover="showTip(event, 'fs20', 62)" class="i">l&#39;</span> 
+            <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs11', 63)" onmouseover="showTip(event, 'fs11', 63)" class="i">removeFirst</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs27', 64)" onmouseover="showTip(event, 'fs27', 64)" class="i">e</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs27', 65)" onmouseover="showTip(event, 'fs27', 65)" class="i">e</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs25', 66)" onmouseover="showTip(event, 'fs25', 66)" class="i">m</span>)
+            <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs18', 67)" onmouseover="showTip(event, 'fs18', 67)" class="i">twoMaxIter</span> (<span onmouseout="hideTip(event, 'fs25', 68)" onmouseover="showTip(event, 'fs25', 68)" class="i">m</span> <span class="o">::</span> <span onmouseout="hideTip(event, 'fs19', 69)" onmouseover="showTip(event, 'fs19', 69)" class="i">o</span>)
+    <span onmouseout="hideTip(event, 'fs18', 70)" onmouseover="showTip(event, 'fs18', 70)" class="i">twoMaxIter</span> [] <span onmouseout="hideTip(event, 'fs17', 71)" onmouseover="showTip(event, 'fs17', 71)" class="i">l</span> 
+    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs21', 72)" onmouseover="showTip(event, 'fs21', 72)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs28', 73)" onmouseover="showTip(event, 'fs28', 73)" class="i">map</span> <span onmouseout="hideTip(event, 'fs5', 74)" onmouseover="showTip(event, 'fs5', 74)" class="i">int64</span>
+    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs21', 75)" onmouseover="showTip(event, 'fs21', 75)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs29', 76)" onmouseover="showTip(event, 'fs29', 76)" class="i">reduce</span> <span class="o">(*)</span></pre>
+</td>
+</tr>
+</table>
+
+<p>At line 17 we pass to <code>twoMaxiter</code> function as first parameter, an empty list which is supposed to contain two maximum numbers at the end, and as the second parameter, the input list of all numbers. Then we match on the empty list <code>o</code>. If the list <code>l'</code> is emtpty then we return the list <code>o</code>. If the <code>o</code> list has two elements, then we are also done, we have our two maximum numbers. Otherwise we take the maximum number from the list <code>l'</code> we remove it with <code>removeFirst</code> function (filtering would not work because if the list has two or more equals max numbers we want just to remove the first one) and then we recurse another time appending the max number to the result list <code>o</code> and passing also the rest of the list <code>l'</code>. At the end we compute the product of two maximum found numbers.</p>
+
+<p>The results are as expected for Input 1, 2 and 3 respectively:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="n">140L</span>
+<span class="n">225L</span>
+<span class="n">9000000000L</span></pre>
+</td>
+</tr>
+</table>
+
+<p>The time complexity is much better then the brute force algorithm. We have <code>n</code> operations to find the first max, then we have <code>n</code> operations to remove the max found number from the end of the list, the next iteration finding the next one max number is <code>n - 1</code> operation and removing it from the rest of the list is also <code>n - 1</code>. Roughly speaking it is <span class="math">\(\theta(4n)\)</span>. We could avoid removing the second time the maximum number from the rest of the list as we already have our two max numbers but this would be <span class="math">\(\theta(3n)\)</span>. Dropping off the constant we can consider it as <span class="math">\(\theta(n)\)</span></p>
+
+<p>But this problem can be easily solved using just one iteration ever the list of numbers.</p>
+
+<h3>Folding the list</h3>
+
+<p>A nice approach to this problem would be using the <code>List.fold</code> function, passing in the empty list <code>state</code> and the input list containing all the elements. The fold operation moves through all the elements, if the state length is less then 2 we append the current element to the state, otherwise if the state has an element less then the current element we keep the max element in the state and append the current element. At the end we return the state which will hold two maximum elements. At the end we compute the product of two maximum found numbers. The algorithm looks like the following:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs30', 77)" onmouseover="showTip(event, 'fs30', 77)" class="i">findTwoMaxFold</span> <span onmouseout="hideTip(event, 'fs17', 78)" onmouseover="showTip(event, 'fs17', 78)" class="i">l</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs17', 79)" onmouseover="showTip(event, 'fs17', 79)" class="i">l</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs21', 80)" onmouseover="showTip(event, 'fs21', 80)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs31', 81)" onmouseover="showTip(event, 'fs31', 81)" class="i">fold</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs32', 82)" onmouseover="showTip(event, 'fs32', 82)" class="i">state</span> <span onmouseout="hideTip(event, 'fs33', 83)" onmouseover="showTip(event, 'fs33', 83)" class="i">elem</span> <span class="k">-&gt;</span> 
+                    <span class="k">if</span> <span onmouseout="hideTip(event, 'fs21', 84)" onmouseover="showTip(event, 'fs21', 84)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs34', 85)" onmouseover="showTip(event, 'fs34', 85)" class="i">length</span> <span onmouseout="hideTip(event, 'fs32', 86)" onmouseover="showTip(event, 'fs32', 86)" class="i">state</span> <span class="o">&lt;</span> <span class="n">2</span> <span class="k">then</span>
+                        <span onmouseout="hideTip(event, 'fs33', 87)" onmouseover="showTip(event, 'fs33', 87)" class="i">elem</span> <span class="o">::</span> <span onmouseout="hideTip(event, 'fs32', 88)" onmouseover="showTip(event, 'fs32', 88)" class="i">state</span>
+                    <span class="k">elif</span> <span onmouseout="hideTip(event, 'fs21', 89)" onmouseover="showTip(event, 'fs21', 89)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs35', 90)" onmouseover="showTip(event, 'fs35', 90)" class="i">exists</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs36', 91)" onmouseover="showTip(event, 'fs36', 91)" class="i">e</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs36', 92)" onmouseover="showTip(event, 'fs36', 92)" class="i">e</span> <span class="o">&lt;</span> <span onmouseout="hideTip(event, 'fs33', 93)" onmouseover="showTip(event, 'fs33', 93)" class="i">elem</span>) <span onmouseout="hideTip(event, 'fs32', 94)" onmouseover="showTip(event, 'fs32', 94)" class="i">state</span> <span class="k">then</span>
+                        [(<span onmouseout="hideTip(event, 'fs21', 95)" onmouseover="showTip(event, 'fs21', 95)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs26', 96)" onmouseover="showTip(event, 'fs26', 96)" class="i">max</span> <span onmouseout="hideTip(event, 'fs32', 97)" onmouseover="showTip(event, 'fs32', 97)" class="i">state</span>); <span onmouseout="hideTip(event, 'fs33', 98)" onmouseover="showTip(event, 'fs33', 98)" class="i">elem</span>]
+                    <span class="k">else</span> <span onmouseout="hideTip(event, 'fs32', 99)" onmouseover="showTip(event, 'fs32', 99)" class="i">state</span>
+                    ) [] 
+      <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs21', 100)" onmouseover="showTip(event, 'fs21', 100)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs28', 101)" onmouseover="showTip(event, 'fs28', 101)" class="i">map</span> <span onmouseout="hideTip(event, 'fs5', 102)" onmouseover="showTip(event, 'fs5', 102)" class="i">int64</span>
+      <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs21', 103)" onmouseover="showTip(event, 'fs21', 103)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs29', 104)" onmouseover="showTip(event, 'fs29', 104)" class="i">reduce</span> <span class="o">(*)</span></pre>
+</td>
+</tr>
+</table>
+
+<p>The results are as expected for Input 1, 2 and 3 respectively:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="n">140L</span>
+<span class="n">225L</span>
+<span class="n">9000000000L</span></pre>
+</td>
+</tr>
+</table>
+
+<p>Estimating the runing time is easy. We iterate just once over the list of <code>n</code> elements. So it's <span class="math">\(\theta(n)\)</span>. The operations on the state holding at most two elements are insignificant.</p>
+
+<blockquote>
+  <p>Note: We could also take the same approach to solve the problem in the recursive algorithm</p>
+</blockquote>
+
+<p>There is no difference in execution time when the input list are small as in the samples above. But the difference can be significant on very large inputs. Let's consider this</p>
+
+<h3>Stress testing and mesuring time on large inputs</h3>
+
+<p>Let's consider the constraints. The number of elements <code>n</code> is between the following range <span class="math">\(2 \le n \le 2\cdot10^5\)</span>.</p>
+
+<p>Generating the input is very easy:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="k">open</span> <span onmouseout="hideTip(event, 'fs37', 105)" onmouseover="showTip(event, 'fs37', 105)" class="i">System</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs38', 106)" onmouseover="showTip(event, 'fs38', 106)" class="i">r</span> <span class="o">=</span> <span class="k">new</span> <span onmouseout="hideTip(event, 'fs39', 107)" onmouseover="showTip(event, 'fs39', 107)" class="i">Random</span>(<span class="n">347</span>)
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs40', 108)" onmouseover="showTip(event, 'fs40', 108)" class="i">n</span> <span class="o">=</span> <span class="n">200001</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs41', 109)" onmouseover="showTip(event, 'fs41', 109)" class="i">l</span> <span class="o">=</span> [<span class="k">for</span> <span onmouseout="hideTip(event, 'fs42', 110)" onmouseover="showTip(event, 'fs42', 110)" class="i">i</span> <span class="k">in</span> <span class="n">2..</span><span onmouseout="hideTip(event, 'fs40', 111)" onmouseover="showTip(event, 'fs40', 111)" class="i">n</span> <span class="k">do</span>
+            <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs38', 112)" onmouseover="showTip(event, 'fs38', 112)" class="i">r</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs43', 113)" onmouseover="showTip(event, 'fs43', 113)" class="i">Next</span>(<span class="n">0</span>, <span onmouseout="hideTip(event, 'fs44', 114)" onmouseover="showTip(event, 'fs44', 114)" class="i">pown</span> <span class="n">10</span> <span class="n">5</span>)]</pre>
+</td>
+</tr>
+</table>
+
+<p>This will produce a list of 200000 elements.</p>
+
+<p>The first algorithm to test is the brute force approach</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="o">&gt;</span> #<span class="i">time</span>
+<span class="o">-</span> <span class="i">l</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs45', 115)" onmouseover="showTip(event, 'fs45', 115)" class="i">Array</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs46', 116)" onmouseover="showTip(event, 'fs46', 116)" class="i">ofList</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs1', 117)" onmouseover="showTip(event, 'fs1', 117)" class="i">getMaxPariwiseProduct</span>
+<span class="o">-</span> #<span class="i">time</span>
+<span class="o">-</span> ;;</pre>
+</td>
+</tr>
+</table>
+
+<p>And the result is:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="o">--&gt;</span> <span class="i">Timing</span> <span class="i">now</span> <span class="i">on</span>
+
+<span class="i">Real</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">04</span><span class="o">:</span><span class="n">17.058</span>, <span class="i">CPU</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">04</span><span class="o">:</span><span class="n">15.764</span>, <span onmouseout="hideTip(event, 'fs47', 118)" onmouseover="showTip(event, 'fs47', 118)" class="i">GC</span> <span class="i">gen0</span><span class="o">:</span> <span class="n">0</span>, <span class="i">gen1</span><span class="o">:</span> <span class="n">0</span>
+<span class="k">val</span> <span class="i">it</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs48', 119)" onmouseover="showTip(event, 'fs48', 119)" class="i">int64</span> <span class="o">=</span> <span class="n">9999700002L</span>
+
+<span class="o">--&gt;</span> <span class="i">Timing</span> <span class="i">now</span> <span class="i">off</span></pre>
+</td>
+</tr>
+</table>
+
+<p>It took more than 4 minutes to compute the result on my computer. Even if I'm doing an extra step of converting the list to an array, this doesn't have much of the inflence on the running time.</p>
+
+<p>Let's look at the recursive approach:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="o">&gt;</span> #<span class="i">time</span>
+<span class="o">-</span> <span class="i">l</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs16', 120)" onmouseover="showTip(event, 'fs16', 120)" class="i">findTwoMax</span>
+<span class="o">-</span> #<span class="i">time</span>
+<span class="o">-</span> ;;</pre>
+</td>
+</tr>
+</table>
+
+<p>And the result is:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="o">--&gt;</span> <span class="i">Timing</span> <span class="i">now</span> <span class="i">on</span>
+
+<span class="i">Real</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">04.632</span>, <span class="i">CPU</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">04.663</span>, <span onmouseout="hideTip(event, 'fs47', 121)" onmouseover="showTip(event, 'fs47', 121)" class="i">GC</span> <span class="i">gen0</span><span class="o">:</span> <span class="n">5</span>, <span class="i">gen1</span><span class="o">:</span> <span class="n">0</span>
+<span class="k">val</span> <span class="i">it</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs48', 122)" onmouseover="showTip(event, 'fs48', 122)" class="i">int64</span> <span class="o">=</span> <span class="n">9999700002L</span>
+
+<span class="o">--&gt;</span> <span class="i">Timing</span> <span class="i">now</span> <span class="i">off</span></pre>
+</td>
+</tr>
+</table>
+
+<p>As you see, this is much better then the brut foce approach. We improved the runing time from over 4 minuts to 4 seconds. Let's see at the implementation using fold:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="o">&gt;</span> #<span class="i">time</span>
+<span class="o">-</span> <span class="i">l</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs30', 123)" onmouseover="showTip(event, 'fs30', 123)" class="i">findTwoMaxFold</span>
+<span class="o">-</span> #<span class="i">time</span>
+<span class="o">-</span> ;;</pre>
+</td>
+</tr>
+</table>
+
+<p>And the result is:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="o">--&gt;</span> <span class="i">Timing</span> <span class="i">now</span> <span class="i">on</span>
+
+<span class="i">Real</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">00.052</span>, <span class="i">CPU</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">00.052</span>, <span onmouseout="hideTip(event, 'fs47', 124)" onmouseover="showTip(event, 'fs47', 124)" class="i">GC</span> <span class="i">gen0</span><span class="o">:</span> <span class="n">0</span>, <span class="i">gen1</span><span class="o">:</span> <span class="n">0</span>
+<span class="k">val</span> <span class="i">it</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs48', 125)" onmouseover="showTip(event, 'fs48', 125)" class="i">int64</span> <span class="o">=</span> <span class="n">9999700002L</span>
+
+<span class="o">--&gt;</span> <span class="i">Timing</span> <span class="i">now</span> <span class="i">off</span></pre>
+</td>
+</tr>
+</table>
+
+<p>So this is really impressive. We improved the running time even better then the previous run going from over 4 seconds to 52 milliseconds. Even if asymptotically the running time of the recursive approach and the one using fold was <span class="math">\(\theta(n)\)</span>, the real running time difference is huge.</p>
+
+<h2>Conclusion</h2>
+
+<p>This simple problem showed how different algorithm implementations can greatly improve/decrease the overal running time. The important points to consider are:</p>
+
+<ul>
+<li>brute force approach is always a good step to take as a base line for measuring time and correctness of the algorithm. It's often simpler to get it right and unless the runing time is reasonable (not taking hours or even more to run) it is very usefull.</li>
+<li>The asympthotic runing times are not always equal in practice. We saw that the recursive algorithm and the fold have similar runing time expressed as <span class="math">\(\theta(n)\)</span> but in practice there is a huge difference.</li>
+<li>always stress test your implementation under the muximum input you think your algorithm may run under.</li>
+</ul>
+
+<div class="tip" id="fs1">val getMaxPariwiseProduct : numbers:int array -&gt; int64<br /><br />Full name: backtobasicsalgorithmsfindingthemaxpairwiseproduct.getMaxPariwiseProduct</div>
+<div class="tip" id="fs2">val numbers : int array</div>
+<div class="tip" id="fs3">Multiple items<br />val int : value:&#39;T -&gt; int (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.Operators.int<br /><br />--------------------<br />type int = int32<br /><br />Full name: Microsoft.FSharp.Core.int<br /><br />--------------------<br />type int&lt;&#39;Measure&gt; = int<br /><br />Full name: Microsoft.FSharp.Core.int&lt;_&gt;</div>
+<div class="tip" id="fs4">type &#39;T array = &#39;T []<br /><br />Full name: Microsoft.FSharp.Core.array&lt;_&gt;</div>
+<div class="tip" id="fs5">Multiple items<br />val int64 : value:&#39;T -&gt; int64 (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.Operators.int64<br /><br />--------------------<br />type int64 = System.Int64<br /><br />Full name: Microsoft.FSharp.Core.int64<br /><br />--------------------<br />type int64&lt;&#39;Measure&gt; = int64<br /><br />Full name: Microsoft.FSharp.Core.int64&lt;_&gt;</div>
+<div class="tip" id="fs6">val mutable result : int64</div>
+<div class="tip" id="fs7">val n : int</div>
+<div class="tip" id="fs8">property System.Array.Length: int</div>
+<div class="tip" id="fs9">val i : int32</div>
+<div class="tip" id="fs10">val j : int32</div>
+<div class="tip" id="fs11">val removeFirst : pred:(&#39;a -&gt; bool) -&gt; lst:&#39;a list -&gt; &#39;a list<br /><br />Full name: backtobasicsalgorithmsfindingthemaxpairwiseproduct.removeFirst</div>
+<div class="tip" id="fs12">val pred : (&#39;a -&gt; bool)</div>
+<div class="tip" id="fs13">val lst : &#39;a list</div>
+<div class="tip" id="fs14">val h : &#39;a</div>
+<div class="tip" id="fs15">val t : &#39;a list</div>
+<div class="tip" id="fs16">val findTwoMax : l:int list -&gt; int64<br /><br />Full name: backtobasicsalgorithmsfindingthemaxpairwiseproduct.findTwoMax</div>
+<div class="tip" id="fs17">val l : int list</div>
+<div class="tip" id="fs18">val twoMaxIter : (&#39;a list -&gt; &#39;a list -&gt; &#39;a list) (requires comparison)</div>
+<div class="tip" id="fs19">val o : &#39;a list (requires comparison)</div>
+<div class="tip" id="fs20">val l&#39; : &#39;a list (requires comparison)</div>
+<div class="tip" id="fs21">Multiple items<br />module List<br /><br />from Microsoft.FSharp.Collections<br /><br />--------------------<br />type List&lt;&#39;T&gt; =<br />&#160;&#160;| ( [] )<br />&#160;&#160;| ( :: ) of Head: &#39;T * Tail: &#39;T list<br />&#160;&#160;interface IEnumerable<br />&#160;&#160;interface IEnumerable&lt;&#39;T&gt;<br />&#160;&#160;member Head : &#39;T<br />&#160;&#160;member IsEmpty : bool<br />&#160;&#160;member Item : index:int -&gt; &#39;T with get<br />&#160;&#160;member Length : int<br />&#160;&#160;member Tail : &#39;T list<br />&#160;&#160;static member Cons : head:&#39;T * tail:&#39;T list -&gt; &#39;T list<br />&#160;&#160;static member Empty : &#39;T list<br /><br />Full name: Microsoft.FSharp.Collections.List&lt;_&gt;</div>
+<div class="tip" id="fs22">val isEmpty : list:&#39;T list -&gt; bool<br /><br />Full name: Microsoft.FSharp.Collections.List.isEmpty</div>
+<div class="tip" id="fs23">val x : &#39;a (requires comparison)</div>
+<div class="tip" id="fs24">val y : &#39;a (requires comparison)</div>
+<div class="tip" id="fs25">val m : &#39;a (requires comparison)</div>
+<div class="tip" id="fs26">val max : list:&#39;T list -&gt; &#39;T (requires comparison)<br /><br />Full name: Microsoft.FSharp.Collections.List.max</div>
+<div class="tip" id="fs27">val e : &#39;a (requires comparison)</div>
+<div class="tip" id="fs28">val map : mapping:(&#39;T -&gt; &#39;U) -&gt; list:&#39;T list -&gt; &#39;U list<br /><br />Full name: Microsoft.FSharp.Collections.List.map</div>
+<div class="tip" id="fs29">val reduce : reduction:(&#39;T -&gt; &#39;T -&gt; &#39;T) -&gt; list:&#39;T list -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Collections.List.reduce</div>
+<div class="tip" id="fs30">val findTwoMaxFold : l:int list -&gt; int64<br /><br />Full name: backtobasicsalgorithmsfindingthemaxpairwiseproduct.findTwoMaxFold</div>
+<div class="tip" id="fs31">val fold : folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; state:&#39;State -&gt; list:&#39;T list -&gt; &#39;State<br /><br />Full name: Microsoft.FSharp.Collections.List.fold</div>
+<div class="tip" id="fs32">val state : int list</div>
+<div class="tip" id="fs33">val elem : int</div>
+<div class="tip" id="fs34">val length : list:&#39;T list -&gt; int<br /><br />Full name: Microsoft.FSharp.Collections.List.length</div>
+<div class="tip" id="fs35">val exists : predicate:(&#39;T -&gt; bool) -&gt; list:&#39;T list -&gt; bool<br /><br />Full name: Microsoft.FSharp.Collections.List.exists</div>
+<div class="tip" id="fs36">val e : int</div>
+<div class="tip" id="fs37">namespace System</div>
+<div class="tip" id="fs38">val r : Random<br /><br />Full name: backtobasicsalgorithmsfindingthemaxpairwiseproduct.r</div>
+<div class="tip" id="fs39">Multiple items<br />type Random =<br />&#160;&#160;new : unit -&gt; Random + 1 overload<br />&#160;&#160;member Next : unit -&gt; int + 2 overloads<br />&#160;&#160;member NextBytes : buffer:byte[] -&gt; unit<br />&#160;&#160;member NextDouble : unit -&gt; float<br /><br />Full name: System.Random<br /><br />--------------------<br />Random() : unit<br />Random(Seed: int) : unit</div>
+<div class="tip" id="fs40">val n : int<br /><br />Full name: backtobasicsalgorithmsfindingthemaxpairwiseproduct.n</div>
+<div class="tip" id="fs41">val l : int list<br /><br />Full name: backtobasicsalgorithmsfindingthemaxpairwiseproduct.l</div>
+<div class="tip" id="fs42">val i : int</div>
+<div class="tip" id="fs43">Random.Next() : int<br />Random.Next(maxValue: int) : int<br />Random.Next(minValue: int, maxValue: int) : int</div>
+<div class="tip" id="fs44">val pown : x:&#39;T -&gt; n:int -&gt; &#39;T (requires member get_One and member ( * ) and member ( / ))<br /><br />Full name: Microsoft.FSharp.Core.Operators.pown</div>
+<div class="tip" id="fs45">type Array =<br />&#160;&#160;member Clone : unit -&gt; obj<br />&#160;&#160;member CopyTo : array:Array * index:int -&gt; unit + 1 overload<br />&#160;&#160;member GetEnumerator : unit -&gt; IEnumerator<br />&#160;&#160;member GetLength : dimension:int -&gt; int<br />&#160;&#160;member GetLongLength : dimension:int -&gt; int64<br />&#160;&#160;member GetLowerBound : dimension:int -&gt; int<br />&#160;&#160;member GetUpperBound : dimension:int -&gt; int<br />&#160;&#160;member GetValue : params indices:int[] -&gt; obj + 7 overloads<br />&#160;&#160;member Initialize : unit -&gt; unit<br />&#160;&#160;member IsFixedSize : bool<br />&#160;&#160;...<br /><br />Full name: System.Array</div>
+<div class="tip" id="fs46">val ofList : list:&#39;T list -&gt; &#39;T []<br /><br />Full name: Microsoft.FSharp.Collections.Array.ofList</div>
+<div class="tip" id="fs47">type GC =<br />&#160;&#160;static member AddMemoryPressure : bytesAllocated:int64 -&gt; unit<br />&#160;&#160;static member CancelFullGCNotification : unit -&gt; unit<br />&#160;&#160;static member Collect : unit -&gt; unit + 2 overloads<br />&#160;&#160;static member CollectionCount : generation:int -&gt; int<br />&#160;&#160;static member GetGeneration : obj:obj -&gt; int + 1 overload<br />&#160;&#160;static member GetTotalMemory : forceFullCollection:bool -&gt; int64<br />&#160;&#160;static member KeepAlive : obj:obj -&gt; unit<br />&#160;&#160;static member MaxGeneration : int<br />&#160;&#160;static member ReRegisterForFinalize : obj:obj -&gt; unit<br />&#160;&#160;static member RegisterForFullGCNotification : maxGenerationThreshold:int * largeObjectHeapThreshold:int -&gt; unit<br />&#160;&#160;...<br /><br />Full name: System.GC</div>
+<div class="tip" id="fs48">Multiple items<br />val int64 : value:&#39;T -&gt; int64 (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.Operators.int64<br /><br />--------------------<br />type int64 = Int64<br /><br />Full name: Microsoft.FSharp.Core.int64<br /><br />--------------------<br />type int64&lt;&#39;Measure&gt; = int64<br /><br />Full name: Microsoft.FSharp.Core.int64&lt;_&gt;</div>
+
+
+<!-- AddThias -->
+
+	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54bed07b3003b40e" async="async"></script>
+	<div class="addthis_sharing_toolbox"></div>
+
+<!-- END AddThias -->
+
+<!-- Disqus -->
+	<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tjaskula'; // required: replace example with your forum shortname
+	    var disqus_title = 'Back to basics: Algorithms - finding the max pairwise product';
+	    var disqus_url = '';
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<!-- Disqus END -->
+        </main>
+        <aside class="col-lg-4">
+              <article>
+                <img class="img-responsive img-circle" src="http://jaskula.fr//img/aside-face200.jpg" />
+                <div class="aside-text">
+                    <blockquote class="small">
+                        <p><cite>Welcome to my blog! F# and functional programming it's what I'm interested in and passionate about at the moment. However, software architecture, software craftsmanship, Domain Driven Design are also topics dear to my heart. So stay tuned! There is more to come...</cite></p>
+                          <footer>Tomasz Jaskuła</footer>
+                    </blockquote>
+                </div>
+                <div class="social">
+                    <a href="https://www.facebook.com/thomas.jaskula" title="facebook"><img src="http://jaskula.fr//img/facebook.jpg" /></a>
+                    <a href="https://github.com/tjaskula" title="github"><img src="http://jaskula.fr//img/github.jpg" /></a>
+                    <a href="https://plus.google.com/u/1/106268061202265370189/about" title="google"><img src="http://jaskula.fr//img/google.jpg" /></a>
+                    <a href="https://twitter.com/tjaskula" title="twitter"><img src="http://jaskula.fr//img/twitter.jpg" /></a>
+                    <a href="http://jaskula.fr//rss.xml" title="rss"><img src="http://jaskula.fr//img/rss.jpg" /></a>
+                </div>
+            </article>
+              <article>
+                   <h2>Recent posts</h2>
+
+                      <ul class="articles-list">
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2016/11-09-back-to-basics-algorithms-finding-the-max-pairwise-product/index.html">Back to basics: Algorithms - finding the max pairwise product</a>
+                                      <span>    <time datetime="2016-11-09T08:05:56" pubdate data-updated="true">Nov 9, 2016</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression/index.html">Data Science tools in F# through univariante linear regression</a>
+                                      <span>    <time datetime="2015-12-02T03:18:24" pubdate data-updated="true">Dec 2, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/08-14-integrating-ndepend-with-teamcity-9/index.html">Integrating NDepend with TeamCity 9</a>
+                                      <span>    <time datetime="2015-08-14T00:10:22" pubdate data-updated="true">Aug 14, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes/index.html">Beginners quick guide to setup FsBlog and start to blog in 5 minutes</a>
+                                      <span>    <time datetime="2015-01-21T11:55:09" pubdate data-updated="true">Jan 21, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/01-20-welcome/index.html">Welcome</a>
+                                      <span>    <time datetime="2015-01-20T11:10:42" pubdate data-updated="true">Jan 20, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                      </ul>
+
+                  <h4>Blog tags</h4>
+                  <p>
+
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+
+                  <h4>Blog archives</h4>
+                    <a href="http://jaskula.fr//blog/archive/november-2016/index.html">
+                      November 2016 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/december-2015/index.html">
+                      December 2015 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/august-2015/index.html">
+                      August 2015 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/january-2015/index.html">
+                      January 2015 (2)</a>,                    <a href="http://jaskula.fr//blog/archive/august-2013/index.html">
+                      August 2013 (4)</a>,                    <a href="http://jaskula.fr//blog/archive/july-2013/index.html">
+                      July 2013 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/october-2012/index.html">
+                      October 2012 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/april-2012/index.html">
+                      April 2012 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/march-2012/index.html">
+                      March 2012 (1)</a>,
+              </article>
+        </aside>
+      </div>
+    </div>
+
+      <footer class="bottom">
+          <div class="container">
+              <div class="row">
+                  <div class="col-lg-12">
+                      <p>This site is generated using <a href="https://github.com/fsprojects/FsBlog">FsBlog</a> and hosted on <a href="https://github.com/tjaskula/Blog">GitHub</a></p>
+                      <p><small>By Tomasz Jaskula, 2015 &mdash; Theme by <a href="https://github.com/matjas">matjas</a></small></p>
+                  </div>
+              </div>
+          </div>
+
+      </footer>
+
+    <script src="http://jaskula.fr//javascripts/scale.fix.js"></script>
+  </body>
+</html>
