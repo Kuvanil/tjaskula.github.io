@@ -91,67 +91,66 @@
 
 <div class="row">
 <div class="medium-8 columns">
-
 <p>If you would like to blog on GitHub pages but you don't want to deep dive to much into documentation and you don't want to waste your time, just keep on reading. In this post you will learn how to set up quickly FsBlog, a static web page generator written in F# for GitHub pages. But, don't be scared. You don't need to know F# in order to use it.</p>
-
 </div>
 </div>
-
 <!-- more -->
-
 <p>If your are a geek, blogging on <a href="https://pages.github.com/">GitHub Pages</a> became a must in the last few months. If you're an F# geek, you have to use <a href="https://github.com/fsprojects/FsBlog">FsBlog</a>. We can read on the project page</p>
-
 <blockquote>
-  <p>Inspired by the likes of <strong>Jekyll</strong> and <strong>Octopress</strong>...FsBlog gives the average F# and .NET hacker the tools they need to get a statically built website up and running quickly and hosted somewhere like GitHub Pages</p>
+<p>Inspired by the likes of <strong>Jekyll</strong> and <strong>Octopress</strong>...FsBlog gives the average F# and .NET hacker the tools they need to get a statically built website up and running quickly and hosted somewhere like GitHub Pages</p>
 </blockquote>
-
 <p>Generating the static content of the blog boils down to using <a href="http://fsharp.github.io/FAKE/">FAKE</a> commands. FAKE is a build automation system with capabilities which are similar to <strong>make</strong> and <strong>rake</strong>. So you don't need to know F# in order to use it. However the chance is that you already know it if you picked up FsBlog.</p>
-
 <p>So here are steps that you may follow to setp up quickly a blogging platform without going deep in understanding of FsBlog and GitHub Pages.</p>
-
 <ol>
 <li>Either go to <a href="https://github.com">GitHub</a> and create a repository that will contain the 'source code' of your blog that you will use to generate the static output. You can call it whatever you want "Blog" or "MyBlog". It's not important. Or fork the <a href="https://github.com/fsprojects/FsBlog">FsBlog project repo</a> that will contain your 'source code' of the blog. The advantage is that if you want to contribute you can then send the 'Pull Requests'. But if you do some changes in <code>layouts</code> folder for your own look and feel you'll have to filter it out. The same is true for your config settings and other personal parameters.</li>
-<li>You have to activate GitHub pages. There are two choices I'm aware of:
+<li>
+You have to activate GitHub pages. There are two choices I'm aware of:
 <ul>
 <li>Using "Automatic Page Generator" from repository "Settings" tab. This will create a new branch in your repository called <code>gh-pages</code> where you will push the output of your blog generation. The url will be like this: <strong><a href="http://username.github.io/*repositoryName">http://username.github.io/*repositoryName</a></strong>*.</li>
 <li><p>Create another GitHub repository called <strong>username.github.io</strong> where you'll push the output of your blog generation. Then you'll have only one <code>master</code> branch with url like this : <strong><a href="http://username.github.io/">http://username.github.io/</a></strong>. Whatever option you chose you have more detailled steps on <a href="https://pages.github.com/">GitHub Pages</a> web site.</p></li>
-</ul></li>
+</ul>
+</li>
 <li>If you didn't fork the <a href="https://github.com/fsprojects/FsBlog">FsBlog project repo</a> project and you have created a GitHub respository to host your blog sources, you can install a nuget package which will bring all the files that you need to modify and generate the static output for your blog. It also installs all the <code>fake</code> commands that you can use to build and generate the blog. To install the nuget package just type into the "Package Manager Console" in Visual Studio : <code>PM&gt; Install-Package FsBlog -Pre</code>.</li>
-<li>You can start to play with the default preview running the following commands:
+<li>
+You can start to play with the default preview running the following commands:
 <ul>
 <li><code>build</code> which will build fake tools (not needed if you installed the nuget package).</li>
 <li><code>fake</code> which will generate the static output and run a local web server to preview the blog.</li>
-</ul></li>
-<li>At this point you should be able to define your own look and feel. Here are some default folders which contents have to be changed
+</ul>
+</li>
+<li>
+At this point you should be able to define your own look and feel. Here are some default folders which contents have to be changed
 <ul>
 <li><code>themes</code> if you have forked the project repo you can copy a default theme to for example "mytheme" folder and tweak it to your needs. Then you'll need to use <code>fake install theme="mytheme"</code> command to make it use the new theme while generating the static output with <code>fake</code> command or <code>fake generate</code> command. If you've installed the nuget package there is no "theme" folder. The content of "theme" folder is available on the root's path of the code source so keep on reading.</li>
 <li><code>layouts</code> contains a main razor files that you can modify. <code>post.cshtml</code> will be used when generating a static content as a template for your blog post page. When you run a command <code>fake new post="hello markdown"</code> this will add a markdown page to the <code>source</code> folder and when you'll run the <code>fake generate</code> command this template will display the content of the markdown pages. You can tweak this page to add for exemple a Disqus for comments or other social connectors you would like to have to promote your blog. You can also change the Razor code in order to have a different display than the one created by default. The same goes for other files contained in this folder i.e. <code>page.cshtml</code> and <code>default.cshtml</code>. The <code>page.cshtml</code> will be used while generating the content for markdown files added with <code>fake new page="my new page"</code> command. The <code>default.cshtml</code> contains general layout of your blog.</li>
 <li><code>stylesheets</code>, <code>javascripts</code>, <code>fonts</code> are other folders where you can personalize the look and feel of your blog.</li>
 <li><code>source</code> contains an <code>index.cshtml</code> file. You can personalize it as a default page that will be displayed on the home page.</li>
 <li><code>source\blog</code> contains also <code>index.cshtml</code> file used to personalize the displayed content when accessing the blog section of your web site.</li>
-</ul></li>
-<li>Once you've personalized the look of your web site you can start to generate the content. All the content is written using the markdown pages *.md and stored in <code>source</code> folder described earlier. Generate markdown pages with <code>fake</code>.
+</ul>
+</li>
+<li>
+Once you've personalized the look of your web site you can start to generate the content. All the content is written using the markdown pages *.md and stored in <code>source</code> folder described earlier. Generate markdown pages with <code>fake</code>.
 <ul>
 <li>to add a new post use <code>fake new post="hello markdown"</code> command</li>
 <li>to add a new page use <code>fake new page="my new page"</code> command. Pages are additional content and you'll have to add a link to the page for example in the menu in order to access it. Pages might be for example "About Me", "Talks", "What I read", etc.</li>
 <li>to add a new F# script use <code>fake new fsx="hello fsharp"</code>. This will create a .fsx file that you can use in your blog post.</li>
-</ul></li>
-<li>The next step before going live is to set up your configuration. There is a file called <code>config.yml</code> which contains default folders described earlier that you might want to change or not. You may also change the title and the description but the most important are the following setting:
+</ul>
+</li>
+<li>
+The next step before going live is to set up your configuration. There is a file called <code>config.yml</code> which contains default folders described earlier that you might want to change or not. You may also change the title and the description but the most important are the following setting:
 <ul>
 <li><code>url</code> is the url of your blog.</li>
 <li><code>gitlocation</code> is the url where the git will push the generated static files of your web blog.</li>
 <li><code>gitbranch</code> is the branch of your github repo definied by <code>gitlocation</code> parameter where git will push the output. Depending on which method you have used to install GitHub Pages on your repository it might be <code>master</code> or <code>gh-pages</code> branch.</li>
-</ul></li>
+</ul>
+</li>
 <li>If you have a DNS domain that you would like to use instead of <strong><a href="http://username.github.io/">http://username.github.io/</a></strong> one way is to add a CNAME file to the root path of the generated output files with just a name of your domain inside it . Then you'll have to redirect at your DNS provider level to the domain used by github. For full guidline please refer to <a href="https://help.github.com/articles/setting-up-a-custom-domain-with-github-pages/">Setting up a custom domain with GitHub Pages</a>.</li>
 <li>You're almost done. Run <code>fake</code> and check if everything is allright. If it's ok, push it with <code>fake GitPublish</code>. This will automaticaly commit and push your output generated files to the GitHub Pages web site according to the configuration from <code>config.yml</code>.</li>
 </ol>
-
 <p>And that's it!</p>
-
 <p>This guide does not explore every possible way of publishing to GitHub pages using FsBlog. It's just a quick ramp-up guide for newcomers that don't want to dive to much into FsBlog internals. For more information please check following links:
- - <a href="https://github.com/fsprojects/FsBlog">FsBlog</a>
- - <a href="https://pages.github.com/">GitHub Pages</a></p>
-
+- <a href="https://github.com/fsprojects/FsBlog">FsBlog</a>
+- <a href="https://pages.github.com/">GitHub Pages</a></p>
 <p>Happy blogging!</p>
 
 
@@ -248,7 +247,7 @@
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

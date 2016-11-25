@@ -89,249 +89,180 @@
               
 
 <h1>C# Language</h1>
-
 <h2>Object Orientation</h2>
-
 <p>Object-orientation paradigm, includes:</p>
-
 <ul>
 <li>encapsulation</li>
 <li>inheritance</li>
 <li>polymorphisme</li>
 </ul>
-
 <h3>Inheritance</h3>
-
 <p>A class can <em>inherit</em> from another class to extend or customize the original class.</p>
-
 <h3>Encapsulation</h3>
-
 <p>Means creating a boundary around <em>object</em>, to separate external (public) behavior from its internal (private) implementation details.</p>
-
 <h3>Polymporphisme</h3>
-
 <ul>
 <li>An instance of type x can refer to the object that subclasses x</li>
-<li>Upcast : => to the reference of the base class (Implicit)</li>
-<li>Downcast : => to the reference of the subclass (Explicit)</li>
+<li>Upcast : =&gt; to the reference of the base class (Implicit)</li>
+<li>Downcast : =&gt; to the reference of the subclass (Explicit)</li>
 </ul>
-
 <h2>Characteristics of C#</h2>
-
 <p>C# is:</p>
-
 <ul>
 <li>Type-safe : cannot interact with <code>string</code> as it was an <code>integer</code></li>
 <li>Staticly-typed : language enforces type safety at compile time</li>
 <li>Strongly-types : cannot get around the restrictions the constraints of the type system like for example calling a function that's designed to accept an integer with a floating-point number, unless you first <em>explicitly</em> convert floating-point number to an integer.</li>
 </ul>
-
 <h2>Object</h2>
-
 <h3>Value and Reference Types</h3>
-
 <p><em>Value types</em> : numeric types, <code>char</code> type, <code>bool</code> type, <code>struc</code> and <code>enum</code> types.</p>
-
 <p><em>Reference types</em> : all class, array, delegate and interface types.</p>
-
 <h4>Value types</h4>
-
 <p>The content of a <em>value type</em> variable or constant is simply a value.</p>
-
 <p>Numeric types</p>
-
 <ul>
 <li>Integral : <code>sbyte</code> (8bits), <code>short</code> (16 bits), <code>int</code> (32 bits), <code>long</code> (64 bits).</li>
 <li>Real : <code>float</code> (32 bits, <span class="math">\(10^{-45}\)</span> to <span class="math">\(10^{38}\)</span>), <code>double</code> (64 bits, <span class="math">\(10^{-324}\)</span> to <span class="math">\(10^{308}\)</span>), <code>decimal</code> (128 bits, <span class="math">\(10^{-28}\)</span> to <span class="math">\(10^{28}\)</span>)</li>
 </ul>
-
 <p><code>decimal</code> is non-native to processor (about 10 times slower than <code>double</code>)</p>
-
 <blockquote>
-  <p>The arithmetic operators (+, -, *, /, %) are definied for all numeric types except the 8- and 16-bit integral types. So C# converts them to larger types as required.</p>
+<p>The arithmetic operators (+, -, *, /, %) are definied for all numeric types except the 8- and 16-bit integral types. So C# converts them to larger types as required.</p>
 </blockquote>
-
 <h4>Reference types</h4>
-
 <p>Reference types have two parts: an <em>object</em> and the <em>reference</em> to that object. The content of a reference-type variable or constant is a reference to an object that contains the value.
 Reference types requires spearate allocations of membory for the reference and the object. The object consumes as many bytes as its fields plus aditional administrative overhead.</p>
-
 <h4>The Stack and the Heap</h4>
-
 <p><em>Stack</em> is a block of memory for storing local variables and parameters. the stack logically grows and shrinks as a function is entered and exited.</p>
-
 <p><em>Heap</em> is a block of memory where <code>objects</code> (i.e., reference-type instances) reside. GC scans only heap.</p>
-
-<h3>Boxing : value-type => reference</h3>
-
+<h3>Boxing : value-type =&gt; reference</h3>
 <p><a href="http://theburningmonk.com/2015/07/beware-of-implicit-boxing-of-value-types/">When does the implicit boxing occurs?</a></p>
-
 <ul>
 <li>When you invoke a virtual method</li>
 </ul>
-
 <p>Value types inherit from the <code>System.ValueType</code>, which itself inherits from <code>System.Object</code>. Amongst other things, <code>System.ValueType</code> provides an override for <code>Equals</code> that gives value types the default compare-by-value behaviour.
 However, a value types is stored in memory without the Method Table Pointer so in order to dispatch a virtual method call it'll first have to be boxed into a reference type first.</p>
-
 <ul>
 <li>When you call <code>List&lt;T&gt;.Contains</code></li>
 </ul>
-
 <p>When you call <code>List&lt;T&gt;.Contains</code>, an instance of <code>EqualityComparer&lt;T&gt;</code> will be used to compare the argument against every element of the list.
 This eventually causes a new <code>EqualityComparer&lt;T&gt;</code> to be created.
 In the default case where the struct doesn't implement the <code>IEquatable&lt;T&gt;</code> interface, the <code>ObjectEqualityComparer&lt;T&gt;</code> will be returned. And it is in here, that the overridden/inherited <code>Equals(object other)</code> method will be used and causes boxing to occur for every comparison!
 If, on the other hand, struct implements the <code>IEquatable&lt;T&gt;</code> interface then the outcome will be very different. This allows some clever logic to kick in and use the overloaded <code>Equals(MyStruct other)</code> instead.</p>
-
 <ul>
 <li>When you invoke an interface method</li>
 </ul>
-
 <p>Like virtual methods, in order to dispatch an interface method you also need the <em>Method Table Pointer</em>, which means boxing is required.
 Fortunately, the CLR is able to short-circuit this by calling the method directly if the compile-time type is resolved to the actual value type (e.g. MyStruct) rather than the interface type.</p>
-
 <ul>
 <li>When <code>Dictionary&lt;T&gt;</code> invokes <code>GetHashCode</code></li>
 </ul>
-
 <p><code>GetHashCode</code> is used by hash-based collection types, the most common being <code>Dictionary&lt;TKey, TValue&gt;</code> and <code>HashSet&lt;T&gt;</code>.
 In both cases, it's invoked through the <code>IEqualityComparer&lt;T&gt;</code> type we talked earlier, and in both cases the comparer is also initialized through <code>EqualityComparer&lt;T&gt;.Default</code> and the <code>CreateComparer</code> method.
 <code>GetHashCode</code> is invoked in many places within <code>Dictionary&lt;TKey, TValue&gt;</code> - on <code>Add</code>, <code>ContainsKey</code>, <code>Remove</code>, etc.</p>
-
 <ul>
 <li>Interfaces and Boxing</li>
 </ul>
-
 <p>Casting a struct to an interface causes boxing. Callin an implicitly implemented member on a struct des not cause boxing.</p>
-
-<h3>Unboxing : reference type => value-type</h3>
-
+<h3>Unboxing : reference type =&gt; value-type</h3>
 <h2>Creating types</h2>
-
 <h3>Writing a Class Versus an Interface</h3>
-
 <p>As a guideline:</p>
-
 <ul>
 <li>Use classes and subclasses for types that naturally share an implementation.</li>
 <li>Use interfaces for types that have independent implementations.</li>
 </ul>
-
 <h3>Constructors</h3>
-
 <p>Constructor with optional parameters may be problematic if it is instantiated from another assemblie. If we add another optional parameter we have to recompile all consuming assemblies because they will continue to call the non existing constructor and fail at runtime. the subtler problem is when we change a value of one of the optional parameters, the callers will continue to call with the old value until they are recompiled. Hence <strong>avoid optional parameters in public functions</strong>.</p>
-
 <p>A static constructor executes once per <em>type</em>, rather than once per <em>instance</em>. A type can define only one static constructor, and it must be parameterless and have the same name as thr type. The constructor is triggerted either by:</p>
-
 <ul>
 <li>Instantiating the type</li>
 <li>Accessing a static member in the type</li>
 </ul>
-
 <p>If type has static fields, they will be initialized <em>before</em> the static constructor.</p>
-
 <h3>Method overloading</h3>
-
 <p>Inheritance has an interesting impact on method overloading. Consider the following two overloads:</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">static</span> <span class="k">void</span> Foo (Asset a) { }
-<span class="k">static</span> <span class="k">void</span> Foo (House h) { }</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">static</span> <span class="k">void</span> Foo (Asset a) { }
+<span class="k">static</span> <span class="k">void</span> Foo (House h) { }
+</code></pre></td></tr></table>
 <p>When an overload is called, the most specific type has precedence:</p>
-
-<table class="pre"><tr><td><pre lang="csharp">House h <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
-Foo(h); <span class="o">/</span><span class="o">/</span> Calls Foo(House)</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">House h <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
+Foo(h); <span class="c">// Calls Foo(House)</span>
+</code></pre></td></tr></table>
 <p>The particular overload to call is <strong>determined statically (at compile time)</strong> rather than at runtime.
 The following code calls Foo(Asset), even though the runtime type of a is House:</p>
-
-<table class="pre"><tr><td><pre lang="csharp">Asset a <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
-Foo(a); <span class="o">/</span><span class="o">/</span> Calls Foo(Asset)</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">Asset a <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
+Foo(a); <span class="c">// Calls Foo(Asset)</span>
+</code></pre></td></tr></table>
 <blockquote>
-  <p>If you cast Asset to dynamic , the decision as to which overload to call is deferred until runtime, and is then based on the object’s actual type:</p>
+<p>If you cast Asset to dynamic , the decision as to which overload to call is deferred until runtime, and is then based on the object’s actual type:</p>
 </blockquote>
-
-<table class="pre"><tr><td><pre lang="csharp">Asset a <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
-Foo ((<span class="k">dynamic</span>)a); <span class="o">/</span><span class="o">/</span> Calls Foo(House)</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">Asset a <span class="o">=</span> <span class="k">new</span> House (<span class="o">.</span><span class="o">.</span><span class="o">.</span>);
+Foo ((<span class="k">dynamic</span>)a); <span class="c">// Calls Foo(House)</span>
+</code></pre></td></tr></table>
 <h3>Abstract classes</h3>
-
 <p>A class declared as <em>abstract</em> can never be instantiated. Instead, only its concrete <em>subclasses</em> can be instantiated.</p>
-
 <h3>Structs</h3>
-
 <p>A <code>struct</code> is similar to a class with the following key differences:</p>
-
 <ul>
 <li>A struct is a value type, whereas a class is a reference type.</li>
 <li>A struct does not support inheritance (other than implicitly deriving from <code>object</code>, or more precisely, <code>System.ValueType</code>).</li>
 </ul>
-
 <p>A struct can have all the mebers a class can, except the following:</p>
-
 <ul>
 <li>A parameterless constructor</li>
 <li>A finalizer</li>
 <li>Virtual members</li>
 </ul>
-
 <p>Struct can implement interfaces.</p>
-
 <h3>Constants</h3>
-
 <p>Difference between <code>consts</code> and <code>static readonly</code>: A <code>static readonly</code> field is avantageous when exposing to other assemblies a value that might change in a later version. For instance, suppose assembly X exposes a constant as follows: <code>public const int MaximumThreads = 20;</code>. If assembly Y references X and uses this constant, the value 20 will be baked into the assembly Y when compiled. This means that if X is later recompiled with the constant set to 50, Y will still use the old value <em>until</em> Y is <em>recompiled</em>. A <code>static readonly</code> field avoids this problem.</p>
-
 <h3>Enums</h3>
-
 <p>Numeric constants grouped and named. By default its underlying values are of type <code>int</code>. You may specify an alternative integral type (<code>byte</code>, <code>long</code>, etc.)
 <code>[Flag]</code> enums can combine enum members. To prevent ambiguities, members of a combinable enum require explicitly assigned values, typically in powers of two.</p>
-
 <h3>Nested types</h3>
-
 <p>Can access the private members of containing type.</p>
-
 <h3>Generics</h3>
-
 <ul>
 <li>Types templates</li>
 <li>type safety and reduction of boxing/unboxing</li>
 </ul>
-
 <h4>Covariance and Contravariance</h4>
-
 <p>As of C# 4.0 generic interfaces permit covariance (as do generic delegates), but generic classes do not. Arrays also support covariance. Contravariance is only supported with the generic interfaces.</p>
-
 <ul>
 <li>Covariant for OUT Subclass to Base</li>
 <li>Contravarient for IN Base to Subclass</li>
 </ul>
-
 <h2>Delegates</h2>
-
 <ul>
 <li>découple l'appellant de la méthode cible</li>
 <li>delegate type : protocole auquelle la cible et l'appellant vont se conformer</li>
 <li>delegate instance : objet qui references une ou plusieurs methods à invoquer</li>
 <li>immutable</li>
 </ul>
-
 <h2>Events</h2>
-
 <ul>
 <li>subscriber/broadcaster model</li>
 <li>But est de prévenir souscripteurs d'inférer entre eux (suppression d'autres souscripteurs, invocations et breoadcast à d'autre) donc on a le mot clé event</li>
 <li>peuvent $etre virtuel, overridden, abstract, seald</li>
 </ul>
-
 <h2>Lambda</h2>
-
 <ul>
 <li>method sans nom écrite à la place de l'instance du délegué</li>
 <li>Closure : lambda qui capture les variables qui sont évaluées au runtime et non au moment de la capture</li>
 </ul>
-
 <h2>Threading</h2>
-
 <ul>
 <li>Contexte switching 6000 a 8000 cycles processeur. Intérvient quand bcp de threads sont en concurence pour un core pour s'exécuter CPU bound</li>
 <li>APM : Asynchronous Programmming Model (Begin, End, IAsyncResult)</li>
@@ -340,9 +271,7 @@ Foo ((<span class="k">dynamic</span>)a); <span class="o">/</span><span class="o"
 <li>async/await</li>
 <li>but d'utiliser threading : responsiveness, handling slow operations</li>
 </ul>
-
 <h2>Collections</h2>
-
 <ul>
 <li>Array : performant cat les éléments stockées dans un bloc continu en mémoire</li>
 <li>Comparaison : <a href="http://geekswithblogs.net/BlackRabbitCoder/archive/2011/06/16/c.net-fundamentals-choosing-the-right-collection-class.aspx">http://geekswithblogs.net/BlackRabbitCoder/archive/2011/06/16/c.net-fundamentals-choosing-the-right-collection-class.aspx</a></li>
@@ -406,7 +335,7 @@ Foo ((<span class="k">dynamic</span>)a); <span class="o">/</span><span class="o"
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

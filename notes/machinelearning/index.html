@@ -89,13 +89,9 @@
               
 
 <h1>Machine Learning</h1>
-
 <p>In a nutshell, ML allows computing systems to become smarter with experience, where the experience happens to be past data and human input. Unlike a traditional rules-based approach to software development where inputs and outputs are known at the outset, ML provides a powerful way to construct and study algorithms that learn from data without the need to program individual rules. ML enables computers to learn the relationships between inputs and expected outcomes such that – when the machine is fed new data at a later point in the future – it can predict what the likely outcome is going to be.</p>
-
 <h2>Vocabulary</h2>
-
 <p>Machine Learning vocabulary:</p>
-
 <ul>
 <li><strong>Experiments</strong> are built by data scientists to create and study different algorithms while they determine the best model to solve their current problem.</li>
 <li><strong>Model</strong> generally refers to a <em>trained model</em> in which an algorithm has been trained to work with a specific set of data around which it can make predictions.</li>
@@ -105,123 +101,77 @@
 <li><strong>Supervised Learning</strong> refers to the training of a model where the <em>Training Data</em> contains both <em>Features</em> and <em>Labels</em>. The way to think about this is we are training the computer to learn on historic outcomes, so it already has an understanding of what it should produce.</li>
 <li><strong>Unsupervised Learning</strong> refers to the training of a model where the <em>Training Data</em> contains only Features.</li>
 </ul>
-
 <h2>Use cases</h2>
-
 <p>Spam filtering, priority filtering, smart tagging, product recommendations</p>
-
 <h2>General information</h2>
-
 <p>There are three main types of machine learning:</p>
-
 <ul>
 <li>classification: multiple choice answers, each corresponding to a class like email's "spam vs. ham,"" it uses predictive analysis to answer the question: "What type of email is this?""</li>
 <li>regression: numerical answers, like the value of a house assessed by a real estate agent. Take characteristics of houses on the market like number of bedrooms and bathrooms, overall size, and year built along with their pricing information. With machine learning, we are trying to fill in the missing values of new houses to market, based on the input you can give. The ML should give the pricing output.</li>
 <li>recommendation: Simply, given this user, what are the top five products to show him?</li>
 </ul>
-
 <p><a href="http://www.saedsayad.com/data_mining_map.htm
 Extract">http://www.saedsayad.com/data_mining_map.htm
 Extract</a> also info from this <a href="http://image.slidesharecdn.com/machinelearningwithspark-150401081552-conversion-gate01/95/machine-learning-with-big-data-using-apache-spark-4-638.jpg?cb=1427876633">http://image.slidesharecdn.com/machinelearningwithspark-150401081552-conversion-gate01/95/machine-learning-with-big-data-using-apache-spark-4-638.jpg?cb=1427876633</a></p>
-
 <p>Azure
 <a href="https://azure.microsoft.com/en-us/documentation/articles/machine-learning-algorithm-choice/">https://azure.microsoft.com/en-us/documentation/articles/machine-learning-algorithm-choice/</a></p>
-
 <h3>Supervised learning</h3>
-
 <p>In supervised learning, we are given a data set and already know what our correct output should look like, having the idea that there is a relationship between the input and the output.
 Supervised learning problems are categorized into "<strong>regression</strong>" and "<strong>classification</strong>" problems. In a <strong>regression</strong> problem, we are trying to predict results within a <strong>continuous output</strong>, meaning that we are trying to map input variables to some <strong>continuous</strong> function. In a <strong>classification</strong> problem, we are instead trying to predict results in a <strong>discrete</strong> output. In other words, we are trying to map input variables into <strong>discrete</strong> categories.</p>
-
 <p><strong>Example</strong>:</p>
-
 <p>Given data about the size of houses on the real estate market, try to predict their price. Price as a function of size is a continuous output, so this is a regression problem.
 We could turn this example into a classification problem by instead making our output about whether the house "sells for more or less than the asking price." Here we are classifying the houses based on price into two discrete categories.</p>
-
 <h4>Linear regression with one variable</h4>
-
 <p>For more information, please refer to the Coursera wiki (login required): <a href="https://share.coursera.org/wiki/index.php/ML:Linear_Regression_with_One_Variable">https://share.coursera.org/wiki/index.php/ML:Linear_Regression_with_One_Variable</a></p>
-
 <ul>
 <li><strong>Model Representation</strong></li>
 </ul>
-
 <p>In <em>regression</em> problems, we are taking input variables and trying to map the output onto a <em>continuous</em> expected result function.</p>
-
 <p>Linear regression with one variable is also known as "univariate linear regression."</p>
-
 <ul>
 <li><strong>The Hypothesis Function</strong></li>
 </ul>
-
 <p>Hypothesis function has the general form: <span class="math">\(h_\theta(x) = \theta_0 + \theta_1 x\)</span></p>
-
 <p>We give to <span class="math">\(h_\theta\)</span> values for <span class="math">\(\theta_0\)</span> and <span class="math">\(\theta_1\)</span> to get our output 'y'. In other words, we are trying to create a function called <span class="math">\(h_\theta\)</span> that is able to reliably map our input data (the x's) to our output data (the y's).</p>
-
 <ul>
 <li><strong>Cost function</strong></li>
 </ul>
-
 <p>We can measure the accuracy of our hypothesis function by using a <strong>cost function</strong>. This takes an average (actually a fancier version of an average) of all the results of the hypothesis with inputs from x's compared to the actual output y's.</p>
-
 <p><span class="math">\[J(\theta_0, \theta_1) = \dfrac {1}{2m} \displaystyle \sum _{i=1}^m \left (h_\theta (x_{i}) - y_{i} \right)^2\]</span></p>
-
 <p>This function is otherwise called the "Squared error function", or "Mean squared error". The mean is halved (<span class="math">\(\frac{1}{2m}\)</span>) as a convenience for the computation of the gradient descent, as the derivative term of the square function will cancel out the <span class="math">\(\frac{1}{2}\)</span> term.</p>
-
 <p>Now we are able to concretely measure the accuracy of our predictor function against the correct results we have so that we can predict new results we don't have.</p>
-
 <ul>
 <li><strong>Gradient Descent</strong></li>
 </ul>
-
 <p>So we have our hypothesis function and we have a way of measuring how accurate it is. Now what we need is a way to automatically improve our hypothesis function. That's where gradient descent comes in.</p>
-
 <p>If we were to plot the cost function, we put <span class="math">\(\theta_0\)</span> on the x axis and <span class="math">\(\theta_1\)</span> on the y axis, with the cost function on the vertical z axis. The points on our graph will be the result of the cost function using our hypothesis with those specific theta parameters.</p>
-
 <p>We will know that we have succeeded when our cost function is at the very bottom of the pits in our graph, i.e. when its value is the minimum.</p>
-
 <p>The way we do this is by taking the <strong>derivative</strong> (the line tangent to a function) of our cost function. The slope of the tangent is the derivative at that point and it will give us a direction to move towards. We make steps down that derivative by the parameter <span class="math">\(\alpha\)</span>, called the learning rate.</p>
-
 <p>The gradient descent equation is (repeat until convergence):</p>
-
 <p><span class="math">\[\theta_j := \theta_j - \alpha \frac{\partial}{\partial \theta_j} J(\theta_0, \theta_1)\]</span></p>
-
 <p>for j=0 and j=1</p>
-
 <p>Intuitively, this could be thought of as (repeat until convergence):</p>
-
 <p><span class="math">\[\theta_j :=\theta_j - \alpha [Slope\:of\:tangent\:aka\:derivative\:in\:j\:dimension]\]</span></p>
-
 <ul>
 <li><strong>Gradient Descent for Linear Regression</strong></li>
 </ul>
-
 <p>When specifically applied to the case of linear regression, a new form of the gradient descent equation can be derived. We can substitute our actual cost function and our actual hypothesis function and modify the equation to:</p>
-
 <p><span class="math">\[\begin{align*}
 \text{repeat until convergence: } \lbrace &amp; \newline 
 \theta_0 := &amp; \theta_0 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m}(h_\theta(x_{i}) - y_{i}) \newline
 \theta_1 := &amp; \theta_1 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m}\left((h_\theta(x_{i}) - y_{i}) x_{i}\right) \newline
 \rbrace&amp;
 \end{align*}\]</span></p>
-
 <p>where m is the size of the training set, <span class="math">\(\theta_0\)</span> a constant that will be changing simultaneously with <span class="math">\(\theta_1\)</span> and <span class="math">\(x_{i}, y_{i}\)</span> are values of the given training set (data).</p>
-
 <h4>Linear Regression with Multiple Variables</h4>
-
 <p>For more information, please refer to the Coursera wiki (login required): <a href="https://share.coursera.org/wiki/index.php/ML:Linear_Regression_with_Multiple_Variables">https://share.coursera.org/wiki/index.php/ML:Linear_Regression_with_Multiple_Variables</a></p>
-
 <ul>
 <li><strong>Multiple Features</strong></li>
 </ul>
-
 <p>Linear regression with multiple variables is also known as "multivariable linear regression."</p>
-
 <p>the multivariable form of the hypothesis function as follows, accomodating these multiple features:</p>
-
 <p><span class="math">\[h_\theta (x) = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \theta_3 x_3 + \cdots + \theta_n x_n\]</span></p>
-
 <p>Using the definition of matrix multiplication, our multivariable hypothesis function can be concisely represented as:</p>
-
 <p><span class="math">\[\begin{align*}
 h_\theta(x) =
 \begin{bmatrix}
@@ -235,9 +185,7 @@ x_n
 \end{bmatrix}
 = \theta^T x
 \end{align*}\]</span></p>
-
 <p>Now we can collect all <span class="math">\(m\)</span> training examples each with <span class="math">\(n\)</span> features and record them in an <span class="math">\(n+1\)</span> by <span class="math">\(m\)</span> matrix.</p>
-
 <p><span class="math">\[\begin{align*}
 X =
 \begin{bmatrix}
@@ -254,11 +202,8 @@ x^{(1)}_1 &amp; x^{(2)}_1 &amp;... &amp; x^{(m)}_1 \newline
 x^{(1)}_n &amp; x^{(2)}_n &amp; ... &amp; x^{(m)}_n \newline
 \end{bmatrix} 
 \end{align*}\]</span></p>
-
 <p>Notice above that the first column is the first training example (like the vector above), the second column is the second training example, and so forth.</p>
-
 <p>Now we can define <span class="math">\(h_\theta(X)\)</span> as a row vector that gives the value of <span class="math">\(h_\theta(x)\)</span> at each of the <span class="math">\(m\)</span> training examples:</p>
-
 <p><span class="math">\[\begin{align*}
 h_\theta(X) =
 \begin{bmatrix}
@@ -267,9 +212,7 @@ h_\theta(X) =
 \theta_0  x^{(m)}_0 + \theta_1 x^{(m)}_1 + ... + \theta_n x^{(m)}_n \newline
 \end{bmatrix}
 \end{align*}\]</span></p>
-
 <p>But again using the definition of matrix multiplication, we can represent this more concisely:</p>
-
 <p><span class="math">\[\begin{align*}
 h_\theta(X) =
 \begin{bmatrix}
@@ -283,9 +226,7 @@ x^{(1)}_n \hspace{2em} x^{(2)}_n \hspace{2em} ... \hspace{2em} x^{(m)}_n \newlin
 \end{bmatrix}=
 \theta^T X
 \end{align*}\]</span></p>
-
 <p>Note: this version of the hypothesis function assumes the matrix <span class="math">\(X\)</span> and vector <span class="math">\(\theta\)</span> store their values as follows:</p>
-
 <p><span class="math">\[\begin{align*}
 X = 
 \begin{bmatrix}
@@ -299,9 +240,7 @@ x^{(1)}_1 &amp; x^{(2)}_1 &amp; x^{(3)}_1
 \theta_1 \newline
 \end{bmatrix}
 \end{align*}\]</span></p>
-
 <p>You might instead store the training examples in <span class="math">\(X\)</span> row-wise, like such:</p>
-
 <p><span class="math">\[\begin{align*}
 X = 
 \begin{bmatrix}
@@ -316,27 +255,18 @@ x^{(3)}_0 &amp; x^{(3)}_1
 \theta_1 \newline
 \end{bmatrix}
 \end{align*}\]</span></p>
-
 <p>In which case you would calculate the hypothesis function with:</p>
-
 <p><span class="math">\[h_\theta(X) = X \theta\]</span></p>
-
 <ul>
 <li><strong>Cost function</strong></li>
 </ul>
-
 <p><span class="math">\[J(\theta) = \dfrac {1}{2m} \displaystyle \sum_{i=1}^m \left (h_\theta (x^{(i)}) - y^{(i)} \right)^2\]</span></p>
-
 <p>The vectorized version is:</p>
-
 <p><span class="math">\[J(\theta) = \dfrac {1}{2m} (X\theta - \vec{y})^{T} (X\theta - \vec{y})\]</span></p>
-
 <ul>
 <li><strong>Gradient Descent for Multiple Variables</strong></li>
 </ul>
-
 <p>The gradient descent equation itself is generally the same form; we just have to repeat it for our 'n' features:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; \text{repeat until convergence:} \; \lbrace \newline 
 \; &amp; \theta_0 := \theta_0 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_0^{(i)}\newline
@@ -345,67 +275,42 @@ x^{(3)}_0 &amp; x^{(3)}_1
 &amp; \cdots
 \newline \rbrace
 \end{align*}\]</span></p>
-
 <p>In other words:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; \text{repeat until convergence:} \; \lbrace \newline 
 \; &amp; \theta_j := \theta_j - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_j^{(i)} \;  &amp; \text{for j := 0..n}
 \newline \rbrace
 \end{align*}\]</span></p>
-
 <p>Finally, the matrix notation (vectorized) of the Gradient Descent rule is:</p>
-
 <p><span class="math">\[\large
 \theta := \theta - \frac{\alpha}{m} X^{T} (X\theta - \vec{y})\]</span></p>
-
 <ul>
 <li><strong>Gradient Descent in Practice</strong></li>
 </ul>
-
 <p>We can speed up gradient descent by having each of our input values in roughly the same range. This is because <span class="math">\(\theta\)</span> will descend quickly on small ranges and slowly on large ranges, and so will oscillate inefficiently down to the optimum when the variables are very uneven.</p>
-
 <p>The way to prevent this is to modify the ranges of our input variables so that they are all roughly the same. Ideally:</p>
-
 <p><span class="math">\[-1 \le x_i \le 1\]</span></p>
-
 <p>or:</p>
-
 <p><span class="math">\[-0.5 \le x_i \le 0.5\]</span></p>
-
 <p>These aren't exact requirements; we are only trying to speed things up. The goal is to get all input variables into roughly one of these ranges, give or take a few.</p>
-
 <p>Two techniques to help with this are <strong>feature scaling</strong> and <strong>mean normalization</strong>. Feature scaling involves dividing the input values by the range (i.e. the maximum value minus the minimum value) of the input variable, resulting in a new range of just 1. Mean normalization involves subtracting the average value for an input variable from the values for that input variable, resulting in a new average value for the input variable of just zero. To implement both of these techniques, adjust your input values as shown in this formula:</p>
-
 <p><span class="math">\[x_i := \dfrac{x_i - \mu_i}{s_i}\]</span></p>
-
 <p>Example: xi is housing prices in range 100-2000. Then, <span class="math">\(x_i := \dfrac{price-1000}{1900}\)</span>, where 1000 is the average price and 1900 is the maximum (2000) minus the minimum (100).</p>
-
 <ul>
 <li><strong>Features and Polynomial Regression</strong></li>
 </ul>
-
 <p>We can improve our features and the form of our hypothesis function in a couple different ways.</p>
-
 <p>We can combine multiple features into one. For example, we can combine <span class="math">\(x_1\)</span> and <span class="math">\(x_2\)</span> into a new feature <span class="math">\(x_3\)</span> by taking <span class="math">\(x_1 \cdot x_2\)</span>.</p>
-
 <p><strong>Polynomial Regression</strong></p>
-
 <p>Our hypothesis function need not be linear (a straight line) if that does not fit the data well.</p>
-
 <p>We <strong>can change the behavior or curve</strong> of our hypothesis function by making it a quadratic, cubic or square root function (or any other form).</p>
-
 <ul>
 <li><strong>Normal Equation</strong></li>
 </ul>
-
 <p>The "normal equation" is a version of finding the optimum <strong>without iteration</strong>.</p>
-
 <p><span class="math">\[\large
 \theta = (X^T X)^{-1}X^T y\]</span></p>
-
 <p>There is <strong>no need to do feature scaling</strong> with the normal equation.</p>
-
 <table>
 <thead>
 <tr class="header">
@@ -429,149 +334,101 @@ x^{(3)}_0 &amp; x^{(3)}_1
 </tbody>
 </table>
 
-
 <p>With the normal equation, computing the inversion has complexity <span class="math">\(\mathcal{O}(n^3)\)</span>. So if we have a very large number of features, the normal equation will be slow. In practice, according to A. Ng, when <span class="math">\(n\)</span> exceeds 10,000 it might be a good time to go from a normal solution to an iterative process.</p>
-
 <h4>Logistic Regression</h4>
-
 <p>For more information, please refer to the Coursera wiki (login required): <a href="https://share.coursera.org/wiki/index.php/ML:Logistic_Regression">https://share.coursera.org/wiki/index.php/ML:Logistic_Regression</a></p>
-
 <p>It's about <strong>classification problems.</strong></p>
-
 <ul>
 <li><strong>Classification</strong></li>
 </ul>
-
 <p>Instead of our output vector <span class="math">\(y\)</span> being a continuous range of values, it will only be 0 or 1.</p>
-
 <p><span class="math">\[\large
 y \in \lbrace 0,1 \rbrace\]</span></p>
-
 <p>Where 0 is usually taken as the "negative class" and 1 as the "positive class", but you are free to assign any representation to it.</p>
-
 <p>One method is to use linear regression and map all predictions greater than 0.5 as a 1 and all less than 0.5 as a 0. This method doesn't work well because classification is not actually a linear function.</p>
-
 <ul>
 <li><strong>Hypothesis Representation</strong></li>
 </ul>
-
 <p>Hypothesis should satisfy:</p>
-
 <p><span class="math">\[\large
 0 \leq h_\theta (x) \leq 1\]</span></p>
-
 <p>The new form uses the "Sigmoid Function," also called the "Logistic Function":</p>
-
 <p><span class="math">\[\large
 \begin{align*}
 &amp; h_\theta (x) =  g ( \theta^T x ) \newline \newline
 &amp; z = \theta^T x \newline
 &amp; g(z) = \dfrac{1}{1 + e^{-z}}
 \end{align*}\]</span></p>
-
 <p>The function g(z) maps any real number to the (0, 1) interval, making it useful for transforming an arbitrary-valued function into a function better suited for classification.</p>
-
 <p><span class="math">\(h_\theta\)</span> will give us the probability that our output is 1. For example, <span class="math">\(h_\theta(x)=0.7\)</span> gives us the probability of 70% that our output is 1.</p>
-
 <p><span class="math">\[\large
 \begin{align*}
 &amp; h_\theta(x) = P(y=1 | x ; \theta) = 1 - P(y=0 | x ; \theta) \newline
 &amp; P(y = 0 | x;\theta) + P(y = 1 | x ; \theta) = 1
 \end{align*}\]</span></p>
-
 <p>Our probability that our prediction is 0 is just the opposite of our probability that it is 1 (e.g. if probability that it is 1 is 70%, then the probability that it is 0 is 30%).</p>
-
 <ul>
 <li><strong>Decision Boundary</strong></li>
 </ul>
-
 <p>In order to get our discrete 0 or 1 classification, we can translate the output of the hypothesis function as follows:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; h_\theta(x) \geq 0.5 \rightarrow y = 1 \newline
 &amp; h_\theta(x) &lt; 0.5 \rightarrow y = 0 \newline
 \end{align*}\]</span></p>
-
 <p>The way our logistic function <span class="math">\(g\)</span> behaves is that when its input is greater than or equal to zero, its output is greater than or equal to 0.5:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; g(z) \geq 0.5 \newline
 &amp; when \; z \geq 0
 \end{align*}\]</span></p>
-
 <p>The <strong>decision boundary</strong> is the line that separates the area where y=0 and where y=1. It is created by our hypothesis function.</p>
-
 <p>Again, the input to the sigmoid function <span class="math">\(g(z)\)</span> (e.g. <span class="math">\(\theta^T X\)</span>) need not be linear, and could be a function that describes a circle (e.g. <span class="math">\(z = \theta_0 + \theta_1 x_1^2 +\theta_2 x_2^2\)</span>) or any shape to fit our data.</p>
-
 <ul>
 <li><strong>Cost Function</strong></li>
 </ul>
-
 <p>We cannot use the same cost function that we use for linear regression because the Logistic Function will cause the output to be wavy, causing many local optima. In other words, it will not be a convex function.</p>
-
 <p>Instead, our cost function for logistic regression looks like:</p>
-
 <p><span class="math">\[\large
 \begin{align*}
 &amp; J(\theta) = \dfrac{1}{m} \sum_{i=1}^m \mathrm{Cost}(h_\theta(x^{(i)}),y^{(i)}) \newline
 &amp; \mathrm{Cost}(h_\theta(x),y) = -\log(h_\theta(x)) \; &amp; \text{if y = 1} \newline
 &amp; \mathrm{Cost}(h_\theta(x),y) = -\log(1-h_\theta(x)) \; &amp; \text{if y = 0}
 \end{align*}\]</span></p>
-
 <p>The more our hypothesis is off from y, the larger the cost function output. If our hypothesis is equal to y, then our cost is 0:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; \mathrm{Cost}(h_\theta(x),y) = 0 \text{  if  } h_\theta(x) = y \newline
 &amp; \mathrm{Cost}(h_\theta(x),y) \rightarrow \infty \text{  if  } y = 0 \; \mathrm{and} \; h_\theta(x) \rightarrow 1 \newline
 &amp; \mathrm{Cost}(h_\theta(x),y) \rightarrow \infty \text{  if  } y = 1 \; \mathrm{and} \; h_\theta(x) \rightarrow 0 \newline
 \end{align*}\]</span></p>
-
 <p>If our correct answer 'y' is 0, then the cost function will be 0 if our hypothesis function also outputs 0. If our hypothesis approaches 1, then the cost function will approach infinity.
 If our correct answer 'y' is 1, then the cost function will be 0 if our hypothesis function outputs 1. If our hypothesis approaches 0, then the cost function will approach infinity.</p>
-
 <ul>
 <li><strong>Simplified Cost Function and Gradient Descent</strong></li>
 </ul>
-
 <p>We can compress our cost function's two conditional cases into one case:</p>
-
 <p><span class="math">\[\mathrm{Cost}(h_\theta(x),y) = - y \; \log(h_\theta(x)) - (1 - y) \log(1 - h_\theta(x))\]</span></p>
-
 <p>A vectorized implementation is:</p>
-
 <p><span class="math">\[\large
 J\left(\theta\right)  =  -\frac{1}{m}\left(\log\left(g\left(X\theta\right)\right)^{T}y+\log\left(1-g\left(X\theta\right)\right)^{T}\left(1-y\right)\right)\]</span></p>
-
 <p><strong> Gradient Descent</strong></p>
-
 <p>Remember that the general form of gradient descent is:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; Repeat \; \lbrace \newline
 &amp; \; \theta_j := \theta_j - \alpha \dfrac{\partial}{\partial \theta_j}J(\theta) \newline
 &amp; \rbrace
 \end{align*}\]</span></p>
-
 <p>We can work out the derivative part using calculus to get:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; Repeat \; \lbrace \newline
 &amp; \; \theta_j := \theta_j - \frac{\alpha}{m} \sum_{i=1}^m (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)} \newline &amp; \rbrace
 \end{align*}\]</span></p>
-
 <p>A vectorized implementation is:</p>
-
 <p><span class="math">\[\large
 \theta := \theta - \frac{\alpha}{m} X^{T} (g(X \theta ) - \vec{y})\]</span></p>
-
 <ul>
 <li><strong>Multiclass Classification: One-vs-all</strong></li>
 </ul>
-
 <p>Now we will approach the classification of data into more than two categories. Instead of y = {0,1} we will expand our definition so that y = {0,1...n}.</p>
-
 <p>In this case we divide our problem into n+1 binary classification problems; in each one, we predict the probability that 'y' is a member of one of our classes.</p>
-
 <p><span class="math">\[\large
 \begin{align*}
 &amp; y \in \lbrace0, 1 ... n\rbrace \newline
@@ -581,86 +438,60 @@ J\left(\theta\right)  =  -\frac{1}{m}\left(\log\left(g\left(X\theta\right)\right
 &amp; h_\theta^{(n)}(x) = P(y = n | x ; \theta) \newline
 &amp; \mathrm{prediction} = \max_i( h_\theta ^{(i)}(x) )\newline
 \end{align*}\]</span></p>
-
 <p>We are basically choosing one class and then lumping all the others into a single second class. We do this repeatedly, applying binary logistic regression to each case, and then use the hypothesis that returned the highest value as our prediction.</p>
-
 <h4>Regularization</h4>
-
 <ul>
 <li><strong>The Problem of Overfitting</strong></li>
 </ul>
-
 <p>Regularization is designed to address the problem of overfitting.</p>
-
 <p><strong>High bias</strong> or <strong>underfitting</strong> is when the form of our hypothesis maps poorly to the trend of the data. It is usually caused by a function that is too simple or uses too few features.</p>
-
 <p>At the other extreme, <strong>overfitting</strong> or <strong>high variance</strong> is caused by a hypothesis function that fits the available data but does not generalize well to predict new data. It is usually caused by a complicated function that creates a lot of unnecessary curves and angles unrelated to the data.</p>
-
 <p>There are two <strong>main</strong> options to address the issue of overfitting:</p>
-
 <ol>
-<li>Reduce the number of features.
+<li>
+Reduce the number of features.
 <ul>
 <li>Manually select which features to keep.</li>
 <li>Use a model selection algorithm</li>
-</ul></li>
-<li>Regularization
+</ul>
+</li>
+<li>
+Regularization
 <ul>
 <li>Keep all the features, but reduce the parameters <span class="math">\(\theta_j\)</span>.</li>
-</ul></li>
+</ul>
+</li>
 </ol>
-
 <p>Regularization works well when we have a lot of slightly useful features.</p>
-
 <ul>
 <li><strong>Cost Function</strong></li>
 </ul>
-
 <p>If we have overfitting from our hypothesis function, we can reduce the weight that some of the terms in our function carry by increasing their cost.</p>
-
 <p>Say we wanted to make the following function more quadratic:</p>
-
 <p><span class="math">\[\theta_0 + \theta_1x + \theta_2x^2 + \theta_3x^3 + \theta_4x^4\]</span></p>
-
 <p>We'll want to eliminate the influence of <span class="math">\(\theta_3 x3\)</span> and $\theta_4 x4. Without actually getting rid of these features or changing the form of our hypothesis, we can instead modify our <strong>cost function</strong>:</p>
-
 <p><span class="math">\[min_\theta\ \dfrac{1}{2m}\sum_{i=1}^m (h_\theta(x^{(i)}) - y^{(i)})^2 + 1000\cdot\theta_3^2 + 1000\cdot\theta_4^2\]</span></p>
-
 <p>We've added two extra terms at the end to inflate the cost of <span class="math">\(\theta_3\)</span> and <span class="math">\(\theta_4\)</span>. Now, in order for the cost function to get close to zero, we will have to reduce the values of <span class="math">\(\theta_3\)</span> and <span class="math">\(\theta_4\)</span> to near zero. This will in turn greatly reduce the values of <span class="math">\(\theta_3x^3\)</span> and <span class="math">\(\theta_4x^4\)</span> in our hypothesis function.</p>
-
 <p><span class="math">\[min_\theta\ \dfrac{1}{2m}\ \left[ \sum_{i=1}^m (h_\theta(x^{(i)}) - y^{(i)})^2 + \lambda\ \sum_{j=1}^n \theta_j^2 \right]\]</span></p>
-
 <p>The <span class="math">\(\lambda\)</span>, or lambda, is the <strong>regularization parameter</strong>. It determines how much the costs of our theta parameters are inflated.</p>
-
 <p>Using the above cost function with the extra summation, we can smooth the output of our hypothesis function to reduce overfitting. If lambda is chosen to be too large, it may smooth out the function too much and cause underfitting.</p>
-
 <ul>
 <li><strong>Regularized Linear Regression</strong></li>
 </ul>
-
 <p>We can apply regularization to both linear regression and logistic regression. We will approach linear regression first.</p>
-
 <p><strong>Gradient Descent</strong></p>
-
 <p>We will modify our gradient descent function to separate out <span class="math">\(\theta_0\)</span> from the rest of the parameters because we do not want to penalize <span class="math">\(\theta_0\)</span>.</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; \text{Repeat}\ \lbrace \newline
 &amp; \ \ \ \ \theta_0 := \theta_0 - \alpha\ \frac{1}{m}\ \sum_{i=1}^m (h_\theta(x^{(i)}) - y^{(i)})x_0^{(i)} \newline
 &amp; \ \ \ \ \theta_j := \theta_j - \alpha\ \left[ \left( \frac{1}{m}\ \sum_{i=1}^m (h_\theta(x^{(i)}) - y^{(i)})x_j^{(i)} \right) + \frac{\lambda}{m}\theta_j \right] &amp;\ \ \ \ \ \ \ \ \ \ j \in \lbrace 1,2...n\rbrace\newline
 &amp; \rbrace
 \end{align*}\]</span></p>
-
 <p>Update rule would look like:</p>
-
 <p><span class="math">\[\theta_j := \theta_j(1 - \alpha\frac{\lambda}{m}) - \alpha\frac{1}{m}\sum_{i=1}^m(h_\theta(x^{(i)}) - y^{(i)})x_j^{(i)}\]</span></p>
-
 <p>The first term in the above equation, <span class="math">\(1 - \alpha\frac{\lambda}{m}\)</span> will always be less than 1.</p>
-
 <p><strong>Normal Equation</strong></p>
-
 <p>To add in regularization, the equation is the same as our original, except that we add another term inside the parentheses:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; \theta = \left( X^TX + \lambda \cdot L \right)^{-1} X^Ty \newline
 &amp; \text{where}\ \ L = 
@@ -672,73 +503,49 @@ J\left(\theta\right)  =  -\frac{1}{m}\left(\log\left(g\left(X\theta\right)\right
  &amp; &amp; &amp; &amp; 1 \newline
 \end{bmatrix}
 \end{align*}\]</span></p>
-
 <ul>
 <li><strong>Regularized Logistic Regression</strong></li>
 </ul>
-
 <p>We can regularize logistic regression in a similar way that we regularize linear regression. Let's start with the cost function.</p>
-
 <p><strong>Cost Function</strong></p>
-
 <p>Original cost function:</p>
-
 <p><span class="math">\[(\theta) = - \frac{1}{m} \sum_{i=1}^m \large[ y^{(i)}\ \log (h_\theta (x^{(i)})) + (1 - y^{(i)})\ \log (1 - h_\theta(x^{(i)})) \large]\]</span></p>
-
 <p>Regularized:</p>
-
 <p><span class="math">\[J(\theta) = - \frac{1}{m} \sum_{i=1}^m \large[ y^{(i)}\ \log (h_\theta (x^{(i)})) + (1 - y^{(i)})\ \log (1 - h_\theta(x^{(i)}))\large] + \frac{\lambda}{2m}\sum_{j=1}^n \theta_j^2\]</span></p>
-
 <p><strong>Gradient Descent</strong></p>
-
 <p><span class="math">\[\begin{align*}
 &amp; \text{Repeat}\ \lbrace \newline
 &amp; \ \ \ \ \theta_0 := \theta_0 - \alpha\ \frac{1}{m}\ \sum_{i=1}^m (h_\theta(x^{(i)}) - y^{(i)})x_0^{(i)} \newline
 &amp; \ \ \ \ \theta_j := \theta_j - \alpha\ \left[ \left( \frac{1}{m}\ \sum_{i=1}^m (h_\theta(x^{(i)}) - y^{(i)})x_j^{(i)} \right) + \frac{\lambda}{m}\theta_j \right] &amp;\ \ \ \ \ \ \ \ \ \ j \in \lbrace 1,2...n\rbrace\newline
 &amp; \rbrace
 \end{align*}\]</span></p>
-
 <p>This is identical to the gradient descent function presented for linear regression.</p>
-
 <h4>Neural Networks: Representation</h4>
-
 <p>Neural networks offers an alternate way to perform machine learning when we have complex hypotheses with many features.</p>
-
 <ul>
 <li><strong>Non-linear Hypotheses</strong></li>
 </ul>
-
 <p>Performing linear regression with a complex set of data with many features is very unwieldy. For example:</p>
-
 <p><span class="math">\[\begin{align*}
 &amp; g(\theta_0 + \theta_1x_1^2 + \theta_2x_1x_2 + \theta_3x_1x_3 \newline
 &amp; + \theta_4x_2^2 + \theta_5x_2x_3 \newline
 &amp; + \theta_6x_3^2 )
 \end{align*}\]</span></p>
-
 <p>That gives us 6 features. <span class="math">\(\frac{(3 + 2 - 1)!}{(2!\cdot (3-1)!)} = 6\)</span></p>
-
 <ul>
 <li><strong>Model Representation 1</strong></li>
 </ul>
-
 <p>At a very simple level, neurons are basically computational units that take input (<strong>dendrites</strong>) as electrical input (called "spikes") that are channeled to outputs (<strong>axons</strong>).
 In our model, our dendrites are like the input features (<span class="math">\(x_1\cdots x_n\)</span>), and the output is the result of our hypothesis function.</p>
-
 <p>In neural networks, we use the same logistic function as in classification:</p>
-
 <p><span class="math">\[\frac{1}{1 + e^{-\theta^Tx}}\]</span></p>
-
 <p>In neural networks however we sometimes call it a sigmoid (logistic) <strong>activation</strong> function.</p>
-
 <p><span class="math">\[\large
 \begin{align*}
 &amp; a_i^{(j)} = \text{"activation" of unit $i$ in layer $j$} \newline
 &amp; \Theta^{(j)} = \text{matrix of weights controlling function mapping from layer $j$ to layer $j+1$}
 \end{align*}\]</span></p>
-
 <p>If we had one hidden layer, it would look visually something like:</p>
-
 <p><span class="math">\[\begin{bmatrix}
 x_0 \newline
 x_1 \newline
@@ -753,61 +560,39 @@ a_3^{(2)} \newline
 \end{bmatrix}
 \rightarrow
 h_\theta(x)\]</span></p>
-
 <p>The values for each of the "activation" nodes is obtained as follows:</p>
-
 <p><span class="math">\[\begin{align*}
 a_1^{(2)} = g(\Theta_{10}^{(1)}x_0 + \Theta_{11}^{(1)}x_1 + \Theta_{12}^{(1)}x_2 + \Theta_{13}^{(1)}x_3) \newline
 a_2^{(2)} = g(\Theta_{20}^{(1)}x_0 + \Theta_{21}^{(1)}x_1 + \Theta_{22}^{(1)}x_2 + \Theta_{23}^{(1)}x_3) \newline
 a_3^{(2)} = g(\Theta_{30}^{(1)}x_0 + \Theta_{31}^{(1)}x_1 + \Theta_{32}^{(1)}x_2 + \Theta_{33}^{(1)}x_3) \newline
 h_\Theta(x) = a_1^{(3)} = g(\Theta_{10}^{(2)}a_0^{(2)} + \Theta_{11}^{(2)}a_1^{(2)} + \Theta_{12}^{(2)}a_2^{(2)} + \Theta_{13}^{(2)}a_3^{(2)}) \newline
 \end{align*}\]</span></p>
-
 <p>This is saying that we compute our activation nodes by using a <span class="math">\(3\times 4\)</span> matrix of parameters. We apply each row of the parameters to our inputs to obtain the value for one activation node. Our hypothesis output is the logistic function applied to the sum of the values of our activation nodes, which have been multiplied by yet another parameter matrix <span class="math">\(\Theta^{(2)}\)</span> containing the weights for our second layer of nodes.</p>
-
 <p>Each layer gets its own matrix of weights, <span class="math">\(\Theta^{(j)}\)</span>.</p>
-
 <p>The dimensions of these matrices of weights is determined as follows:</p>
-
 <p><span class="math">\[\text{If network has $s_j$ units in layer $j$ and $s_{j+1}$ units in layer $j+1$, then $\Theta^{(j)}$ will be of dimension $s_{j+1} \times (s_j + 1)$.}\]</span></p>
-
 <p>The +1 comes from the addition in <span class="math">\(\Theta^{(j)}\)</span> of the "bias nodes," <span class="math">\(x_0\)</span> and <span class="math">\(\Theta_0^{(j)}\)</span>. In other words the output nodes will not include the bias nodes while the inputs will.</p>
-
 <ul>
 <li><strong>Model Representation II</strong></li>
 </ul>
-
 <p>In our previous example if we replaced the variable <span class="math">\(z\)</span> for all the parameters we would get:</p>
-
 <p><span class="math">\[\begin{align*}
 a_1^{(2)} = g(z_1^{(2)}) \newline
 a_2^{(2)} = g(z_2^{(2)}) \newline
 a_3^{(2)} = g(z_3^{(2)}) \newline
 \end{align*}\]</span></p>
-
 <p>Now we can get a vector of our activation nodes for layer j as follows:</p>
-
 <p><span class="math">\[\large
 a^{(j)} = g(z^{(j)})\]</span></p>
-
 <p>Where our function <span class="math">\(g\)</span> can be applied element-wise to our vector <span class="math">\(z^(j)\)</span>.</p>
-
 <p>To compute our final hypothesis, let's first compute another <span class="math">\(z\)</span> vector:</p>
-
 <p><span class="math">\[z^{(j+1)} = \Theta^{(j)}a^{(j)}\]</span></p>
-
 <p>This last theta matrix (<span class="math">\(\Theta^{(j)}\)</span>) will have only <strong>one row</strong> so that our result is a single number.</p>
-
 <p>We then get our final result with:</p>
-
 <p><span class="math">\[h_\Theta(x) = a^{(j+1)} = g(z^{(j+1)})\]</span></p>
-
 <p>Notice that in this <strong>last step</strong>, between layer <span class="math">\(j\)</span> and layer <span class="math">\(j+1\)</span>, we are doing <strong>exactly the same thing</strong> as we did in logistic regression.</p>
-
 <p>Adding all these intermediate layers in neural networks allows us to more elegantly produce interesting and more complex non-linear hypotheses.</p>
-
 <p>The <span class="math">\(\Theta^{(1)}\)</span> matrices for AND, NOR, and OR are:</p>
-
 <p><span class="math">\[\begin{align*}
 AND:\newline
 \Theta^{(1)} =
@@ -819,9 +604,7 @@ OR:\newline
 \Theta^{(1)} = 
 \begin{bmatrix}-10 &amp; 20 &amp; 20\end{bmatrix} \newline
 \end{align*}\]</span></p>
-
 <p>We can combine these to get the XNOR logical operator (which gives 1 if <span class="math">\(x_1\)</span> and <span class="math">\(x_2\)</span> are both 0 or both 1).</p>
-
 <p><span class="math">\[\begin{align*}
 \begin{bmatrix}
 x_0 \newline
@@ -837,34 +620,25 @@ a^{(3)}
 \end{bmatrix} \rightarrow
 h_\Theta(x)
 \end{align*}\]</span></p>
-
 <p>For the transition between the first and second layer, we'll use a <span class="math">\(\Theta^{(1)}\)</span> matrix that combines the values for AND and NOR:</p>
-
 <p><span class="math">\[\Theta^{(1)} = 
 \begin{bmatrix}
 -30 &amp; 20 &amp; 20 \newline
 10 &amp; -20 &amp; -20
 \end{bmatrix}\]</span></p>
-
 <p>For the transition between the second and third layer, we'll use a <span class="math">\(\Theta^{(2)}\)</span> matrix that uses the value for OR:</p>
-
 <p><span class="math">\[\Theta^{(2)} = 
 \begin{bmatrix}-10 &amp; 20 &amp; 20\end{bmatrix}\]</span></p>
-
 <p><span class="math">\[\begin{align*}
 &amp; a^{(2)} = g(\Theta^{(1)} \cdot x) \newline
 &amp; a^{(3)} = g(\Theta^{(2)} \cdot a^{(2)}) \newline
 &amp; h_\Theta(x) = a^{(3)}
 \end{align*}\]</span></p>
-
 <p>And there we have the XNOR operator using one hidden layer!</p>
-
 <ul>
 <li><strong>Multiclass Classification</strong></li>
 </ul>
-
 <p>To classify data into multiple classes, we let our hypothesis function return a vector of values. Say we wanted to classify our data into one of four final resulting classes:</p>
-
 <p><span class="math">\[\begin{align*}
 \begin{bmatrix}
 x_0 \newline
@@ -892,11 +666,8 @@ h_\Theta(x)_3 \newline
 h_\Theta(x)_4 \newline
 \end{bmatrix} \rightarrow
 \end{align*}\]</span></p>
-
 <p>Our final layer of nodes, when multiplied by its theta matrix, will result in another vector, on which we will apply the <span class="math">\(g()\)</span> logistic function to get a vector of hypothesis values.</p>
-
 <p>Our resulting hypothesis for one set of inputs may look like:</p>
-
 <p><span class="math">\[h_\Theta(x) = 
 \begin{bmatrix}
 0 \newline
@@ -904,150 +675,91 @@ h_\Theta(x)_4 \newline
 1 \newline
 0 \newline
 \end{bmatrix}\]</span></p>
-
 <p>In which case our resulting class is the third one down, or <span class="math">\(h_\Theta(x)_3\)</span>.</p>
-
 <p>We can define our set of resulting classes as <span class="math">\(y\)</span>:</p>
-
 <p><span class="math">\[y^{(i)} = \begin{bmatrix}1\newline 0\newline 0\newline 0\end{bmatrix}
 \begin{bmatrix}0\newline 1\newline 0\newline 0\end{bmatrix}
 \begin{bmatrix}0\newline 0\newline 1\newline 0\end{bmatrix}
 \begin{bmatrix}0\newline 0\newline 0\newline 1\end{bmatrix}\]</span></p>
-
 <p>Our final value of our hypothesis for a set of inputs will be one of the elements in y.</p>
-
 <h4>Neural Networks: Learning</h4>
-
 <p>For more information, please refer to the Coursera wiki (login required): <a href="https://share.coursera.org/wiki/index.php/ML:Neural_Networks:_Learning">https://share.coursera.org/wiki/index.php/ML:Neural_Networks:_Learning</a></p>
-
 <ul>
 <li><strong>Cost function</strong></li>
 </ul>
-
 <p>In neural networks, we may have many output nodes.</p>
-
 <p>For neural networks, the cost function is going to be slightly more complicated then for regularized logistic regression:</p>
-
 <p><span class="math">\[\begin{gather*}
 \large
 J(\Theta) = - \frac{1}{m} \left[ \sum_{i=1}^m \sum_{k=1}^K y^{(i)}_k \log ((h_\Theta (x^{(i)}))_k) + (1 - y^{(i)}_k)\log (1 - (h_\Theta(x^{(i)}))_k)\right] + \frac{\lambda}{2m}\sum_{l=1}^{L-1} \sum_{i=1}^{s_l} \sum_{j=1}^{s_{l+1}} ( \Theta_{j,i}^{(l)})^2
 \end{gather*}\]</span></p>
-
 <p>Some nested summations are added to account for our multiple output nodes. In the first part of the equation, between the square brackets, we have an additional nested summation that loops through the number of output nodes.</p>
-
 <p>In the regularization part, after the square brackets, we must account for multiple theta matrices. The number of columns in our current theta matrix is equal to the number of nodes in our current layer (including the bias unit). The number of rows in our current theta matrix is equal to the number of nodes in the next layer (excluding the bias unit). As before with logistic regression, we square every term.</p>
-
 <ul>
 <li><strong>Backpropagation algorithm</strong></li>
 </ul>
-
 <p>"Backpropagation" is neural-network terminology for minimizing our cost function, just like what we were doing with gradient descent in logistic and linear regression.</p>
-
 <p>Our goal is to compute:</p>
-
 <p><span class="math">\[\min_\Theta J(\Theta)\]</span></p>
-
 <p>For the <strong>last layer</strong>, we can compute the vector of delta values with:</p>
-
 <p><span class="math">\[\large
 \delta^{(L)} = a^{(L)} - y\]</span></p>
-
 <p>Where L is our total number of layers and <span class="math">\(a^{(L)}\)</span> is the vector of activation units for the last layer. So our "error values" for the last layer are simply the differences of our actual results in the last layer and the correct outputs in y.</p>
-
 <p>To get the delta values of the layers before the last layer, we can use an equation that steps us back from right to left:</p>
-
 <p><span class="math">\[\delta^{(l)} = ((\Theta^{(l)})^T \delta^{(l+1)})\ .*\ g'(z^{(l)})\]</span></p>
-
 <p>The delta values of layer <span class="math">\(l\)</span> are calculated by multiplying the delta values in the next layer with the theta matrix of layer <span class="math">\(l\)</span>. We then element-wise multiply that with a function called <span class="math">\(g'\)</span>, or g-prime, which is the derivative of the activation function <span class="math">\(g\)</span> evaluated with the input values given by <span class="math">\(z^{(l)}\)</span>.</p>
-
 <p>The g-prime derivative terms can also be written out as:</p>
-
 <p><span class="math">\[g'(z^{(l)}) = a^{(l)}\ .*\ (1 - a^{(l)})\]</span></p>
-
 <p>This can be shown and proved in calculus.</p>
-
 <p><span class="math">\[g(z) = \frac{1}{1 + e^{-z}}\]</span></p>
-
 <p>The full backpropagation equation for the inner nodes is then:</p>
-
 <p><span class="math">\[\delta^{(l)} = ((\Theta^{(l)})^T \delta^{(l+1)})\ .*\ a^{(l)}\ .*\ (1 - a^{(l)})\]</span></p>
-
 <ul>
 <li><strong>Backpropagation Intuition</strong></li>
 </ul>
-
 <p>The cost function is:</p>
-
 <p><span class="math">\[\begin{gather*}
 J(\theta) = - \frac{1}{m} \left[ \sum_{t=1}^m \sum_{k=1}^K y^{(t)}_k \ \log (h_\theta (x^{(t)}))_k + (1 - y^{(t)}_k)\ \log (1 - h_\theta(x^{(t)})_k)\right] + \frac{\lambda}{2m}\sum_{l=1}^{L-1} \sum_{i=1}^{s_l} \sum_{j=1}^{s_l+1} ( \theta_{j,i}^{(l)})^2
 \end{gather*}\]</span></p>
-
 <p>If we consider simple non-multiclass classification (k = 1) and disregard regularization, the cost is computed with:</p>
-
 <p><span class="math">\[cost(t) =y^{(t)} \ \log (h_\theta (x^{(t)})) + (1 - y^{(t)})\ \log (1 - h_\theta(x^{(t)}))\]</span></p>
-
 <p>More intuitively you can think of that equation roughly as:</p>
-
 <p><span class="math">\[cost(t) \approx (h_\theta(x^{(t)})-y^{(t)})^2\]</span></p>
-
 <p>Intuitively, <span class="math">\(\delta_j^{(l)}\)</span> is the "error" for <span class="math">\(a^{(l)}_j\)</span> (unit <span class="math">\(j\)</span> in layer <span class="math">\(l\)</span>)</p>
-
 <p>More formally, the delta values are actually the derivative of the cost function:</p>
-
 <p><span class="math">\[\delta_j^{(l)} = \dfrac{\partial}{\partial z_j^{(l)}} cost(t)\]</span></p>
-
 <p>Recall that our derivative is the slope of a line tangent to the cost function, so the steeper the slope the more incorrect we are.</p>
-
 <ul>
 <li><strong>Gradient Checking</strong></li>
 </ul>
-
 <p>Gradient checking will assure that our backpropagation works as intended.</p>
-
 <p>We can approximate the derivative of our cost function with:</p>
-
 <p><span class="math">\[\dfrac{\partial}{\partial\Theta}J(\Theta) \approx \dfrac{J(\Theta + \epsilon) - J(\Theta - \epsilon)}{2\epsilon}\]</span></p>
-
 <p>With multiple theta matrices, we can approximate the derivative <strong>with respect to</strong> <span class="math">\(\Theta_j\)</span> as follows:</p>
-
 <p><span class="math">\[\dfrac{\partial}{\partial\Theta_j}J(\Theta) \approx \dfrac{J(\Theta_1, \dots, \Theta_j + \epsilon, \dots, \Theta_n) - J(\Theta_1, \dots, \Theta_j - \epsilon, \dots, \Theta_n)}{2\epsilon}\]</span></p>
-
 <p>A good small value for <span class="math">\({\epsilon}\)</span> (epsilon), garantee the math above to become true. If the value be much smaller, may we will end up with numerical problems. Proposed value would be <span class="math">\({\epsilon = 10^{-4}}\)</span></p>
-
 <p>We are only adding or subtracting epsilon to the <span class="math">\(\Theta_j\)</span> matrix.</p>
-
 <p>Once you've verified <strong>once</strong> that your backpropagation algorithm is correct, then you don't need to compute gradApprox again. The code to compute gradApprox is very slow.</p>
-
 <ul>
 <li><strong>Random Initialization</strong></li>
 </ul>
-
 <p>Initializing all theta weights to zero does not work with neural networks. When we backpropagate, all nodes will update to the same value repeatedly.</p>
-
 <p>Instead we can randomly initialize our weights:</p>
-
 <p>Initialize each <span class="math">\(\Theta^{(l)}_{ij}\)</span> to a random value between <span class="math">\([-\epsilon,\epsilon]\)</span>:</p>
-
 <p><span class="math">\[\epsilon = \dfrac{\sqrt{6}}{\sqrt{\mathrm{Loutput} + \mathrm{Linput}}}
 \Theta^{(l)} =  2 \epsilon \; \mathrm{rand}(\mathrm{Loutput}, \mathrm{Linput} + 1) - \epsilon\]</span></p>
-
 <p>Note: this epsilon is unrelated to the epsilon from Gradient Checking</p>
-
 <ul>
 <li><strong>Putting it Together</strong></li>
 </ul>
-
 <p>First, pick a network architecture; choose the layout of your neural network, including how many hidden units in each layer and how many layers total.</p>
-
 <ul>
 <li>Number of input units = dimension of features <span class="math">\(x^{(i)}\)</span></li>
 <li>Number of output units = number of classes</li>
 <li>Number of hidden units per layer = usually more the better (must balance with cost of computation as it increases with more hidden units)</li>
 <li>Defaults: 1 hidden layer. If more than 1 hidden layer, then the same number of units in every hidden layer.</li>
 </ul>
-
 <p><strong>Training a Neural Network</strong></p>
-
 <ol>
 <li>Randomly initialize the weights</li>
 <li>Implement forward propagation to get <span class="math">\(h_\theta(x^{(i)})\)</span></li>
@@ -1056,30 +768,19 @@ J(\theta) = - \frac{1}{m} \left[ \sum_{t=1}^m \sum_{k=1}^K y^{(t)}_k \ \log (h_\
 <li>Use gradient checking to confirm that your backpropagation works. Then disable gradient checking.</li>
 <li>Use gradient descent or a built-in optimization function to minimize the cost function with the weights in theta.</li>
 </ol>
-
 <p>When we perform forward and back propagation, we loop on every training example.</p>
-
 <h4>Advice for Applying Machine Learning</h4>
-
 <p>For more information, please refer to the Coursera wiki (login required): <a href="https://share.coursera.org/wiki/index.php/ML:Advice_for_Applying_Machine_Learning">https://share.coursera.org/wiki/index.php/ML:Advice_for_Applying_Machine_Learning</a></p>
-
 <h3>Unsupervised Learning</h3>
-
 <p>Unsupervised learning, on the other hand, allows us to approach problems with little or no idea what our results should look like. We can derive structure from data where we don't necessarily know the effect of the variables.
 We can derive this structure by <strong>clustering</strong> the data based on relationships among the variables in the data.
 With unsupervised learning there is no feedback based on the prediction results, i.e., there is no teacher to correct you. It’s not just about clustering. For example, associative memory is unsupervised learning.</p>
-
 <p>This terminology is applied to both linear and logistic regression.</p>
-
 <p><strong>Example</strong>:</p>
-
 <p><em>Clustering</em>: Take a collection of 1000 essays written on the US Economy, and find a way to automatically group these essays into a small number that are somehow similar or related by different variables, such as word frequency, sentence length, page count, and so on.
 Another, non-Clustering example, is the "Cocktail Party Algorithm" which can find structure in messy data-like identifying individual voices and music from a mesh of sounds at a cocktail party</p>
-
 <h2>Algorithms</h2>
-
 <h3>K-nearest neighbors</h3>
-
 <p><a href="http://www.statsoft.com/textbook/k-nearest-neighbors">http://www.statsoft.com/textbook/k-nearest-neighbors</a></p>
 
 
@@ -1140,7 +841,7 @@ Another, non-Clustering example, is the "Cocktail Party Algorithm" which can fin
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

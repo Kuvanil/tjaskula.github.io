@@ -91,189 +91,124 @@
 
 <div class="row">
 <div class="medium-8 columns">
-
 <p>This post is part of the <a href="https://sergeytihon.wordpress.com/tag/fsadvent/">F# Advent Calendar in English 2015</a>. Be sure to check out the other posts!</p>
-
 <p>Machine Learning is very interesting and inspiring filed. I've been interested in this topic for several years now, mainly focusing on theory (although I was able to implement a poor recommeder system for my startup) and having a little experience from the real-world problems. But several months ago I started a real hardcore learning in Machine Learning, reading many books and following almost every course on Coursera and other MOOC portals. I know that those courses are aimed towards the newcomers like me and don't give you a solid knowledge as if you had a PhD in the field. However with a lot of practice, you can do many usefull things.</p>
-
 </div>
 </div>
-
 <!-- more -->
-
 <p>However, every time I read a book or follow a machine learning course, the tools and languages that are used are most often <code>R</code> and <code>Python</code> and their powerful set of packages and easy to use environments. This is for obvious reasons like historical reasons and because of the rich packages the comunity has built over the years that you can chose from to prototype very quickly and to explore the data.</p>
-
 <p>I want to check what kind of tools are available to my prefered language at the moment which is <code>F#</code> of course.</p>
-
 <h2>FsLab : the best place to start</h2>
-
 <p>If you follow the top F# folks you've certainly heard about the <a href="http://fslab.org/">fslab.org</a>. To quote from the FSlab</p>
-
 <blockquote>
-  <p>FsLab is a collection of libraries for data-science. It provides a rapid development environment that lets you write advanced analysis with a few lines of production-quality code.</p>
+<p>FsLab is a collection of libraries for data-science. It provides a rapid development environment that lets you write advanced analysis with a few lines of production-quality code.</p>
 </blockquote>
-
 <p>FsLab has many interesting libraries for data-science and the whole process of working with data. It encompasses data access, calulations, charting and producing final reports. You can even integrate <code>R</code> language through the data provider.This is very interesting.</p>
-
 <p>For my problem at hand I don't need the whole FsLab package. What I want to is to pick whatever library I need. My additional constraint is to make it work on OSX and <code>mono</code>.</p>
-
 <h2>Part 1: Linear regression with one variable</h2>
-
 <p>This sample is taken from the famous Machine Learning course from Stanford University on Coursera. The is the week 2 assignement on linear regression. I took this course because I already know the results of the exercice so it will be easy for me to check against it my F# implementation. You don't need to be aware about machine learning because I'm more focused on libraries I use to achieve my goal rather then explaining the theory.</p>
-
 <h3>The problem</h3>
-
 <p>The problem for the assignement is as follows. Suppose you are the CEO of a restaurant franchise and are considering different cities for opening a new outlet. The chain already has trucks in various cities and you have data for profits and populations from the cities. We will need this data to help you select which city to expand to next.</p>
-
 <p>The training data is contained in the <code>data.csv</code> file. The first column is the population of a city and the second column is the profit of a food truck in that city. A negative value for profit indicates a loss. So we can have values like that:</p>
-
-<table class="pre"><tr><td class="lines"><pre class="fssnip">
-<span class="l">1: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
-</pre>
-</td>
-<td class="snippet"><pre class="fssnip">
-<span class="n">6.1101</span>,<span class="n">17.592</span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="n">6.1101</span>,<span class="n">17.592</span>
 <span class="n">5.5277</span>,<span class="n">9.1302</span>
 <span class="n">8.5186</span>,<span class="n">13.662</span>
 <span class="n">7.0032</span>,<span class="n">11.854</span>
-<span class="o">..</span><span class="o">.</span></pre>
-</td>
+<span class="o">..</span><span class="o">.</span>
+</code></pre></td>
 </tr>
 </table>
-
 <h3>Data visualisation</h3>
-
 <p>Before starting on any task, it is often useful to understand the data by visualizing it. We can use a scatter plot to visualize the data, since it has only two properties to plot (profit and population). Many real-world problems are multi-dimentional and cannot be plotted on a 2-d plot. But for our simple problem at hand it will be enough.</p>
-
 <p>What i need is a library that allow me to plot. I would like to use it on OSX and from F# interactive. This is important because it allows me to easily propotype and explore my data.</p>
-
 <p>My first choice was <a href="http://fslab.org/FSharp.Charting/">FSharp.Charting</a>. It has been around since some time and it has all powerful features. There is also a package <code>FSharp.Charting.Gtk</code> to make it work on OSX with GTK. Unfortunatelly after spending few hours on trying to install <code>gtk-sharp</code> on my machine I gave up. I was able to display the form but instead of visualizing the plot it was empty.</p>
-
 <p>My second choice was the other nice package for charting <a href="https://tahahachana.github.io/XPlot/">XPlot</a>. This is based on GoogleCharts and Plotly. Very nice features, I was also able to use it from F# interactive with <a href="http://suave.io/">Suave.Io</a> support. However it cannot combine plots (scatter and line for example). I will need this for my future post so I go back to FSharp.Charting and Windows until I fix my <code>gtk-sharp</code> issue on mac.</p>
-
 <p>This is the scatter plot for my training data:</p>
-
 <p><img src="img/ScatterPlot.png" alt="Scatter plot for training data" /></p>
-
 <p>So this looks pretty well! The code for generating the scatter plot is really simple:</p>
-
-<table class="pre"><tr><td class="lines"><pre class="fssnip">
-<span class="l">1: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
-</pre>
-</td>
-<td class="snippet"><pre class="fssnip">
-<span class="i">Chart</span><span class="o">.</span><span class="i">Point</span>(<span class="i">points</span>)
-    <span class="o">.</span><span class="i">WithXAxis</span>(<span class="i">Title</span><span class="o">=</span><span class="s">&quot;</span><span class="s">Population</span><span class="s"> </span><span class="s">of</span><span class="s"> </span><span class="s">City</span><span class="s"> </span><span class="s">in</span><span class="s"> </span><span class="s">10</span><span class="s">,</span><span class="s">000</span><span class="s">s</span><span class="s">&quot;</span>, <span class="i">Min</span><span class="o">=</span><span class="n">4.0</span>, <span class="i">Max</span><span class="o">=</span><span class="n">24.0</span>)
-    <span class="o">.</span><span class="i">WithYAxis</span>(<span class="i">Title</span><span class="o">=</span><span class="s">&quot;</span><span class="s">Profit</span><span class="s"> </span><span class="s">in</span><span class="s"> </span><span class="s">$</span><span class="s">10</span><span class="s">,</span><span class="s">000</span><span class="s">s</span><span class="s">&quot;</span>)
-    <span class="o">.</span><span class="i">WithMarkers</span>(<span class="i">Style</span><span class="o">=</span><span class="i">ChartTypes</span><span class="o">.</span><span class="i">MarkerStyle</span><span class="o">.</span><span class="i">Cross</span>, <span class="i">Color</span><span class="o">=</span><span class="i">Drawing</span><span class="o">.</span><span class="i">Color</span><span class="o">.</span><span class="i">Red</span>, <span class="i">Size</span><span class="o">=</span><span class="n">7</span>)</pre>
-</td>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Chart</span><span class="o">.</span><span class="i">Point</span>(<span class="i">points</span>)
+    <span class="o">.</span><span class="i">WithXAxis</span>(<span class="i">Title</span><span class="o">=</span><span class="s">&quot;Population of City in 10,000s&quot;</span>, <span class="i">Min</span><span class="o">=</span><span class="n">4.0</span>, <span class="i">Max</span><span class="o">=</span><span class="n">24.0</span>)
+    <span class="o">.</span><span class="i">WithYAxis</span>(<span class="i">Title</span><span class="o">=</span><span class="s">&quot;Profit in $10,000s&quot;</span>)
+    <span class="o">.</span><span class="i">WithMarkers</span>(<span class="i">Style</span><span class="o">=</span><span class="i">ChartTypes</span><span class="o">.</span><span class="i">MarkerStyle</span><span class="o">.</span><span class="i">Cross</span>, <span class="i">Color</span><span class="o">=</span><span class="i">Drawing</span><span class="o">.</span><span class="i">Color</span><span class="o">.</span><span class="i">Red</span>, <span class="i">Size</span><span class="o">=</span><span class="n">7</span>)
+</code></pre></td>
 </tr>
 </table>
-
 <p>It is really strightforward. You can customize titles, markers' styles, axis scales, etc. A great tool accessible from inside the F# interactive.</p>
-
 <p>But before we could plot we had to get the data points from somewhere.</p>
-
 <h3>Reading data</h3>
-
 <p>I could read data points passed to the scatter plot using standard .NET IO functions. But there is a better way. I took <a href="http://numerics.mathdotnet.com/">Math.NET Numerics</a> for calculations that follows in the next part. This excellent library already knows how to read data from <code>.csv</code> file:</p>
-
-<table class="pre"><tr><td class="lines"><pre class="fssnip">
-<span class="l">1: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
-</pre>
-</td>
-<td class="snippet"><pre class="fssnip">
-<span class="k">let</span> <span class="i">dataCulture</span> <span class="o">=</span> <span class="i">CultureInfo</span>(<span class="s">&quot;</span><span class="s">en</span><span class="s">-</span><span class="s">US</span><span class="s">&quot;</span>)
-<span class="k">let</span> <span class="i">dataPath</span> <span class="o">=</span> <span class="i">Path</span><span class="o">.</span><span class="i">Combine</span>(<span class="k">__SOURCE_DIRECTORY__</span>, <span class="s">&quot;</span><span class="s">data</span><span class="s">.</span><span class="s">csv</span><span class="s">&quot;</span>)
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">dataCulture</span> <span class="o">=</span> <span class="i">CultureInfo</span>(<span class="s">&quot;en-US&quot;</span>)
+<span class="k">let</span> <span class="i">dataPath</span> <span class="o">=</span> <span class="i">Path</span><span class="o">.</span><span class="i">Combine</span>(<span class="k">__SOURCE_DIRECTORY__</span>, <span class="s">&quot;data.csv&quot;</span>)
 
 <span class="c">// loads a matrix of 97x2</span>
-<span class="k">let</span> <span class="i">data</span> <span class="o">=</span> <span class="i">DelimitedReader</span><span class="o">.</span><span class="i">Read</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">double</span><span class="o">&gt;</span>(<span class="i">dataPath</span>, <span class="k">false</span>, <span class="s">&quot;</span><span class="s">,</span><span class="s">&quot;</span>, <span class="k">false</span>, <span class="i">dataCulture</span>)</pre>
-</td>
+<span class="k">let</span> <span class="i">data</span> <span class="o">=</span> <span class="i">DelimitedReader</span><span class="o">.</span><span class="i">Read</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">double</span><span class="o">&gt;</span>(<span class="i">dataPath</span>, <span class="k">false</span>, <span class="s">&quot;,&quot;</span>, <span class="k">false</span>, <span class="i">dataCulture</span>)
+</code></pre></td>
 </tr>
 </table>
-
 <p>And that's it. It reads the content on my file and builds up a matrix. All that I want. All I need to do is the final transformation to points I pass to the chart:</p>
-
-<table class="pre"><tr><td class="lines"><pre class="fssnip">
-<span class="l">1: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
-</pre>
-</td>
-<td class="snippet"><pre class="fssnip">
-<span class="k">let</span> <span class="i">x</span> <span class="o">=</span> <span class="i">data</span><span class="o">.</span><span class="i">Column</span>(<span class="n">0</span>)<span class="o">.</span><span class="i">ToColumnMatrix</span>()
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">x</span> <span class="o">=</span> <span class="i">data</span><span class="o">.</span><span class="i">Column</span>(<span class="n">0</span>)<span class="o">.</span><span class="i">ToColumnMatrix</span>()
 <span class="k">let</span> <span class="i">y</span> <span class="o">=</span> <span class="i">data</span><span class="o">.</span><span class="i">Column</span>(<span class="n">1</span>)<span class="o">.</span><span class="i">ToColumnMatrix</span>()
-<span class="k">let</span> <span class="i">points</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">Array</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">zip</span> (<span class="i">x</span><span class="o">.</span><span class="i">ToColumnWiseArray</span>()) (<span class="i">y</span><span class="o">.</span><span class="i">ToColumnWiseArray</span>()) <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="i">Seq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="i">ofArray</span></pre>
-</td>
+<span class="k">let</span> <span class="i">points</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">Array</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">zip</span> (<span class="i">x</span><span class="o">.</span><span class="i">ToColumnWiseArray</span>()) (<span class="i">y</span><span class="o">.</span><span class="i">ToColumnWiseArray</span>()) <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="i">Seq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="i">ofArray</span>
+</code></pre></td>
 </tr>
 </table>
-
 <p>Math.NET numerics has already all the features that enable to transform the data to the column array <code>ToColumnWiseArray()</code>.</p>
-
 <h3>Calculating the cost function</h3>
-
 <p>The objective of linear regression is to minimize the cost function:</p>
-
 <p><span class="math">\[J(\theta_0, \theta_1) = \dfrac {1}{2m} \displaystyle \sum _{i=1}^m \left (h_\theta (x_{i}) - y_{i} \right)^2\]</span></p>
-
 <p>where the hypothesis <span class="math">\(h_\theta (x)\)</span> is given by the linear model:</p>
-
 <p><span class="math">\[h_\theta(x) = \theta_0 + \theta_1 x\]</span></p>
-
 <p>The cost function measures the accuracy of our hypothesis. This takes an average (actually a fancier version of an average) of all the results of the hypothesis with inputs from x's compared to the actual output y's</p>
-
 <p>For this task I need a powerfull library that will allow me to work with vectors and matrices. All the <span class="math">\(\theta\)</span> parameter should be updated at once and using matrices is very strighforward instead of loops. <a href="http://numerics.mathdotnet.com/">Math.NET Numerics</a> library is an excellent choice. It works well on <code>mono</code> and mac too.</p>
-
 <p>To calculate the cost function <code>j</code> we can simply do this:</p>
-
-<table class="pre"><tr><td class="lines"><pre class="fssnip">
-<span class="l">1: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
 <span class="l">6: </span>
 <span class="l">7: </span>
-</pre>
-</td>
-<td class="snippet"><pre class="fssnip">
-<span class="k">let</span> <span class="i">theta</span> <span class="o">=</span> <span class="i">vector</span> [ <span class="n">0.0</span>; <span class="n">0.0</span>; ]
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">theta</span> <span class="o">=</span> <span class="i">vector</span> [ <span class="n">0.0</span>; <span class="n">0.0</span>; ]
 <span class="c">// intercept parameter needed for calucation. Another feature.</span>
 <span class="k">let</span> <span class="i">xIntercept</span> <span class="o">=</span> <span class="i">x</span><span class="o">.</span><span class="i">InsertColumn</span>(<span class="n">0</span>, (<span class="i">Vector</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs1', 6)" onmouseover="showTip(event, 'fs1', 6)" class="i">double</span><span class="o">&gt;</span><span class="o">.</span><span class="i">Build</span><span class="o">.</span><span class="i">Dense</span>(<span class="i">m</span>, <span class="n">1.0</span>)))
 
 <span class="k">let</span> <span class="i">h</span> <span class="o">=</span> <span class="i">xIntercept</span> <span class="o">*</span> <span class="i">theta</span><span class="o">.</span><span class="i">ToColumnMatrix</span>()
 <span class="k">let</span> <span class="i">squaredErrors</span> <span class="o">=</span> <span class="i">h</span><span class="o">.</span><span class="i">Subtract</span>(<span class="i">y</span>)<span class="o">.</span><span class="i">PointwisePower</span>(<span class="n">2.0</span>);
-<span class="k">let</span> <span class="i">j</span> <span class="o">=</span> (<span class="n">1.0</span> <span class="o">/</span> (<span class="n">2.0</span> <span class="o">*</span> (<span class="i">m</span><span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs1', 7)" onmouseover="showTip(event, 'fs1', 7)" class="i">double</span>))) <span class="o">*</span> <span class="i">squaredErrors</span><span class="o">.</span><span class="i">ColumnSums</span>();</pre>
-</td>
+<span class="k">let</span> <span class="i">j</span> <span class="o">=</span> (<span class="n">1.0</span> <span class="o">/</span> (<span class="n">2.0</span> <span class="o">*</span> (<span class="i">m</span><span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs1', 7)" onmouseover="showTip(event, 'fs1', 7)" class="i">double</span>))) <span class="o">*</span> <span class="i">squaredErrors</span><span class="o">.</span><span class="i">ColumnSums</span>();
+</code></pre></td>
 </tr>
 </table>
-
 <p>What the calculation does it's not important. It's just the implementation of the formula above. Look how easy is to do any operation on vectors and matrices. Multiplying them, substracting and transforming is very easy with <a href="http://numerics.mathdotnet.com/">Math.NET Numerics</a>. Although the code is not idiomatic to F#, it's pretty readable. Imagine what you would need to do if you would like to use loops for example and make a calculation for every training example instead of manipulating vectors and matrices.</p>
-
 <p>The cost function returns the correct result.</p>
-
 <p>And that's all for this first part.</p>
-
 <h2>Summary</h2>
-
 <p>F# is a great language for prototyping and exploring data. The community has built many tools that allows this smooth experience. I will investigate on the only little problem I had on Mac with FSharp.Charting.</p>
-
 <p>If you know how to write more idiomatic F# code with either of thses libraries, please leave a comment.</p>
-
 <p>This is the first part of implementing the linear regression with one variable. In the next post I'll implement the gradient descent part and predictions with these two libraries. Stay tuned</p>
 
-<div class="tip" id="fs1">Multiple items<br />val double : value:&#39;T -&gt; float (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.ExtraTopLevelOperators.double<br /><br />--------------------<br />type double = System.Double<br /><br />Full name: Microsoft.FSharp.Core.double</div>
+<div class="tip" id="fs1">Multiple items<br />val double : value:&#39;T -&gt; double (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.ExtraTopLevelOperators.double<br /><br />--------------------<br />type double = System.Double<br /><br />Full name: Microsoft.FSharp.Core.double</div>
 <div class="tip" id="fs2">module Array<br /><br />from Microsoft.FSharp.Collections</div>
 <div class="tip" id="fs3">val zip : array1:&#39;T1 [] -&gt; array2:&#39;T2 [] -&gt; (&#39;T1 * &#39;T2) []<br /><br />Full name: Microsoft.FSharp.Collections.Array.zip</div>
 <div class="tip" id="fs4">module Seq<br /><br />from Microsoft.FSharp.Collections</div>
@@ -372,7 +307,7 @@
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

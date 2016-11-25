@@ -91,81 +91,53 @@
 
 <div class="row">
 <div class="medium-8 columns">
-
 <p>The <a href="http://www.ndepend.com">NDepend 6</a> was released a couple of weeks ago. It comes along with really exciting new features like for example Visual Studio 2015 integration, analysis enhancements, async support, etc. Take a look at NDepend website to have a full list of new features. The feature I'm interested in is the <a href="https://www.jetbrains.com/teamcity/">TeamCity</a> integration which should be very easy to do according to NDepend's team.</p>
-
 </div>
 </div>
-
 <!-- more -->
-
 <p>If you use C# as your main programming language and you have already worked on a quite big project you know how painful is to enforce coding rules and to query about dependencies if you don't have right tool. NDepend is a static analysis tool that helps you digging into your code in a very easy and efficient way to carry-out code rules checks, code quality checks, comparing two versions of code base, browsing for differences and many more. This is something that you should have in your tool belt. If you're working on medium to large project you are supposed to have a build server and a sort of Continous Integration process. I'm using TeamCity 9 for my projects. It would be nice to take advantage of NDepend static code base analysis inside your CI build. It was always possible to integrate NDepend into your build process in TeamCity but it was quite tedious. NDepend 6 comes with this new shiny TeamCity plugin (for TeamCity 8 and 9) and I decided to give it a shot. Let's try it out and check if this is easier to do than before.</p>
-
 <h2>NDepend TeamCity plugin installation</h2>
-
 <p>I have followed the installation steps described at <a href="http://www.ndepend.com/docs/teamcity-integration-ndepend">NDepend documentation</a> so there is no need to rewrite it here. However, <strong>I'll highlight some of the differences</strong> in the process that I found on my specific environment compared to the official documentation.</p>
-
 <p>First of all, finding the TeamCity plugin folder was not straightforward as my environment variable <strong>TEAMCITY_DATA_PATH</strong> was not definied. After checking the official <a href="https://confluence.jetbrains.com/display/TCD9/TeamCity+Data+Directory">TeamCity documentation</a> we can read the following:</p>
-
 <blockquote>
-  <p><strong>Before TeamCity 9.1</strong>, the TeamCity Windows installer configured the TeamCity data directory during installation by setting the <strong>TEAMCITY_DATA_PATH</strong> environment variable. The default path suggested for the directory is: <em>%ALLUSERSPROFILE%\JetBrains\TeamCity</em>. 
+<p><strong>Before TeamCity 9.1</strong>, the TeamCity Windows installer configured the TeamCity data directory during installation by setting the <strong>TEAMCITY_DATA_PATH</strong> environment variable. The default path suggested for the directory is: <em>%ALLUSERSPROFILE%\JetBrains\TeamCity</em>.
 <br />
 <strong>Since TeamCity 9.1</strong>, installer does not ask for the TeamCity data directory and it can be configured on the first TeamCity start.</p>
 </blockquote>
-
-<p>Obviously I have installed the TeamCity server v9.1 and I don't have the <strong>TEAMCITY_DATA_PATH</strong> set. The best way to check where your data directory is located, is to check it directly in the TeamCity web interface. Browse to <strong>Administration -> Global Settings</strong> and check the value of <strong>Data directory:</strong>. The mine is located in <em>C:\TeamCity.BuildServer</em>. You can now copy/paste the NDepend plugin and follow the instructions at <a href="http://www.ndepend.com/docs/teamcity-integration-ndepend">NDepend documentation</a>. At the end, you should be able to display NDepend step in the TeamCity server.</p>
-
+<p>Obviously I have installed the TeamCity server v9.1 and I don't have the <strong>TEAMCITY_DATA_PATH</strong> set. The best way to check where your data directory is located, is to check it directly in the TeamCity web interface. Browse to <strong>Administration -&gt; Global Settings</strong> and check the value of <strong>Data directory:</strong>. The mine is located in <em>C:\TeamCity.BuildServer</em>. You can now copy/paste the NDepend plugin and follow the instructions at <a href="http://www.ndepend.com/docs/teamcity-integration-ndepend">NDepend documentation</a>. At the end, you should be able to display NDepend step in the TeamCity server.</p>
 <p><img src="http://www.ndepend.com/Doc/CI_TeamCity/NDependBuildStep.png" alt="NDepend step in TeamCity" /></p>
-
 <h2>NDepend TeamCity plugin configuration</h2>
-
 <p>If you follow <a href="http://www.ndepend.com/docs/teamcity-integration-ndepend">NDepend documentation</a> setting up the NDepend build step is rather strightforward. Don't forget to change paths inside your NDepend project from absolute to relative. Remember that your build server may have different paths than those definied on your development machine. That's why relative paths are very handy. You can achieve it very easily, by going to your Ndepend project properties, clicking on the <strong>Paths Referenced</strong> tab and then right clicking on the listed paths and selecting <strong>Set as Path Relative</strong> option from the menu.</p>
-
 <p><img src="img/NDependMenuAbsToRelPath.png" alt="NDepend menu" /></p>
-
 <p>Once the change is done and commited, I've add NDepend build step to my build process</p>
-
 <a href="img/TeamCityNDependBuildStep.png"><img alt="TeamCity NDepend build step" src="img/TeamCityNDependBuildStep.png" width="600"></a>
-
 <h2>Running the first build</h2>
-
 <p>We're are finaly ready to run our first build with NDepend step. The whole <strong>NDepend plugin configuration step inside TeamCity took me something like 10 min!</strong> It's really a pice of cake!</p>
-
 <p>Let's check the output of the first run:</p>
-
 <a href="img/TeamCityBuildwithNDependDefaults.png"><img alt="TeamCity result of build run with NDepend plugin" src="img/TeamCityBuildwithNDependDefaults.png" width="600"></a>
-
 <ol>
 <li>The build has failed because of NDepend exception. When the static analysis detects that critical rules are violated then the build fails. NDepend plugin maps rules violations to the TeamCity code inspections and errors. Rules violations are mapped as TeamCity code inspections and critical rules violations are mapped as errors.</li>
 <li>Total number of problems detected during the NDepend analysis. These are visible in the TeamCity code insepctions tab (step number 3).</li>
-<li>The list of code inspections as a result of NDepend analysis. You can browse through all the problems detected by NDepend. Clicking on the details of the problem it brings you directly to opened Visual Studio solution.
-<a href="img/TeamCityNDependCodeIns.png"><img alt="TeamCity Code Inspections NDepend" src="img/TeamCityNDependCodeIns.png" width="600"></a></li>
-<li>NDepend report is accessible in it's own tab! Awesome!
-<a href="img/TeamCityNDependReport.png"><img alt="TeamCity NDepend report" src="img/TeamCityNDependReport.png" width="600"></a></li>
+<li>
+The list of code inspections as a result of NDepend analysis. You can browse through all the problems detected by NDepend. Clicking on the details of the problem it brings you directly to opened Visual Studio solution.
+<a href="img/TeamCityNDependCodeIns.png"><img alt="TeamCity Code Inspections NDepend" src="img/TeamCityNDependCodeIns.png" width="600"></a>
+</li>
+<li>
+NDepend report is accessible in it's own tab! Awesome!
+<a href="img/TeamCityNDependReport.png"><img alt="TeamCity NDepend report" src="img/TeamCityNDependReport.png" width="600"></a>
+</li>
 </ol>
-
 <p>As a bonus, NDepend output is available as a TeamCity artifact so you can download it if needed.</p>
-
 <a href="img/NDependArtifact.png"><img alt="NDepend output artifact" src="img/NDependArtifact.png" width="600"></a>
-
 <p>In the Build Configuration settings, you can also set build failure upon rules and critical rules violations values. This may be usefull if you want the build fail because of the evolution of the NDepend metric change.</p>
-
 <h2>More NDepend features for free</h2>
-
 <p>Of course you don't need to work that hard to get others usefull NDepend feature for free. I'm talking about comparison of differences between two different NDepend analysis and code coverage. For the code coverage all you need to do is to configure it in the NDepend project properties. For the code comparison you have to chose a value in the NDepend build step on TeamCity for "baseline for comparison". I've selected "The last successful build" so the effect will be the comparison between the current build and the last successful one. You have to set also the right value in the NDepend project properties like below:</p>
-
 <a href="img/NDependProjectConf.png"><img alt="Configuring NDepend project properties" src="img/NDependProjectConf.png" width="600"></a>
-
 <p>Once it's done, you run the build and check the build output. You should see baseline for comparison and code coverage picked up by the build like on the picture below:</p>
-
 <a href="img/NDependBaselinePlusCoverage.png"><img alt="NDepend build output with baseline comparison" src="img/NDependBaselinePlusCoverage.png" width="600"></a>
-
 <p>You should also see on the NDepend tab, the code metrics of the current build (brown letters) and how it compares to the previous analysis (grey letters).</p>
-
 <a href="img/NDependMetrics.png"><img alt="NDepend build output metrics" src="img/NDependMetrics.png" width="600"></a>
-
 <h2>Summary</h2>
-
 <p>What to say? The NDepend plugin is just so easy to install compared to the manual process I had to do with the previous versions. This is a really nice feature to have on your CI server. TeamCity NDepend plugin test: PASSED!</p>
 
 
@@ -262,7 +234,7 @@
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

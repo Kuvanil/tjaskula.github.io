@@ -11,9 +11,7 @@
       <pubDate>Wed, 09 Nov 2016 07:05:56 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;Once you've acquired some experience using your favorite programming language, doing somme cool apps, even if they are complicated, I think it's always good to go back to the roots and start implementing some algorithms. Why is that? Algorithms have some interesting properties that will require to look at the problem at hand from a different point of view. They will force you to use your language in a different way because you'll need to fulfill those properties. So what are the properties I'm talking about?&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -27,11 +25,8 @@
       <pubDate>Wed, 02 Dec 2015 02:18:24 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;This post is part of the &lt;a href="https://sergeytihon.wordpress.com/tag/fsadvent/"&gt;F# Advent Calendar in English 2015&lt;/a&gt;. Be sure to check out the other posts!&lt;/p&gt;
-
 &lt;p&gt;Machine Learning is very interesting and inspiring filed. I've been interested in this topic for several years now, mainly focusing on theory (although I was able to implement a poor recommeder system for my startup) and having a little experience from the real-world problems. But several months ago I started a real hardcore learning in Machine Learning, reading many books and following almost every course on Coursera and other MOOC portals. I know that those courses are aimed towards the newcomers like me and don't give you a solid knowledge as if you had a PhD in the field. However with a lot of practice, you can do many usefull things.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -45,9 +40,7 @@
       <pubDate>Thu, 13 Aug 2015 22:10:22 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;The &lt;a href="http://www.ndepend.com"&gt;NDepend 6&lt;/a&gt; was released a couple of weeks ago. It comes along with really exciting new features like for example Visual Studio 2015 integration, analysis enhancements, async support, etc. Take a look at NDepend website to have a full list of new features. The feature I'm interested in is the &lt;a href="https://www.jetbrains.com/teamcity/"&gt;TeamCity&lt;/a&gt; integration which should be very easy to do according to NDepend's team.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -61,9 +54,7 @@
       <pubDate>Wed, 21 Jan 2015 10:55:09 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;If you would like to blog on GitHub pages but you don't want to deep dive to much into documentation and you don't want to waste your time, just keep on reading. In this post you will learn how to set up quickly FsBlog, a static web page generator written in F# for GitHub pages. But, don't be scared. You don't need to know F# in order to use it.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -77,9 +68,7 @@
       <pubDate>Tue, 20 Jan 2015 10:10:42 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;When I started to think about what title would best fit my new blog, I was stuck. I couldn't find anything that really translated the state of my mind. I wanted it to be short but also communicative. Something, that when you read it you already have an idea of what kind of content you can find on this blog. Still nothing on my mind...&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -93,9 +82,7 @@
       <pubDate>Wed, 21 Aug 2013 06:07:57 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;This is the next part of the series "My 2 weeks trip from OOP to FP"&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -109,9 +96,7 @@
       <pubDate>Fri, 16 Aug 2013 04:25:13 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;This is the next part of my 2 weeks trip from OOP to FP programming with F#.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -125,9 +110,7 @@
       <pubDate>Wed, 14 Aug 2013 02:16:51 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;I have been programming using an OOP language since a long, long time. Really? Since the very first betas of .NET Framework I've been always using C# to accomplish almost every programming task. Working for companies that mainly used .NET platform and C# didn't help me to push me in another direction... It's not that I was not interested in other languages...it's that I was afraid that the learning curve will be so high and that I will never have enough time to learn everything to know in order to be efficient and to write a code that follows the best practices for a given language.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -141,9 +124,7 @@
       <pubDate>Mon, 12 Aug 2013 00:02:46 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;In my last post, I showed you &lt;a href="http://jaskula.fr//blog/2013/07-26-configure-structuremap-in-asp-net-webapi-to-play-nicely-with-hyprlinkr/index.html"&gt;how to configure ASP.NET WebApi, StructureMap and HyprLinkr&lt;/a&gt;.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -157,9 +138,7 @@
       <pubDate>Fri, 26 Jul 2013 08:00:11 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;There are plenty of blog posts about how to configure StructureMap with ASP.NET WebApi so I won't go into much details about that.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -173,9 +152,7 @@
       <pubDate>Mon, 29 Oct 2012 05:01:50 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;This is the question I've been asking myself while confronted to a problem of building a web site and RESTful API at the same time. I've been told that I can't build one and have both. Why? HTML is just another media-type but what is generally used when building web sites is the capacity of &lt;strong&gt;templated view generation&lt;/strong&gt; which is much more then simple HTML resource representation.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -189,9 +166,7 @@
       <pubDate>Fri, 06 Apr 2012 04:01:50 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;I've been always confused whenever you should or not implement asynchronous execution for "lengthy" operations when it comes to the ASP.NET platform. It has to be said that there is many factors that come into play. The way ASP.NET concurrent request are handled not only has changed over the different version of Framework .NET but also you have to consider how ASP.NET deals with threads and ThreadPool in general.&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 
@@ -205,9 +180,7 @@
       <pubDate>Sun, 11 Mar 2012 09:58:47 GMT</pubDate>
       <description>&lt;div class="row"&gt;
 &lt;div class="medium-8 columns"&gt;
-
 &lt;p&gt;I've been reading through several blog post about how people configure DI support in the new &lt;a href="http://www.asp.net/web-api"&gt;ASP.NET Web Api&lt;/a&gt;. For example you can read about it here :&lt;/p&gt;
-
 &lt;/div&gt;
 &lt;/div&gt;
 

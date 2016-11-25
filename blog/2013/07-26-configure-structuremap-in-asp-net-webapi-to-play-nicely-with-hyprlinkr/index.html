@@ -91,144 +91,197 @@
 
 <div class="row">
 <div class="medium-8 columns">
-
 <p>There are plenty of blog posts about how to configure StructureMap with ASP.NET WebApi so I won't go into much details about that.</p>
-
 </div>
 </div>
-
 <!-- more -->
-
 <p>The goal of this post is to show you how to configure <a href="https://github.com/ploeh/Hyprlinkr">HyprLinkr</a> to be correctly injected into your web api controllers. For those who don't know what <a href="https://github.com/ploeh/Hyprlinkr">HyprLinkr</a> is, here is a little description taken from the project wiki page <a href="https://github.com/ploeh/Hyprlinkr">https://github.com/ploeh/Hyprlinkr</a></p>
-
 <blockquote>
-  <p>Hyprlinkr is a small and very focused helper library for the ASP.NET Web API. It does one thing only: it creates URIs according to the application's route configuration in a type-safe manner.</p>
+<p>Hyprlinkr is a small and very focused helper library for the ASP.NET Web API. It does one thing only: it creates URIs according to the application's route configuration in a type-safe manner.</p>
 </blockquote>
-
 <p>Let’s set up some context of how HyprLinkr is used.</p>
-
 <h2>Usage context</h2>
-
 <p>The main component in HyprLinkr is <code>RouteLinker</code> which implements <code>IResourceLinker</code> interface and that I want to inject inside my web api constructor.</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> ItemsController <span class="o">:</span> ApiController
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">class</span> ItemsController <span class="o">:</span> ApiController
 {
-    <span class="k">private</span> <span class="k">readonly</span> IItemsRepository _itemsRepository;
-    <span class="k">private</span> <span class="k">readonly</span> IResourceLinker _resourceLinker;
+  <span class="k">private</span> <span class="k">readonly</span> IItemsRepository _itemsRepository;
+  <span class="k">private</span> <span class="k">readonly</span> IResourceLinker _resourceLinker;
 
-    <span class="k">public</span> ItemsController(IItemsRepository itemsRepository, IResourceLinker resourceLinker)
-    {
-        <span class="k">if</span> (itemsRepository <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"itemsRepository"</span>);
-        <span class="k">if</span> (resourceLinker <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"resourceLinker"</span>);
+  <span class="k">public</span> ItemsController(IItemsRepository itemsRepository, IResourceLinker resourceLinker)
+  {
+    <span class="k">if</span> (itemsRepository <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"itemsRepository"</span>);
+    <span class="k">if</span> (resourceLinker <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"resourceLinker"</span>);
 
-        _itemsRepository <span class="o">=</span> itemsRepository;
-        _resourceLinker <span class="o">=</span> resourceLinker;
-    }
+    _itemsRepository <span class="o">=</span> itemsRepository;
+    _resourceLinker <span class="o">=</span> resourceLinker;
+  }
 
         <span class="c">// some stuff here</span>
-}</pre></td></tr></table>
-
+}
+</code></pre></td></tr></table>
 <h2>What doesn't work?</h2>
-
 <p>If you follow the best practices, the composition root of ASP.NET WebApi would be a custom controller activator (implementation of <code>IHttpControllerActivator</code>). In my case it’s based on StructureMap and is defined as follows :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> StructureMapControllerActivator <span class="o">:</span> IHttpControllerActivator
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">class</span> StructureMapControllerActivator <span class="o">:</span> IHttpControllerActivator
 {
-    <span class="k">private</span> <span class="k">readonly</span> Container _container;
+  <span class="k">private</span> <span class="k">readonly</span> Container _container;
 
-    <span class="k">public</span> StructureMapControllerActivator(Container container)
+  <span class="k">public</span> StructureMapControllerActivator(Container container)
+  {
+    <span class="k">if</span> (container <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"container"</span>);
+    _container <span class="o">=</span> container;
+  }
+
+  <span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
+      HttpControllerDescriptor controllerDescriptor, Type controllerType)
+  {
+    <span class="k">try</span>
     {
-        <span class="k">if</span> (container <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"container"</span>);
-        _container <span class="o">=</span> container;
+      <span class="k">return</span> (IHttpController)_container.GetInstance(controllerType);
     }
-
-    <span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
-            HttpControllerDescriptor controllerDescriptor, Type controllerType)
+    <span class="k">catch</span> (Exception e)
     {
-        <span class="k">try</span>
-        {
-            <span class="k">return</span> (IHttpController)_container.GetInstance(controllerType);
-        }
-        <span class="k">catch</span> (Exception e)
-        {
-            <span class="c">// TODO : Logging</span>
-            <span class="k">throw</span> e;
-        }
+      <span class="c">// TODO : Logging</span>
+      <span class="k">throw</span> e;
     }
-}</pre></td></tr></table>
-
+  }
+}
+</code></pre></td></tr></table>
 <p>The registration of <code>IResourceLinker</code> in StructureMap is simple like that :</p>
-
-<table class="pre"><tr><td><pre lang="csharp">For&lt;IResourceLinker&gt;().Use&lt;RouteLinker&gt;();</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">For&lt;IResourceLinker&gt;().Use&lt;RouteLinker&gt;();
+</code></pre></td></tr></table>
 <p>The problem is when you run this code and when the first request hits <code>ItemsController</code>,  StructureMap throws an exception saying that the mapping for <code>HttpRequestMessage</code> is not defined and thus the <code>IResourceLinker</code> instance cannot be resolved.</p>
-
 <p>When you look into the <code>RouteLinker</code> code you understand the error. You have to pass at least an instance of <code>HttpRequestMessage</code> to the constructor of <code>RouteLinker</code>. This is understandable as <code>RouteLinker</code> needs a request context in order to generate urls for the links.</p>
-
 <h2>How to make it work?</h2>
-
 <p>The main issue is that we need to provide an <code>HttpRequestMessage</code> instance before the controller is resolved. The only place where we have an instance of <code>HttpRequestMessage</code> is in the controller activator. So we need to kind of inject the instance of <code>HttpRequestMessage</code> into the StructureMap container before the controller is resolved. Fortunately StrucureMap has such a feature and we could do something like this in the <code>StrucureMapControllerActivator</code> :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
-        HttpControllerDescriptor controllerDescriptor, Type controllerType)
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
+    HttpControllerDescriptor controllerDescriptor, Type controllerType)
 {
-    <span class="k">try</span>
-    {
-        _container.Inject(<span class="k">typeof</span>(HttpRequestMessage), request);
-        <span class="k">return</span> (IHttpController)scopedContainer.GetInstance(controllerType);
-    }
-    <span class="k">catch</span> (Exception e)
-    {
-        <span class="c">// TODO : Logging</span>
-        <span class="k">throw</span> e;
-    }
-}</pre></td></tr></table>
-
+  <span class="k">try</span>
+  {
+    _container.Inject(<span class="k">typeof</span>(HttpRequestMessage), request);
+    <span class="k">return</span> (IHttpController)scopedContainer.GetInstance(controllerType);
+  }
+  <span class="k">catch</span> (Exception e)
+  {
+    <span class="c">// TODO : Logging</span>
+    <span class="k">throw</span> e;
+  }
+}
+</code></pre></td></tr></table>
 <p>This might be a good idea at first sight, except that is not…</p>
-
 <p>Do you spot an eventual issue?</p>
-
 <p>What could happen with concurrent requests? The container instance is shared between requests. It means that when an instance of <code>HttpRequestMessage</code> is injected into the container, and before the container resolves the controller, another request could come in and inject HIS instance of <code>HttpRequestMessage</code>. Then when the first controller is resolved, the wrong instance of <code>HttpRequestMessage</code> would be passed into the <code>RouteLinked</code> constructor.</p>
-
 <p>Another point that I that maybe StructureMap doesn't allow multiple injection of the same instance type. I haven't checked that. But anyways i wouldn't work for the first reason I mentioned.</p>
-
 <h2>StructureMap and nested containers</h2>
-
 <p>One handy feature of StructureMap are nested containers. If you don't know what the nested containers are, please read Jeremy Miller post about it when it was introduced in StructureMap <a href="http://codebetter.com/jeremymiller/2010/02/10/nested-containers-in-structuremap-2-6-1/.">http://codebetter.com/jeremymiller/2010/02/10/nested-containers-in-structuremap-2-6-1/.</a> To sum up we want to create a nested container on each incoming request and to inject there an instance of <code>HttpRequestMessage</code>. Each request will have it's own nested container from which the controller and all dependencies will be pulled. Let's refactor our <code>StructureMapControllerActivator</code> :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
-        HttpControllerDescriptor controllerDescriptor, Type controllerType)
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> IHttpController Create(HttpRequestMessage request, 
+    HttpControllerDescriptor controllerDescriptor, Type controllerType)
 {
-    <span class="k">try</span>
-    {
-        <span class="k">var</span> scopedContainer <span class="o">=</span> _container.GetNestedContainer();
-        scopedContainer.Inject(<span class="k">typeof</span>(HttpRequestMessage), request);
-        request.RegisterForDispose(scopedContainer);
-        <span class="k">return</span> (IHttpController)scopedContainer.GetInstance(controllerType);
-    }
-    <span class="k">catch</span> (Exception e)
-    {
-        <span class="c">// TODO : Logging</span>
-        <span class="k">throw</span> e;
-    }
-}</pre></td></tr></table>
-
+  <span class="k">try</span>
+  {
+    <span class="k">var</span> scopedContainer <span class="o">=</span> _container.GetNestedContainer();
+    scopedContainer.Inject(<span class="k">typeof</span>(HttpRequestMessage), request);
+    request.RegisterForDispose(scopedContainer);
+    <span class="k">return</span> (IHttpController)scopedContainer.GetInstance(controllerType);
+  }
+  <span class="k">catch</span> (Exception e)
+  {
+    <span class="c">// TODO : Logging</span>
+    <span class="k">throw</span> e;
+  }
+}
+</code></pre></td></tr></table>
 <p>As you can see, all dependencies are pulled from the nested container. However you might wonder why we need this line?</p>
-
-<table class="pre"><tr><td><pre lang="csharp">request.RegisterForDispose(scopedContainer);</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">request.RegisterForDispose(scopedContainer);
+</code></pre></td></tr></table>
 <p>In fact nested containers has some feature that you might not be aware of.</p>
-
 <blockquote>
-  <p>The nested container will track all of the transient objects that it creates.  When the nested container itself is disposed, it will call Dispose() on any of the transient objects that it created. A normal StructureMap Container does not track the transient objects that it creates</p>
+<p>The nested container will track all of the transient objects that it creates.  When the nested container itself is disposed, it will call Dispose() on any of the transient objects that it created. A normal StructureMap Container does not track the transient objects that it creates</p>
 </blockquote>
-
 <p>This is important because it means that if you don't dispose of your nested container you may encounter some memory leaks as it track the resolution of all transient components. Fortunately the web api framework allows us to register our nested container for dispose.</p>
-
 <p>There is a last thing to do. We have to change our <code>IResourceLinker</code> registration in StructureMap in order to tell which constructor we want to use when <code>RouteLinker</code> will be constructed. By default StructureMap selects most "greedy" constructor which means with most of the arguments.</p>
-
-<table class="pre"><tr><td><pre lang="csharp">For&lt;IResourceLinker&gt;().Use(ctx <span class="o">=</span><span class="o">&gt;</span> <span class="k">new</span> RouteLinker(ctx.GetInstance&lt;HttpRequestMessage&gt;()));</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">For&lt;IResourceLinker&gt;().Use(ctx <span class="o">=</span><span class="o">&gt;</span> <span class="k">new</span> RouteLinker(ctx.GetInstance&lt;HttpRequestMessage&gt;()));
+</code></pre></td></tr></table>
 <p>Now when you run the application, everything works as expected.</p>
 
 
@@ -325,7 +378,7 @@
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

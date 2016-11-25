@@ -91,48 +91,84 @@
 
 <div class="row">
 <div class="medium-8 columns">
-
 <p>I've been reading through several blog post about how people configure DI support in the new <a href="http://www.asp.net/web-api">ASP.NET Web Api</a>. For example you can read about it here :</p>
-
 </div>
 </div>
-
 <!-- more -->
-
 <ul>
 <li>Official "<a href="http://www.asp.net/web-api/overview/extensibility/using-the-web-api-dependency-resolver">Using the Web API Dependency Resolver</a>"</li>
 <li>"<a href="http://alexmg.com/post/2012/03/08/Autofac-ASPNET-Web-API-(Beta)-Integration.aspx">Autofac ASP.NET Web API (Beta) Integration</a>"</li>
 <li>"<a href="http://wildermuth.com/2012/2/26/WebAPI_and_Ninject">Web Api and Ninject</a>"</li>
 </ul>
-
 <p>What stands out is that every implementation relays on <code>System.Web.Http.Services.IDependencyResolver</code> interface which is similar to the one introduced in the ASP.NET MVC 3 and which lives in the <code>System.Web.Mvc</code> namespace to avoid confusion. Let's look at its implementation details :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">interface</span> IDependencyResolver
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">interface</span> IDependencyResolver
 {
-    <span class="k">object</span> GetService(System.Type serviceType);
+  <span class="k">object</span> GetService(System.Type serviceType);
     IEnumerable&lt;<span class="k">object</span>&gt; GetServices(System.Type serviceType);
-}</pre></td></tr></table>
-
+}
+</code></pre></td></tr></table>
 <p>Since it was introduced in MVC 3 I've never used it because of its lack of "Release" method and the fact that there is no way cleaning-up resolved services from you DI container. If it's not a problem for all DI containers, it is certainly a problem for Castle.Windsor which tracks resolved components. <a href="http://mikehadlow.blogspot.com/">Mike Hadlow</a> already spotted it was a problem and wrote a blog post "<a href="http://mikehadlow.blogspot.com/2011/02/mvc-30-idependencyresolver-interface-is.html">The MVC 3.0 IDependencyResolver interface is broken. Don't use it with Windsor.</a>" I think that this problem still remains with a WebApi <code>IDependencyResolver</code> interface and that’s why I decided to not use it. But will I manage to do it ?</p>
-
 <h2>Self Hosting</h2>
-
 <p>My current WebApi project is using self hosting feature and for the moment I won't be interested in IIS hosting. After all, there should not be significant differences between two hosting options on adding IoC container support. We will check it after.</p>
-
 <p>Given that in ASP.NET MVC 3 we weren't compelled to implement <code>IDependencyResolver</code> at all I started to figure out what other hooks WebApi offers in order to set up my <a href="http://blog.ploeh.dk/2011/07/28/CompositionRoot.aspx">Composition Root</a>. After few minutes of inspecting WebApi's API, I found <code>IHttpControllerFactory</code> in the <code>System.Web.Http.Dispatcher</code> namespace which seems to me like a viable seam for connecting my own implementation. This interface is quite similar to the one from the <code>System.Web.Mvc</code> namespace and is all what I need.</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">interface</span> IHttpControllerFactory
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">interface</span> IHttpControllerFactory
 {
-    IHttpController CreateController(HttpControllerContext controllerContext, 
-                                        <span class="k">string</span> controllerName);
-    <span class="k">void</span> ReleaseController(IHttpController controller);
-}</pre></td></tr></table>
-
+  IHttpController CreateController(HttpControllerContext controllerContext, 
+                    <span class="k">string</span> controllerName);
+  <span class="k">void</span> ReleaseController(IHttpController controller);
+}
+</code></pre></td></tr></table>
 <p>As you noticed, there is "Create" and "Release" controller methods which allows me to use it with Castle.Windsor. Let's look at it :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> WindsorHttpControllerFactory <span class="o">:</span> IHttpControllerFactory
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+<span class="l">26: </span>
+<span class="l">27: </span>
+<span class="l">28: </span>
+<span class="l">29: </span>
+<span class="l">30: </span>
+<span class="l">31: </span>
+<span class="l">32: </span>
+<span class="l">33: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">class</span> WindsorHttpControllerFactory <span class="o">:</span> IHttpControllerFactory
 {
-    <span class="k">private</span> <span class="k">readonly</span> IWindsorContainer _windsorContainer;
+  <span class="k">private</span> <span class="k">readonly</span> IWindsorContainer _windsorContainer;
 
     <span class="k">public</span> WindsorHttpControllerFactory(IWindsorContainer windsorContainer)
     {
@@ -144,9 +180,9 @@
     }
 
     <span class="k">public</span> IHttpController CreateController(HttpControllerContext controllerContext, 
-                                            <span class="k">string</span> controllerName)
+                        <span class="k">string</span> controllerName)
     {
-        <span class="k">var</span> controllerFullName <span class="o">=</span> <span class="k">string</span>.Format(<span class="s">"{0}.{1}{2}"</span>, 
+      <span class="k">var</span> controllerFullName <span class="o">=</span> <span class="k">string</span>.Format(<span class="s">"{0}.{1}{2}"</span>, 
                    <span class="k">typeof</span>(OrderController).Namespace, 
                    controllerName, ControllerSuffix);
         <span class="k">var</span> controllerType <span class="o">=</span> Type.GetType(controllerFullName);
@@ -156,36 +192,75 @@
 
     <span class="k">public</span> <span class="k">void</span> ReleaseController(IHttpController controller)
     {
-        <span class="k">var</span> disposableController <span class="o">=</span> controller <span class="k">as</span> IDisposable;
+      <span class="k">var</span> disposableController <span class="o">=</span> controller <span class="k">as</span> IDisposable;
         <span class="k">if</span> (disposableController <span class="o">!</span><span class="o">=</span> <span class="k">null</span>)
             disposableController.Dispose();
 
         _windsorContainer.Release(controller);
     }
-}</pre></td></tr></table>
-
+}
+</code></pre></td></tr></table>
 <p>Straightforward implementation that doesn't need any comments. Next step is to register it in the WebApi framework.</p>
-
 <h2>First Fail : Registration</h2>
-
 <p>I really should start from there... Looking into the WebApi's API I can't really find where to register my own implementation into the framework. It seems that there is nothing similar to <code>ControllerBuilder.Current.SetControllerFactory</code>. My current startup code is like this :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">var</span> config <span class="o">=</span> <span class="k">new</span> HttpSelfHostConfiguration(<span class="s">"http://localhost:6666"</span>);
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">var</span> config <span class="o">=</span> <span class="k">new</span> HttpSelfHostConfiguration(<span class="s">"http://localhost:6666"</span>);
 config.Routes.MapHttpRoute(<span class="s">"defualt"</span>, <span class="s">"{controller}/{id}"</span>, 
                                 <span class="k">new</span> {id <span class="o">=</span> RouteParameter.Optional});
 <span class="k">var</span> server <span class="o">=</span> <span class="k">new</span> HttpSelfHostServer(config);
-
-server.OpenAsync().Wait();</pre></td></tr></table>
-
+ 
+server.OpenAsync().Wait();
+</code></pre></td></tr></table>
 <p>Once again, standard initialization. But there is nothing on the <code>HttpSelfHostConfiguration</code> class that allows defining your own <code>IHttpControllerFactory</code> implementation. The only thing I can see is <code>HttpSelfHostConfiguration.ServiceResolver.SetResolver</code> methods with it's overrides. It seems that there is no way to avoid implementing <code>IDependencyResolver</code> interface. So let's do it.</p>
-
 <h2>Rolling out my own Dependency Resolver</h2>
-
 <p>As my unique solution is to implement my own <code>IDependencyResolver</code> so let's do it :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> WindsorDependencyResolver <span class="o">:</span> IDependencyResolver
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+<span class="l">26: </span>
+<span class="l">27: </span>
+<span class="l">28: </span>
+<span class="l">29: </span>
+<span class="l">30: </span>
+<span class="l">31: </span>
+<span class="l">32: </span>
+<span class="l">33: </span>
+<span class="l">34: </span>
+<span class="l">35: </span>
+<span class="l">36: </span>
+<span class="l">37: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">class</span> WindsorDependencyResolver <span class="o">:</span> IDependencyResolver
 {
-    <span class="k">private</span> <span class="k">readonly</span> WindsorContainer _windsorContainer;
+  <span class="k">private</span> <span class="k">readonly</span> WindsorContainer _windsorContainer;
 
     <span class="k">public</span> WindsorDependencyResolver(WindsorContainer windsorContainer)
     {
@@ -198,42 +273,63 @@ server.OpenAsync().Wait();</pre></td></tr></table>
 
     <span class="k">public</span> <span class="k">object</span> GetService(Type serviceType)
     {
-        <span class="k">try</span>
+      <span class="k">try</span>
         {
-            <span class="k">return</span> _windsorContainer.Resolve(serviceType);
+          <span class="k">return</span> _windsorContainer.Resolve(serviceType);
         }
         <span class="k">catch</span> (ComponentNotFoundException)
         {
-            <span class="k">return</span> <span class="k">null</span>;
+          <span class="k">return</span> <span class="k">null</span>;
         }
     }
 
     <span class="k">public</span> IEnumerable&lt;<span class="k">object</span>&gt; GetServices(Type serviceType)
     {
-        <span class="k">try</span>
+      <span class="k">try</span>
         {
-            <span class="k">return</span> _windsorContainer.ResolveAll(serviceType).Cast&lt;<span class="k">object</span>&gt;();
+          <span class="k">return</span> _windsorContainer.ResolveAll(serviceType).Cast&lt;<span class="k">object</span>&gt;();
         }
         <span class="k">catch</span> (ComponentNotFoundException)
         {
             <span class="k">return</span> <span class="k">new</span> List&lt;<span class="k">object</span>&gt;();
         }
     }
-}</pre></td></tr></table>
-
+}
+</code></pre></td></tr></table>
 <p>Then we have to register it as follows :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">static</span> <span class="k">void</span> Main(<span class="k">string</span>[] args)
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">static</span> <span class="k">void</span> Main(<span class="k">string</span>[] args)
 {
-    <span class="k">var</span> container <span class="o">=</span> <span class="k">new</span> WindsorContainer();
+  <span class="k">var</span> container <span class="o">=</span> <span class="k">new</span> WindsorContainer();
     container.Install(FromAssembly.This());
-
+ 
     <span class="k">var</span> config <span class="o">=</span> <span class="k">new</span> HttpSelfHostConfiguration(<span class="s">"http://localhost:6666"</span>);
     config.ServiceResolver.SetResolver
                         (<span class="k">new</span> WindsorDependencyResolver(container));
     config.Routes.MapHttpRoute(<span class="s">"defualt"</span>, 
                <span class="s">"{controller}/{id}"</span>, <span class="k">new</span> { id <span class="o">=</span> RouteParameter.Optional });
-
+   
     <span class="k">using</span> (<span class="k">var</span> server <span class="o">=</span> <span class="k">new</span> HttpSelfHostServer(config))
     {
         server.OpenAsync().Wait();
@@ -243,55 +339,72 @@ server.OpenAsync().Wait();</pre></td></tr></table>
     }
 
     container.Dispose();
-}</pre></td></tr></table>
-
+}
+</code></pre></td></tr></table>
 <p>This is not sufficient because of the problem described at the beginning of this post (the lack of the "Release" method and thus being unable to release components resolved with Castle.Windsor). The next step is to figure out how to register our implementation of <code>IHttpControllerFactory</code>. The good news is that that framework WebApi calls every time to our implementation of <code>IDependencyResolver</code> in the hope that it could find a service for every seam that is try to resolve. One of that seams is <code>IHttpControllerFactory</code> so it easy to register our own implementation with Castle.Windsor :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> ControllerFactoryInstaller <span class="o">:</span> IWindsorInstaller
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+<span class="l">9: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">class</span> ControllerFactoryInstaller <span class="o">:</span> IWindsorInstaller
 {
-    <span class="k">public</span> <span class="k">void</span> Install(IWindsorContainer container, IConfigurationStore store)
+  <span class="k">public</span> <span class="k">void</span> Install(IWindsorContainer container, IConfigurationStore store)
     {
         container.Register(
             Component.For&lt;IHttpControllerFactory&gt;().Instance(
                 <span class="k">new</span> WindsorHttpControllerFactory(container)));
     }
-}</pre></td></tr></table>
-
+}
+</code></pre></td></tr></table>
 <p>Note, that the default liftetime when unspecified is Singleton.</p>
-
 <p>We're ready to test.</p>
-
 <h2>Second Fail : Testing in Fiddler</h2>
-
 <p>To my surprise, when calling my service I end up with the following error (sorry for the French) :</p>
-
 <p><em>{"ExceptionType":"System.NullReferenceException","Message":"La référence d’objet n’est pas définie à une instance d’un objet.","StackTrace":"   à System.Web.Http.ApiController.ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)u000du000a   à System.Web.Http.Dispatcher.HttpControllerDispatcher.SendAsyncInternal(HttpRequestMessage request, CancellationToken cancellationToken)u000du000a   à System.Web.Http.Dispatcher.HttpControllerDispatcher.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)"}</em></p>
-
 <p>For me it brakes the <a href="http://en.wikipedia.org/wiki/Principle_of_least_astonishment">POLA</a>. After wandering on Internet I didn't find anything helpful. I decompiled some WebApi code sources, debugged once again and found that the instance of <code>HttpControllerContext</code> passed to my controller factory was a bit strange. In fact <code>ControllerDescriptor</code> and Controller properties was not assigned. By trial and error I ended up modifying my implementation like this :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> IHttpController CreateController(HttpControllerContext controllerContext, 
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> IHttpController CreateController(HttpControllerContext controllerContext, 
                                                             <span class="k">string</span> controllerName)
 {
     <span class="k">var</span> controllerFullName <span class="o">=</span> <span class="k">string</span>.Format(<span class="s">"{0}.{1}{2}"</span>, 
                                                 <span class="k">typeof</span>(OrderController).Namespace, 
                                                 controllerName, ControllerSuffix);
     <span class="k">var</span> controllerType <span class="o">=</span> Type.GetType(controllerFullName);
-
+ 
     controllerContext.ControllerDescriptor <span class="o">=</span> 
                 <span class="k">new</span> HttpControllerDescriptor(controllerContext.Configuration, 
                                                     controllerName, controllerType);
     controllerContext.Controller <span class="o">=</span> 
                     _windsorContainer.Resolve(controllerType) <span class="k">as</span> IHttpController;
-
+ 
     <span class="k">return</span> controllerContext.Controller;
-}</pre></td></tr></table>
-
+}
+</code></pre></td></tr></table>
 <p>Now everything works as expected. It's a bit weird as these properties seem to be optional from the point of view of the API, or at least they should be provided with the instance of <code>HttpControllerContext</code>.</p>
-
 <h2>In Closing</h2>
-
 <p>As you see, there is no way to get rid of <code>IDependencyResolver</code> in the WebApi compared to MVC. It's a pity because it puts another burden on the developer to implement an interface that doesn't act as a composition root. In fact our composition root is resolved from the implementation of <code>IDependencyResolver</code> so it's a bit confusing. It's understandable from the point of view of ASP.NET team which wanted to make <code>IDependencyResolver</code> a central piece of IoC support in the WebApi framework but for me it presents some design flaws as the API is not clear enough which seams should be used and how exactly implement them.</p>
-
 <p>In the next post I'll do the test implementing it in IIS hosting environment.</p>
 
 
@@ -388,7 +501,7 @@ server.OpenAsync().Wait();</pre></td></tr></table>
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

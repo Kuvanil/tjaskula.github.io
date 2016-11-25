@@ -91,127 +91,206 @@
 
 <div class="row">
 <div class="medium-8 columns">
-
 <p>In my last post, I showed you <a href="http://jaskula.fr//blog/2013/07-26-configure-structuremap-in-asp-net-webapi-to-play-nicely-with-hyprlinkr/index.html">how to configure ASP.NET WebApi, StructureMap and HyprLinkr</a>.</p>
-
 </div>
 </div>
-
 <!-- more -->
-
 <p>Today I would like to show you how to use <a href="https://github.com/ploeh/Hyprlinkr">HyprLinkr</a> with <a href="http://attributerouting.net/">AttributeRouting</a>. HyprLinkr works with the standard route configuration created by the Visual Studio project template (route named "API Default"). If you would like to make it work with another routing framework you have to tweak somehow HyprLinkr. Hopefully, the API is very developer-friendly and Mark Seemann which is the creator of HyprLinkr has provided some means for doing it very easily. For those who don't know AttributeRouting, it allows to define route templates in attributes directly on the controllers and actions. It allows some extra features like hierarchical route definition and so on.</p>
-
 <h2>Usage context</h2>
-
 <p>Once you've downloaded and configured AttributeRouting inside your WebApi application, your controllers might look something like this :</p>
-
-<table class="pre"><tr><td><pre lang="csharp">[RoutePrefix(<span class="s">"api/rest"</span>)]
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+<span class="l">26: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">[RoutePrefix(<span class="s">"api/rest"</span>)]
 <span class="k">public</span> <span class="k">class</span> ItemsController <span class="o">:</span> ApiController
 {
-    <span class="k">private</span> <span class="k">readonly</span> IItemsRepository _itemsRepository;
-    <span class="k">private</span> <span class="k">readonly</span> IResourceLinker _resourceLinker;
+  <span class="k">private</span> <span class="k">readonly</span> IItemsRepository _itemsRepository;
+  <span class="k">private</span> <span class="k">readonly</span> IResourceLinker _resourceLinker;
 
-    <span class="k">public</span> ItemsController(IItemsRepository itemsRepository, 
-                            IResourceLinker resourceLinker)
-    {
-        <span class="k">if</span> (itemsRepository <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
-            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"itemsRepository"</span>);
-        <span class="k">if</span> (resourceLinker <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
-            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"resourceLinker"</span>);
+  <span class="k">public</span> ItemsController(IItemsRepository itemsRepository, 
+              IResourceLinker resourceLinker)
+  {
+    <span class="k">if</span> (itemsRepository <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+      <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"itemsRepository"</span>);
+    <span class="k">if</span> (resourceLinker <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+      <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"resourceLinker"</span>);
 
-        _itemsRepository <span class="o">=</span> itemsRepository;
-        _resourceLinker <span class="o">=</span> resourceLinker;
-    }
+    _itemsRepository <span class="o">=</span> itemsRepository;
+    _resourceLinker <span class="o">=</span> resourceLinker;
+  }
 
-    [GET(<span class="s">"items/{id}/{config?}"</span>)]
-    <span class="k">public</span> ItemRepresentation GetItem(<span class="k">int</span> id, <span class="k">string</span> config <span class="o">=</span> <span class="s">"small"</span>)
-    {
-        <span class="k">var</span> uri <span class="o">=</span> _resourceLinker.GetUri&lt;ItemsController&gt;(
-                a <span class="o">=</span><span class="o">&gt;</span> a.GetRelatedItems(id, config, 1, 15)).ToString();
-        <span class="k">return</span> _itemsRepository.GetItem(id, config);
-    }
-}</pre></td></tr></table>
-
+  [GET(<span class="s">"items/{id}/{config?}"</span>)]
+  <span class="k">public</span> ItemRepresentation GetItem(<span class="k">int</span> id, <span class="k">string</span> config <span class="o">=</span> <span class="s">"small"</span>)
+  {
+    <span class="k">var</span> uri <span class="o">=</span> _resourceLinker.GetUri&lt;ItemsController&gt;(
+        a <span class="o">=</span><span class="o">&gt;</span> a.GetRelatedItems(id, config, <span class="n">1</span>, <span class="n">15</span>)).ToString();
+    <span class="k">return</span> _itemsRepository.GetItem(id, config);
+  }
+}
+</code></pre></td></tr></table>
 <h2>Tweaking of HyprLinkr</h2>
-
 <p>If you recall from <a href="http://jaskula.fr/blog/2013/07-26-configure-structuremap-in-asp-net-webapi-to-play-nicely-with-hyprlinkr/index.html">my previous post</a> StructureMap is configured to inject <code>IResourceLinker</code> in order to resolve url for hypermedia links. However with AttributeRouting it won't work. For that we need to implement our own <code>IRouteDispatcher</code> interface and to provide the implementation to the <code>IResourceLinker</code> instance being resolved by StructureMap. Here's the implementation of <code>IRouteDispatcher</code> for AttributeRouting framework :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">class</span> AttributeRoutingRouteDispatcher <span class="o">:</span> IRouteDispatcher
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+<span class="l">26: </span>
+<span class="l">27: </span>
+<span class="l">28: </span>
+<span class="l">29: </span>
+<span class="l">30: </span>
+<span class="l">31: </span>
+<span class="l">32: </span>
+<span class="l">33: </span>
+<span class="l">34: </span>
+<span class="l">35: </span>
+<span class="l">36: </span>
+<span class="l">37: </span>
+<span class="l">38: </span>
+<span class="l">39: </span>
+<span class="l">40: </span>
+<span class="l">41: </span>
+<span class="l">42: </span>
+<span class="l">43: </span>
+<span class="l">44: </span>
+<span class="l">45: </span>
+<span class="l">46: </span>
+<span class="l">47: </span>
+<span class="l">48: </span>
+<span class="l">49: </span>
+<span class="l">50: </span>
+<span class="l">51: </span>
+<span class="l">52: </span>
+<span class="l">53: </span>
+<span class="l">54: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">class</span> AttributeRoutingRouteDispatcher <span class="o">:</span> IRouteDispatcher
 {
-    <span class="k">private</span> <span class="k">readonly</span> HttpRequestMessage _httpRequestMessage;
+  <span class="k">private</span> <span class="k">readonly</span> HttpRequestMessage _httpRequestMessage;
 
-    <span class="k">public</span> AttributeRoutingRouteDispatcher(
-                HttpRequestMessage httpRequestMessage)
+  <span class="k">public</span> AttributeRoutingRouteDispatcher(
+        HttpRequestMessage httpRequestMessage)
+  {
+    <span class="k">if</span> (httpRequestMessage <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+      <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"httpRequestMessage"</span>);
+
+    _httpRequestMessage <span class="o">=</span> httpRequestMessage;
+  }
+
+  <span class="k">public</span> Rouple Dispatch(MethodCallExpression method, 
+          IDictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt; routeValues)
+  {
+    <span class="k">if</span> (method <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
+      <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"method"</span>);
+
+    <span class="k">var</span> newRouteValues <span class="o">=</span> 
+        <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;(routeValues);
+
+    <span class="k">var</span> controllerName <span class="o">=</span> method
+      .Object
+      .Type
+      .Name
+      .ToLowerInvariant()
+      .Replace(<span class="s">"controller"</span>, <span class="s">""</span>);
+    newRouteValues[<span class="s">"controller"</span>] <span class="o">=</span> controllerName;
+
+    <span class="k">var</span> attributeRoute <span class="o">=</span> method.Method
+          .GetCustomAttributes(<span class="k">true</span>)
+          .Cast&lt;HttpRouteAttribute&gt;()
+          .FirstOrDefault();
+
+    <span class="k">string</span> routeName <span class="o">=</span> <span class="k">null</span>;
+
+    <span class="k">if</span> (attributeRoute <span class="o">!</span><span class="o">=</span> <span class="k">null</span>)
     {
-        <span class="k">if</span> (httpRequestMessage <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
-            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"httpRequestMessage"</span>);
-
-        _httpRequestMessage <span class="o">=</span> httpRequestMessage;
+      <span class="k">const</span> <span class="k">string</span> patterToMatch <span class="o">=</span> <span class="s">"(:(.*?)*|(?)*)}"</span>;
+      <span class="k">var</span> strippedFromTokensUrl <span class="o">=</span> 
+        Regex.Replace(attributeRoute.RouteUrl, patterToMatch, <span class="s">"}"</span>);
+      <span class="k">var</span> matchedRoute <span class="o">=</span> 
+        _httpRequestMessage.GetConfiguration()
+          .Routes.FirstOrDefault(x <span class="o">=</span><span class="o">&gt;</span> 
+            x.RouteTemplate.Contains(strippedFromTokensUrl)) 
+            <span class="k">as</span> HttpAttributeRoute;
+      <span class="k">if</span> (matchedRoute <span class="o">!</span><span class="o">=</span> <span class="k">null</span>) 
+        routeName <span class="o">=</span> matchedRoute.RouteName;
     }
 
-    <span class="k">public</span> Rouple Dispatch(MethodCallExpression method, 
-                    IDictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt; routeValues)
-    {
-        <span class="k">if</span> (method <span class="o">=</span><span class="o">=</span> <span class="k">null</span>) 
-            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(<span class="s">"method"</span>);
-
-        <span class="k">var</span> newRouteValues <span class="o">=</span> 
-                <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;(routeValues);
-
-        <span class="k">var</span> controllerName <span class="o">=</span> method
-            .Object
-            .Type
-            .Name
-            .ToLowerInvariant()
-            .Replace(<span class="s">"controller"</span>, <span class="s">""</span>);
-        newRouteValues[<span class="s">"controller"</span>] <span class="o">=</span> controllerName;
-
-        <span class="k">var</span> attributeRoute <span class="o">=</span> method.Method
-                    .GetCustomAttributes(<span class="k">true</span>)
-                    .Cast&lt;HttpRouteAttribute&gt;()
-                    .FirstOrDefault();
-
-        <span class="k">string</span> routeName <span class="o">=</span> <span class="k">null</span>;
-
-        <span class="k">if</span> (attributeRoute <span class="o">!</span><span class="o">=</span> <span class="k">null</span>)
-        {
-            <span class="k">const</span> <span class="k">string</span> patterToMatch <span class="o">=</span> <span class="s">"(:(.*?)*|(?)*)}"</span>;
-            <span class="k">var</span> strippedFromTokensUrl <span class="o">=</span> 
-                Regex.Replace(attributeRoute.RouteUrl, patterToMatch, <span class="s">"}"</span>);
-            <span class="k">var</span> matchedRoute <span class="o">=</span> 
-                _httpRequestMessage.GetConfiguration()
-                    .Routes.FirstOrDefault(x <span class="o">=</span><span class="o">&gt;</span> 
-                        x.RouteTemplate.Contains(strippedFromTokensUrl)) 
-                        <span class="k">as</span> HttpAttributeRoute;
-            <span class="k">if</span> (matchedRoute <span class="o">!</span><span class="o">=</span> <span class="k">null</span>) 
-                routeName <span class="o">=</span> matchedRoute.RouteName;
-        }
-
-        <span class="k">return</span> <span class="k">new</span> Rouple(routeName, newRouteValues);
-    }
-}</pre></td></tr></table>
-
+    <span class="k">return</span> <span class="k">new</span> Rouple(routeName, newRouteValues);
+  }
+}
+</code></pre></td></tr></table>
 <p>We need to return a <code>Rouple</code> object with a routeName and route values in order to allow HyprLinkr to generate the right url. As input we only need an instance of <code>HttpRequestMessage</code>. This is necessary to access the configured routes in the <code>RouteTable</code>. When the application is being run for the first time, the AttributeRouting framework scans all the controllers and extracts url templates from the attributes. Then it adds these to the Route table of WebApi configuration object. We need to match the template url extracted from the controller action attribute to the route configured in the route table and then get its name to construct our <code>Rouple</code> object. In order to match an url to the attribute's template we have to apply a regex that strips some special characters from the template (type definitions like ":int?", optional parameter "?", etc.)</p>
-
 <h2>Configuring all</h2>
-
 <p>In order to construct our rouple object in the custom dispatcher, we need to tell to AttributeRouting framework to generate route names for each registered route (by default this is not done and we can't use it with HyprLinkr). The configuration can be done in WebApi registration section. <code>AutoGenerateRouteNames</code> should be set to <code>true</code> :</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">var</span> configuration <span class="o">=</span> <span class="k">new</span> HttpWebConfiguration
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">var</span> configuration <span class="o">=</span> <span class="k">new</span> HttpWebConfiguration
 {
         AutoGenerateRouteNames <span class="o">=</span> <span class="k">true</span>
 };
 configuration.AddRoutesFromAssembly(Assembly.GetExecutingAssembly());
-config.Routes.MapHttpAttributeRoutes(configuration);</pre></td></tr></table>
-
+config.Routes.MapHttpAttributeRoutes(configuration);
+</code></pre></td></tr></table>
 <p>The last step consist of configuring StructureMap for passing the right dependencies inside our instance of <code>IResourceLinker</code> :</p>
-
-<table class="pre"><tr><td><pre lang="csharp">For&lt;IResourceLinker&gt;()
-    .Use(ctx <span class="o">=</span><span class="o">&gt;</span> <span class="k">new</span> RouteLinker(ctx.GetInstance&lt;HttpRequestMessage&gt;(), 
-                ctx.GetInstance&lt;AttributeRoutingRouteDispatcher&gt;()));</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">For&lt;IResourceLinker&gt;()
+  .Use(ctx <span class="o">=</span><span class="o">&gt;</span> <span class="k">new</span> RouteLinker(ctx.GetInstance&lt;HttpRequestMessage&gt;(), 
+        ctx.GetInstance&lt;AttributeRoutingRouteDispatcher&gt;()));
+</code></pre></td></tr></table>
 <h2>In closing</h2>
-
 <p>As you noticed, it's very straightforward to adapt HyprLinkr to work with other routes definition frameworks in WebApi. AttribouteRouting will be the next important feature of WebApi Next (V2) so it's important to know how to make it work with HyprLinkr if you're using it as your hypermedia links generating framework.</p>
 
 
@@ -308,7 +387,7 @@ config.Routes.MapHttpAttributeRoutes(configuration);</pre></td></tr></table>
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

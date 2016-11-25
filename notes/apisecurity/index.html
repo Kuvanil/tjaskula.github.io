@@ -89,59 +89,41 @@
               
 
 <h1>API Security</h1>
-
 <h2>Protocols</h2>
-
 <h3>OpenId</h3>
-
 <h4>OpenId Connect</h4>
-
 <ul>
 <li>Extends OAuth 2.0</li>
 <li>Describes user_info, ID token based on JWT</li>
 <li>Web friendly and modern alternative to SAML web browser SSO</li>
 </ul>
-
 <h2>OAuth</h2>
-
 <ul>
 <li><a href="http://tools.ietf.org/wg/oauth/">Resources and specifications</a></li>
 </ul>
-
 <h2>Token based authentication</h2>
-
 <p>Why?</p>
-
 <ul>
 <li>Stateless and scalable servers</li>
 <li>Mobile application ready</li>
 <li>Pass authentication to other applications</li>
 <li>Extra security</li>
 </ul>
-
 <p>Details about how <a href="https://scotch.io/tutorials/the-ins-and-outs-of-token-based-authentication">tokens came around</a></p>
-
 <p>As web is stateless...</p>
-
 <p>Before we had</p>
-
 <ul>
 <li>a server that had to remeber user details in session and send a cookie</li>
 </ul>
-
 <p>Problems:</p>
-
 <ul>
 <li>Sessions need to be stored by the server (scalability and performance problems)</li>
 <li>Scalability</li>
 <li>CORS: As we want to expand our application to let our data be used across multiple mobile devices, we have to worry about cross-origin resource sharing (CORS). When using AJAX calls to grab resources from another domain (mobile to our API server), we could run into problems with forbidden requests.</li>
 <li>CSRF: We will also have protection against cross-site request forgery (CSRF). Users are susceptible to CSRF attacks since they can already be authenticated with say a banking site and this could be taken advantage of when visiting other sites.</li>
 </ul>
-
 <p><strong>Token based authentication is stateless</strong>. We are not storing any information about our user on the server or in a session.</p>
-
 <p>Benefits of tokens</p>
-
 <ul>
 <li>Stateless and Scalable</li>
 <li>Security</li>
@@ -149,13 +131,9 @@
 <li>Multiple Platforms and Domains by <code>Access-Control-Allow-Origin: *</code></li>
 <li>Standards Based (JSON Web Tokens)</li>
 </ul>
-
 <h3>JSON Web Tokens</h3>
-
 <p><a href="https://scotch.io/tutorials/the-anatomy-of-a-json-web-token">Details</a></p>
-
 <p>Whar are JSON Web Tokens</p>
-
 <ul>
 <li>JSON Web Tokens work across different programming languages</li>
 <li>JWTs are self-contained</li>
@@ -220,7 +198,7 @@
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">

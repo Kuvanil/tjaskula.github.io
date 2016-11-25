@@ -91,73 +91,58 @@
 
 <div class="row">
 <div class="medium-8 columns">
-
 <p>This is the next part of my 2 weeks trip from OOP to FP programming with F#.</p>
-
 </div>
 </div>
-
 <!-- more -->
-
 <p>You would say what's the big deal about sharing code between C# and F# if both of them rely on the .NET Framework and are compiled to the same IL? And in fact there is no a big deal. My concern is about how to do it properly from the architectural point of view.</p>
-
 <p>In <a href="http://jaskula.fr//blog/2013/08-14-my-2-weeks-trip-from-oop-to-fp-with-f/index.html">my last post</a> I made a gentle introduction to my first real world experience with F# development. In this part I would like to focus on the integration I had to made between my ASP.NET MVC project developed with C# and my recomendation engine alorithm written in F#.</p>
-
 <p>My first concern was about the kind of integration that would be needed from the business point of view. Technically I could use direct synchronous integration by using recommendation engine in process or relay on eventual consistency with use of queues or message buses, etc. From the business point of view, it would be better to have results as soon as the user makes a request. The point is that the recommendation engine has to be fast enough to allow this feature. Otherwise the user would have to wait too long time. With eventual consistency it would be also possible, but I would have to tweak some GUI screens to handle it properly.</p>
-
 <p>Let's <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a>. I always like simplest and most pragmatic take on the whole problem. Before I could make my opinion I had to benchmark my recommendation engine in terms of calculation speed. I generated a test data about 600 000 items (which is 30 times more what I expect to have in production) to make the recommendations on. The overall calculation process was around 0.5s which is fast enough to consider a direct synchronous integration. Before having 600 000 items in production I would have time to make another implementation if needed.</p>
-
 <p>Let's look how the integration could be made:</p>
-
 <img src="img/ArchiIntegrationCSharpFSharp.PNG" alt="C# with F# integrartion" width="700px">
-
 <p>Let's look on the left side of the schema. It's a classic hexagonal architecture (even if I drew the circles) that you've already seen in many projects. The domain is in the center of application and everything is wired using <a href="http://en.wikipedia.org/wiki/Dependency_inversion_principle">dependency inversion principle</a>. I'm using StructureMap for wiring all the dependencies. In my domain I've defined an interface <code>ICalculator</code> which is supposed to be implemented by all kinds of calculators for recommendation engine. This simple interface looks like this:</p>
-
-<table class="pre"><tr><td><pre lang="csharp"><span class="k">public</span> <span class="k">interface</span> ICalculator
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp"><span class="k">public</span> <span class="k">interface</span> ICalculator
 {
-    <span class="k">void</span> DoCalculation(<span class="k">int</span> itemId);
-}</pre></td></tr></table>
-
+  <span class="k">void</span> DoCalculation(<span class="k">int</span> itemId);
+}
+</code></pre></td></tr></table>
 <p>It's supposed to make a recommendation based on an item.</p>
-
 <p>The more interesting part is on the right side with F# implementation. As you noticed, the architecture is quite different from the standard hexagonal architecture from the left side. Here are some reasons:</p>
-
 <ol>
 <li>I've never used F# in real world scenarios except playing around with "Hello world" examples. But I have a gut feelings that standard hexagonal architecture based on DI principle is just a nonsense in the FP world.</li>
 <li>The composition in F# is made on the function level and not on the object (component) level. So you deal differently with the coupling between layers.</li>
 <li>The Facade is supposed to provide an entry point for the C#/F# integration. It's responsibility is also to coordinate internal functionalities from Domain and Infrastructure layers.</li>
 </ol>
-
 <p>So the overall architecture is quite straightforward and simple. I would like to notice that while for the MVC each layer is contained in the separate assembly, for F# every layer is defined in the same assembly. I haven't found any reason to make it more complicated.</p>
-
 <p>We have a big picture of integration points. Let's look how the calculator is implemented in F#:</p>
-
-<table class="pre"><tr><td class="lines"><pre class="fssnip">
-<span class="l">1: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
 <span class="l">6: </span>
-</pre>
-</td>
-<td class="snippet"><pre class="fssnip">
-<span class="k">type</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">Calculator</span>() <span class="o">=</span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="t">Calculator</span>() <span class="o">=</span>
 
 <span class="k">interface</span> <span class="i">ICalculator</span> <span class="k">with</span>
     <span class="k">member</span> <span class="i">v</span><span class="o">.</span><span class="i">DoCalculation</span> <span class="i">itemId</span> <span class="o">=</span>
         <span class="c">// here will be called functions for doing actual calculations</span>
-        ()</pre>
-</td>
+        ()
+</code></pre></td>
 </tr>
 </table>
-
 <p>Since I want to keep things simple and the calculation will be done in process I could inject my <code>ICalculator</code> instance into MVC controller by configuring my StructureMap container like this:</p>
-
-<table class="pre"><tr><td><pre lang="csharp">For&lt;ICalculator&gt;().Use(ctx <span class="o">=</span><span class="o">&gt;</span> ctx.GetInstance&lt;Calculator&gt;());</pre></td></tr></table>
-
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="csharp">For&lt;ICalculator&gt;().Use(ctx <span class="o">=</span><span class="o">&gt;</span> ctx.GetInstance&lt;Calculator&gt;());
+</code></pre></td></tr></table>
 <p>Once you've done it you can declare dependency in MVC Controller constructor and the F# implementation will be injected.</p>
-
 <p>I don't know if it's the best way to integrate it that way but it works for me and it's really simple. In the next post I'll focus on the internal architecture of my F# application and how I tried to achieve decoupling and testability.</p>
 
 <div class="tip" id="fs1">Multiple items<br />type Calculator =<br />&#160;&#160;new : unit -&gt; Calculator<br /><br />Full name: sharingcodebetweencandf.Calculator<br /><br />--------------------<br />new : unit -&gt; Calculator</div>
@@ -255,7 +240,7 @@
                   <h4>Blog tags</h4>
                   <p>
 
-                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/di/">di</a>&nbsp;(5),                     <a href="http://jaskula.fr//blog/tag/ioc/">ioc</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/aspdotnet-web-api/">asp.net web api</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/architecture/">architecture</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/hyprlinkr/">hyprlinkr</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/structuremap/">structuremap</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/ndepend/">ndepend</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/teamcity/">teamcity</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsblog/">fsblog</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/announce/">announce</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dotnet/">.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/csharp/">c#</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/oop/">oop</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/attributerouting/">attributerouting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/rest/">rest</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/restful-api/">restful api</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/aspdotnet/">asp.net</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/tpl/">tpl</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/castledotwindsor/">castle.windsor</a>&nbsp;(1)                  </p>
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(7),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/machine-learning/">machine learning</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-science/">data science</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/mathnetdotnumerics/">mathnet.numerics</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/fsharpdotcharting/">fsharp.charting</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/xplot/">xplot</a>&nbsp;(1)                  </p>
 
                   <h4>Blog archives</h4>
                     <a href="http://jaskula.fr//blog/archive/november-2016/index.html">
