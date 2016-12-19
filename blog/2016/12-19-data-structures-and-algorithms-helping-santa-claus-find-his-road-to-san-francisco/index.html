@@ -1,0 +1,999 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Tomasz Jaskula's blog</title>
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/bootstrap/less/bootstrap.css">
+    <link rel="stylesheet" href="http://jaskula.fr//stylesheets/pygment_trac.css">
+    <link rel="shortcut icon" href="http://jaskula.fr//favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="F# implementation of Dijkstra shortest path algorithm and mutable priority queue data structure" />
+    <meta name="author" content="Tomasz Jaskuła" />
+    <meta name="copyright" content="Tomasz Jaskuła 2015" />
+
+    <!-- Twitter cards -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:creator" content="@tjaskula">
+    <meta name="twitter:title" content="Data structures and algorithms - helping Santa Claus find his road to San Francisco">
+    <meta name="twitter:description" content="F# implementation of Dijkstra shortest path algorithm and mutable priority queue data structure">
+    
+    <!-- End Twitter cards -->
+
+    <link rel="alternate" type="application/rss+xml" title="Tomasz Jaskula's blog" href="http://jaskula.fr/rss.xml" />
+
+      <script>
+          (function(d) {
+              var config = {
+                          kitId: 'xfo7ulp',
+                          scriptTimeout: 3000
+                      },
+                      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='//use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+          })(document);
+      </script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- FSharp.Formatting Styles --> 
+    <link rel="stylesheet" type="text/css" media="screen" href="http://jaskula.fr//fsharp.formatting/tooltips.css" />
+  	<script type="text/javascript" src="http://jaskula.fr//fsharp.formatting/tooltips.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-58152976-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+
+  </head>
+  <body>
+
+	  <header>
+
+        <div class="navbar-header">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <h1><a class="" href="http://jaskula.fr//index.html">Tomasz Jaskula's blog</a>
+                <small>Improve signal, reduce noise = use F#</small>
+            </h1>
+        </div>
+
+        <nav class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+              <li>
+                  <a href="http://jaskula.fr//blog/">Blog</a>
+              </li>
+              <li>
+                  <A HREF="http://jaskula.fr//talks/">Talks</A>
+              </li>
+              <!-- <li class="active">
+                    <a href="http://jaskula.fr//talks/">Talks</a>
+              </li> -->
+          </ul>
+        </nav>
+
+    </header>
+
+    <div class="container">
+      <div class="row">
+        <main class="col-lg-8">
+              
+<h1>Data structures and algorithms - helping Santa Claus find his road to San Francisco</h1>
+
+<div class="row">
+<div class="medium-8 columns">
+<p>It's almost a Christmas time and very soon Santa Claus will pull out his sleigh along with the herd of reindeers. But how his gonna find his way to all the places he is supposed to visit? Well, asuming his not going to buy any GPS device we will try to help him out writing the shortest path algorithm from scratch with the underlying data structures. The goal of this article is to understand the nitty-gritty details about the algorithms and underlying data structures and not how to write code in functional style. That's why I'm not going to use the functional data structures and style (most of the time) but bear with me, this is just to set everyone one on the same page and give the basic understanding of the topic. I want also to give some intuition about the choices that has been made in terms of running time and space complexity.</p>
+</div>
+</div>
+<!-- more -->
+<p>I mentioned Santa Claus but what about San Francisco? To check the correctness of my algorithm I wanted to run it against the real datasets with millions of nodes and edges. I googled for some public datasets and found the "<a href="http://www.dis.uniroma1.it/challenge9/competition.shtml">9th DIMACS Implementation Challenge - Shortest Paths</a>" California and Nevada large road networks datasets. Perfect for the task at hand. So let's say Santa Claus has to find his way to Golden Gate Bridge in San Francisco from any point in California and Nevada. Of course following the roads on his sleigh (yeah, this kills the whole magic).</p>
+<h2>The shortest path algorithm (part I)</h2>
+<p>The road network can be seen as the big graph of nodes connected by the edges. As many of you know, the most popular algorithm to find the shortest path between two nodes in a graph is <a href="https://en.wikipedia.org/wiki/Dijkstra's_algorithm">Dijkstra algorithm</a>. The algorithm exists in many variants; Dijkstra's original variant found the shortest path between two nodes, but a more common variant fixes a single node as the "source" node and finds shortest paths from the source to all other nodes in the graph. This is the approach I'm going to use in this article.</p>
+<p>Let's look at the example from <a href="https://en.wikipedia.org/wiki/Dijkstra's_algorithm">Dijkstra algorithm</a> wikipedia page:</p>
+<p><img src="img/Dijkstra_Animation.gif" alt="Dijkstra algorithm" /></p>
+<p>From the animated image below we see that the "source" node <strong>a (1)</strong> is fixed and distances are calculated to each node in the graph. The shortest path to the destination node <strong>b (5)</strong> is calculated and is equlat to <strong>20</strong>. It passes through the nodes <strong>3</strong> and <strong>6</strong> which is the shortest path indeed.</p>
+<h3>The pseudo code</h3>
+<p>The pseudo code of Dijkstra algorithm looks something like this:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">initialize</span> <span class="i">graph</span>
+<span class="i">initialize</span> <span class="i">Q</span> <span class="c">// some structure to store the grpah nodes</span>
+<span class="i">Q</span><span class="o">.</span><span class="i">insertAll</span>(<span class="i">graph</span><span class="o">.</span><span class="i">getVertices</span>())
+
+<span class="k">while</span> (<span class="i">pq</span> <span class="i">is</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">not</span> <span class="i">empty</span>)
+  <span class="i">node</span> <span class="o">=</span> <span class="i">Q</span><span class="o">.</span><span class="i">extract_minimum</span>() <span class="c">// this determines the speed of the algorithm</span>
+  <span class="i">edges</span> <span class="o">=</span> <span class="i">node</span><span class="o">.</span><span class="i">getEdges</span>()
+
+  <span class="k">for</span> <span class="i">all</span> <span class="i">edges</span> {
+    <span class="i">destination</span> <span class="o">=</span> <span class="i">edge</span><span class="o">.</span><span class="i">getDestination</span>()
+    <span class="i">newDistance</span> <span class="o">=</span> <span class="i">edge</span><span class="o">.</span><span class="i">getLength</span>() <span class="o">+</span> <span class="i">node</span><span class="o">.</span><span class="i">getDistance</span>()
+    <span class="k">if</span> (<span class="i">newDistance</span> <span class="o">&lt;</span> <span class="i">destination</span><span class="o">.</span><span class="i">getDistance</span>()) {
+      <span class="i">destination</span><span class="o">.</span><span class="i">setShortestDistance</span>(<span class="i">newDistance</span>)
+      <span class="i">Q</span><span class="o">.</span><span class="i">decrease_key</span>(<span class="i">destination</span>) <span class="c">// this also determines the speed of the algorithm</span>
+</code></pre></td>
+</tr>
+</table>
+<p>When inserting the graph into the structure <code>Q</code> the starting node's shortes distance is set to <code>0.0</code> while the other nodes' shortest distances are set to <code>infinity</code>. Remove from the <code>Q</code> the min element and explore all of it's edges. Compare the shortest distances with all adjacent nodes and if any distance is less than the shortest distance on the current node, update adjacent node shortest distance inside the <code>Q</code>. Continue until <code>Q</code> is not empty. Nodes which got no edges will finish with the shortest distance of infinity because it is not possible "get to them" from the starting node. However, they will be still removed from the <code>Q</code>.</p>
+<h3>The running time</h3>
+<p>The original variant of the algorithm uses <strong>linked list</strong> or an <strong>array</strong> to store all the nodes of the graph. The <strong>extract_minimum</strong> operation is simply a linear search through all nodes (vertices) in <code>Q</code> and in that case the running time is <span class="math">\(O(|V|^2)\)</span> where <span class="math">\(|V|\)</span> is the number of nodes (vertices).</p>
+<p>Depending on how <code>Q</code> is implemented the running time can be <span class="math">\(O(|E| \cdot T_{dk} + |V| \cdot T_{em})\)</span> where <span class="math">\(T_{dk}\)</span> and <span class="math">\(T_{em}\)</span> are the complexities of the <strong>decrease_key</strong> and <strong>extract_minimum</strong> operations in <code>Q</code> respectively.</p>
+<p>Now that we have a basic understanding on how the Dijkstra shortest path aglorithm works we need to implement our data structure <code>Q</code>. One of the approaches of speeding up the algorithm is to use a <em></em>Priority Queue" and that is what I'm going to implement next.</p>
+<h2>Priority Queue</h2>
+<p>What is a Queue? A queue is an abstract data type supporting two operation <code>Enqueue</code> to the rear of the collection of elements and <code>Dequeue</code> from the front of the collection of elements. This makes it a FIFO data structure, the first element added to the queue will be the first one to be removed.</p>
+<p>What is a Priority Queue? A priority queue is a generalization of a queue where each element is assigned a priority and elements come out in order by priority.</p>
+<p>Typical uses cases are:</p>
+<ul>
+<li>Scheduling jobs</li>
+<li>Dijkstra’s algorithm: finding a shortest path in a graph</li>
+<li>Prim's algorithm: constructing a minimum spanning tree of a graph</li>
+<li>Huffman's algorithm: constructing an optimum prefix-free encoding of a string</li>
+<li>Heap sort: sorting a given sequence</li>
+</ul>
+<p>Supported operations:</p>
+<ul>
+<li><code>Insert(p)</code> adds a new element with a priority <code>p</code>.</li>
+<li><code>Extract()</code> extracts an element with the minimum or maximum priority (depending if it's a Min or Max priority queue)</li>
+</ul>
+<p>For simplicity I'm using in my code <code>Enqueue</code> and <code>Dequeue</code> respectively.</p>
+<p>Additionaly others operations like <code>TryDequeue()</code>, <code>Delete(element)</code> and <code>ChangePriority(p)</code> can be implemented.</p>
+<h3>Naive implementation considerations</h3>
+<p>If the priority queue is implemented with <strong>unsorted array/list</strong>, what are the costs of different operations?</p>
+<ul>
+<li><code>Enqueue(e)</code> adds <code>e</code> to the end. Running time <span class="math">\(O(1)\)</span></li>
+<li><code>Dequeue()</code> scans the array/list for the min/max element. Running time <span class="math">\(O(n)\)</span></li>
+</ul>
+<p>If the priority queue is implemented with <strong>sorted array</strong>, what are the costs of different operations?</p>
+<ul>
+<li>
+<code>Enqueue(e)</code> finds a position for <code>e</code> <span class="math">\(O(\log n)\)</span> by using binary search, shift all elements to the
+right of it by 1 <span class="math">\(O(n)\)</span>, insert <code>e</code> <span class="math">\(O(1)\)</span>. Running time <span class="math">\(O(n)\)</span>
+</li>
+<li><code>Dequeue()</code> Extracts the last element. Running time <span class="math">\(O(1)\)</span></li>
+</ul>
+<p>If the priority queue is implemented with <strong>sorted list</strong>, what are the costs of different operations?</p>
+<ul>
+<li><code>Enqueue(e)</code> finds a position for <code>e</code> <span class="math">\(O(n)\)</span> cannot use binary search, insert <code>e</code> <span class="math">\(O(1)\)</span>. Running time <span class="math">\(O(n)\)</span></li>
+<li><code>Dequeue()</code> Extracts the last element. Running time <span class="math">\(O(1)\)</span></li>
+</ul>
+<p>Is there a better data structure? Yes, <strong>binary heap</strong></p>
+<ul>
+<li><code>Enqueue(e)</code> Running time <span class="math">\(O(\log n)\)</span></li>
+<li><code>Dequeue()</code> Running time <span class="math">\(O(\log n)\)</span></li>
+</ul>
+<h3>Priority Queue with Binary Heap</h3>
+<p>Binary max-heap is a binary tree (each node has zero, one, or two children) where the value of each node is at least the values of
+its children. In other words, for each edge of the tree, the value of the parent is at least the value of the child. Binary min-heap is the other way round.</p>
+<p>My implementation should support the following operations</p>
+<ul>
+<li><code>TryDequeue()</code> Retruns the root element without removing the node. Running time <span class="math">\(O(1)\)</span></li>
+<li><code>Enqueue e</code> Attach a new node to any leaf. This however my violate the heap property. To fix this we let the new element to <code>siftUp</code>.</li>
+<li><code>private siftUp i</code> it swaps the problematic node (indexed <code>i</code>) with its parent until the property of the heap is satisfied. Invariant: heap property is violated on at most one edge. This edge gets closer to the root while sifting-up. Running time <span class="math">\(O(H)\)</span> where <span class="math">\(H\)</span> is the height of the tree.</li>
+<li><code>Dequeue()</code> replace the root with any leaf but again this may viloate the heap property. To fix it, we let the problematic node <code>siftDown</code>.</li>
+<li><code>private siftDown i</code> it swaps the problematic node with larger child until the heap property is satisfied. We swap with the larger child which automatically fixes one of the two bad edges. Running time <span class="math">\(O(H)\)</span> where <span class="math">\(H\)</span> is the height of the tree.</li>
+</ul>
+<p>As most of the operations works in time <span class="math">\(O(H)\)</span> where <span class="math">\(H\)</span> is the height of the tree, we definitely want a tree to be shallow.</p>
+<p>How to keep a tree shallow? Making it a complete binary tree. A binary tree is complete if all its levels are filled except possibly the last one which is filled from left to right. <strong>The first advantage</strong> is that a complete binary tree with <span class="math">\(n\)</span> nodes has height at most <span class="math">\(O(\log n)\)</span>. <strong>The second advantage</strong> is that it can be easily stored as array. How to find the <strong>parent</strong>, <strong>leftChild</strong> and <strong>rightChild</strong> of the node stored in array? This is the simple formulas for <code>0</code> based indexed array:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">parent</span> <span class="i">i</span> <span class="o">=</span> (<span class="i">i</span> <span class="o">-</span> <span class="n">1</span>) <span class="o">/</span> <span class="n">2</span>
+<span class="k">let</span> <span class="i">leftChild</span> <span class="i">i</span> <span class="o">=</span> <span class="n">2</span> <span class="o">*</span> <span class="i">i</span> <span class="o">+</span> <span class="n">1</span>
+<span class="k">let</span> <span class="i">rightChild</span> <span class="i">i</span> <span class="o">=</span> <span class="n">2</span> <span class="o">*</span> <span class="i">i</span> <span class="o">+</span> <span class="n">2</span>
+</code></pre></td>
+</tr>
+</table>
+<p>This is the mutable implementation of priority queue using <code>System.Collections.Generic.List&lt;'T&gt;</code> (which is baked by an array):</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+<span class="l">26: </span>
+<span class="l">27: </span>
+<span class="l">28: </span>
+<span class="l">29: </span>
+<span class="l">30: </span>
+<span class="l">31: </span>
+<span class="l">32: </span>
+<span class="l">33: </span>
+<span class="l">34: </span>
+<span class="l">35: </span>
+<span class="l">36: </span>
+<span class="l">37: </span>
+<span class="l">38: </span>
+<span class="l">39: </span>
+<span class="l">40: </span>
+<span class="l">41: </span>
+<span class="l">42: </span>
+<span class="l">43: </span>
+<span class="l">44: </span>
+<span class="l">45: </span>
+<span class="l">46: </span>
+<span class="l">47: </span>
+<span class="l">48: </span>
+<span class="l">49: </span>
+<span class="l">50: </span>
+<span class="l">51: </span>
+<span class="l">52: </span>
+<span class="l">53: </span>
+<span class="l">54: </span>
+<span class="l">55: </span>
+<span class="l">56: </span>
+<span class="l">57: </span>
+<span class="l">58: </span>
+<span class="l">59: </span>
+<span class="l">60: </span>
+<span class="l">61: </span>
+<span class="l">62: </span>
+<span class="l">63: </span>
+<span class="l">64: </span>
+<span class="l">65: </span>
+<span class="l">66: </span>
+<span class="l">67: </span>
+<span class="l">68: </span>
+<span class="l">69: </span>
+<span class="l">70: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">PriorityQueue</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">T</span> <span class="k">when</span> <span class="o">&#39;</span><span class="i">T</span> <span class="o">:</span> <span class="i">comparison</span><span class="o">&gt;</span>(<span class="i">values</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">seq</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">T</span><span class="o">&gt;</span>, <span class="i">isDescending</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">bool</span>) <span class="o">=</span>
+    <span class="k">let</span> <span class="i">heap</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="i">Collections</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs6', 6)" onmouseover="showTip(event, 'fs6', 6)" class="i">Generic</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs7', 7)" onmouseover="showTip(event, 'fs7', 7)" class="i">List</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">T</span><span class="o">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs4', 8)" onmouseover="showTip(event, 'fs4', 8)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs5', 9)" onmouseover="showTip(event, 'fs5', 9)" class="i">Collections</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs6', 10)" onmouseover="showTip(event, 'fs6', 10)" class="i">Generic</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs7', 11)" onmouseover="showTip(event, 'fs7', 11)" class="i">List</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">T</span><span class="o">&gt;</span>(<span class="i">values</span>)
+
+    <span class="k">let</span> <span class="i">isGreater</span> <span class="i">x</span> <span class="i">y</span> <span class="o">=</span>
+        <span class="k">if</span> <span class="i">isDescending</span> <span class="k">then</span> <span class="i">x</span> <span class="o">&gt;</span> <span class="i">y</span> <span class="k">else</span> <span class="i">x</span> <span class="o">&lt;</span> <span class="i">y</span>
+
+    <span class="k">let</span> <span class="i">isLower</span> <span class="i">x</span> <span class="i">y</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs1', 12)" onmouseover="showTip(event, 'fs1', 12)" class="i">not</span> (<span class="i">isGreater</span> <span class="i">x</span> <span class="i">y</span>)
+
+    <span class="k">let</span> <span class="k">mutable</span> <span class="i">size</span> <span class="o">=</span> <span class="i">heap</span><span class="o">.</span><span class="i">Count</span>
+
+    <span class="k">let</span> <span class="i">shrinkHeap</span>() <span class="o">=</span>
+        <span class="k">let</span> <span class="i">shouldShrink</span> <span class="o">=</span> <span class="i">size</span> <span class="o">&lt;</span> <span class="i">heap</span><span class="o">.</span><span class="i">Count</span> <span class="o">/</span> <span class="n">2</span>
+        <span class="k">if</span> <span class="i">shouldShrink</span> <span class="k">then</span> <span class="i">heap</span><span class="o">.</span><span class="i">RemoveRange</span>(<span class="i">size</span>, <span class="i">heap</span><span class="o">.</span><span class="i">Count</span> <span class="o">-</span> <span class="i">size</span> <span class="o">-</span> <span class="n">1</span>)
+
+    <span class="k">let</span> <span class="i">parent</span> <span class="i">i</span> <span class="o">=</span> (<span class="i">i</span> <span class="o">-</span> <span class="n">1</span>) <span class="o">/</span> <span class="n">2</span>
+    <span class="k">let</span> <span class="i">leftChild</span> <span class="i">i</span> <span class="o">=</span> <span class="n">2</span> <span class="o">*</span> <span class="i">i</span> <span class="o">+</span> <span class="n">1</span>
+    <span class="k">let</span> <span class="i">rightChild</span> <span class="i">i</span> <span class="o">=</span> <span class="n">2</span> <span class="o">*</span> <span class="i">i</span> <span class="o">+</span> <span class="n">2</span>
+
+    <span class="k">let</span> <span class="i">swap</span> <span class="i">i</span> <span class="i">maxIndex</span> <span class="o">=</span>
+        <span class="k">let</span> <span class="i">temp</span> <span class="o">=</span> <span class="i">heap</span><span class="o">.</span>[<span class="i">i</span>]
+        <span class="i">heap</span><span class="o">.</span>[<span class="i">i</span>] <span class="o">&lt;-</span> <span class="i">heap</span><span class="o">.</span>[<span class="i">maxIndex</span>]
+        <span class="i">heap</span><span class="o">.</span>[<span class="i">maxIndex</span>] <span class="o">&lt;-</span> <span class="i">temp</span>
+
+    <span class="k">let</span> <span class="i">siftUp</span> <span class="i">i</span> <span class="o">=</span>
+        <span class="k">let</span> <span class="k">mutable</span> <span class="i">indx</span> <span class="o">=</span> <span class="i">i</span>
+        <span class="k">while</span> <span class="i">indx</span> <span class="o">&gt;</span> <span class="n">0</span> <span class="o">&amp;&amp;</span> <span class="i">isLower</span> <span class="i">heap</span><span class="o">.</span>[<span class="i">parent</span> <span class="i">indx</span>] <span class="i">heap</span><span class="o">.</span>[<span class="i">indx</span>] <span class="k">do</span>
+            <span class="i">swap</span> (<span class="i">parent</span> <span class="i">indx</span>) <span class="i">indx</span>
+            <span class="i">indx</span> <span class="o">&lt;-</span> <span class="i">parent</span> <span class="i">indx</span>
+
+    <span class="k">let</span> <span class="k">rec</span> <span class="i">siftDown</span> <span class="i">i</span> <span class="o">=</span>
+        <span class="k">let</span> <span class="i">l</span> <span class="o">=</span> <span class="i">leftChild</span> <span class="i">i</span>
+        <span class="k">let</span> <span class="i">r</span> <span class="o">=</span> <span class="i">rightChild</span> <span class="i">i</span>
+        <span class="k">let</span> <span class="i">maxIndexLeft</span> <span class="o">=</span> <span class="k">if</span> <span class="i">l</span> <span class="o">&lt;</span> <span class="i">size</span> <span class="o">&amp;&amp;</span> <span class="i">isGreater</span> <span class="i">heap</span><span class="o">.</span>[<span class="i">l</span>] <span class="i">heap</span><span class="o">.</span>[<span class="i">i</span>] <span class="k">then</span> <span class="i">l</span> <span class="k">else</span> <span class="i">i</span>
+        <span class="k">let</span> <span class="i">maxIndex</span> <span class="o">=</span> <span class="k">if</span> <span class="i">r</span> <span class="o">&lt;</span> <span class="i">size</span> <span class="o">&amp;&amp;</span> <span class="i">isGreater</span> <span class="i">heap</span><span class="o">.</span>[<span class="i">r</span>] <span class="i">heap</span><span class="o">.</span>[<span class="i">maxIndexLeft</span>] <span class="k">then</span> <span class="i">r</span> <span class="k">else</span> <span class="i">maxIndexLeft</span>
+        <span class="k">if</span> <span class="i">i</span> <span class="o">&lt;&gt;</span> <span class="i">maxIndex</span> <span class="k">then</span>
+            <span class="i">swap</span> <span class="i">i</span> <span class="i">maxIndex</span>
+            <span class="i">siftDown</span> <span class="i">maxIndex</span>
+        <span class="k">else</span> ()
+
+    <span class="k">let</span> <span class="i">build</span>() <span class="o">=</span>
+        <span class="k">for</span> <span class="i">i</span> <span class="o">=</span> <span class="i">size</span> <span class="o">/</span> <span class="n">2</span> <span class="k">downto</span> <span class="n">0</span> <span class="k">do</span>
+            <span class="i">siftDown</span> <span class="i">i</span>
+
+    <span class="k">do</span> <span class="i">build</span>()
+
+    <span class="k">new</span> (<span class="i">values</span>) <span class="o">=</span> <span class="i">PriorityQueue</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">T</span><span class="o">&gt;</span>(<span class="i">values</span>, <span class="k">true</span>)
+    <span class="k">new</span> () <span class="o">=</span> <span class="i">PriorityQueue</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">T</span><span class="o">&gt;</span>([], <span class="k">true</span>)
+
+    <span class="k">member</span> <span class="i">this</span><span class="o">.</span><span class="i">IsEmpty</span> <span class="o">=</span> <span class="i">size</span> <span class="o">=</span> <span class="n">0</span>
+
+    <span class="k">member</span> <span class="i">this</span><span class="o">.</span><span class="i">Count</span> <span class="o">=</span> <span class="i">size</span>
+
+    <span class="k">member</span> <span class="i">this</span><span class="o">.</span><span class="i">Dequeue</span>() <span class="o">=</span>
+        <span class="k">if</span> <span class="i">this</span><span class="o">.</span><span class="i">IsEmpty</span> <span class="k">then</span> <span onmouseout="hideTip(event, 'fs8', 13)" onmouseover="showTip(event, 'fs8', 13)" class="i">raise</span> (<span class="k">new</span> <span class="i">Exception</span>(<span class="s">&quot;No more elements to dequeue&quot;</span>))
+        <span class="k">let</span> <span class="i">result</span> <span class="o">=</span> <span class="i">heap</span><span class="o">.</span>[<span class="n">0</span>]
+        <span class="i">heap</span><span class="o">.</span>[<span class="n">0</span>] <span class="o">&lt;-</span> <span class="i">heap</span><span class="o">.</span>[<span class="i">size</span> <span class="o">-</span> <span class="n">1</span>]
+        <span class="c">// we limit the boundary but the last element stays in memory</span>
+        <span class="c">// we could use heap.Remove but it&#39;s O(n) operation so too slow</span>
+        <span class="i">size</span> <span class="o">&lt;-</span> <span class="i">size</span> <span class="o">-</span> <span class="n">1</span>
+        <span class="i">shrinkHeap</span>()
+        <span class="i">siftDown</span> <span class="n">0</span>
+        <span class="i">result</span>
+
+    <span class="k">member</span> <span class="i">this</span><span class="o">.</span><span class="i">Enqueue</span> <span class="i">p</span> <span class="o">=</span>
+        <span class="k">if</span> <span class="i">heap</span><span class="o">.</span><span class="i">Count</span> <span class="o">=</span> <span class="i">size</span> <span class="k">then</span>
+            <span class="i">heap</span><span class="o">.</span><span class="i">Add</span>(<span class="i">p</span>)
+        <span class="k">else</span>
+            <span class="i">heap</span><span class="o">.</span>[<span class="i">size</span>] <span class="o">&lt;-</span> <span class="i">p</span>
+        <span class="i">size</span> <span class="o">&lt;-</span> <span class="i">size</span> <span class="o">+</span> <span class="n">1</span>
+        <span class="i">siftUp</span> (<span class="i">size</span> <span class="o">-</span> <span class="n">1</span>)
+</code></pre></td>
+</tr>
+</table>
+<p>All the operations are described above. As you can see it is very simple and strightforward. The resulting implementation is:</p>
+<ul>
+<li><strong>Fast</strong>: all operations work in time <span class="math">\(O(\log n)\)</span></li>
+<li><strong>Space efficient</strong>: elements are stored in the list. Parent-child connections are not stored but are computed on the fly.</li>
+<li><strong>Easy to implement</strong>: just few lines of code.</li>
+<li><strong>Not functional friendly</strong>: mutable structures can be sometimes useful, but this implementation doesn't help with functional style and immutability.</li>
+</ul>
+<p>The interesting bits are the <code>build()</code> function which allows to turn an array into the heap. We repair the heap property going from bottom to top. Initially, the heap property is satisfied in all the leaves (i.e., subtrees of depth 0) then start repairing the heap property in all subtrees of depth 1. When we reach the root, the heap property is satisfied in the whole tree. Running time is <span class="math">\(O(n \log n)\)</span> since we call <code>siftDown</code> for <span class="math">\(O(n)\)</span> nodes. If node is already close to the leaves than sifting it down is fast.</p>
+<h3>Benchmarking the running time</h3>
+<p>I used <a href="https://github.com/dotnet/BenchmarkDotNet">BenchmarkDotNet</a> to mesure the performance of my implementation and I compared it to the <code>FSharpx.Collections.PriorityQueue</code> which is a full functional data structure.</p>
+<p>This is the test I used:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+<span class="l">26: </span>
+<span class="l">27: </span>
+<span class="l">28: </span>
+<span class="l">29: </span>
+<span class="l">30: </span>
+<span class="l">31: </span>
+<span class="l">32: </span>
+<span class="l">33: </span>
+<span class="l">34: </span>
+<span class="l">35: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">rng</span> <span class="o">=</span> <span class="i">Random</span>()
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs9', 14)" onmouseover="showTip(event, 'fs9', 14)" class="i">max</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs10', 15)" onmouseover="showTip(event, 'fs10', 15)" class="i">pown</span> <span class="n">10</span> <span class="n">9</span>
+
+<span class="k">type</span> <span class="i">PriorityQueue</span> () <span class="o">=</span>
+    <span class="k">let</span> <span class="k">mutable</span> <span onmouseout="hideTip(event, 'fs11', 16)" onmouseover="showTip(event, 'fs11', 16)" class="i">list</span>  <span class="o">:</span> <span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="i">int</span> <span onmouseout="hideTip(event, 'fs11', 18)" onmouseover="showTip(event, 'fs11', 18)" class="i">list</span> <span class="o">=</span> []
+
+    [&lt;<span class="i">Params</span> (<span class="n">2000</span>, <span class="n">20000</span>, <span class="n">200000</span>, <span class="n">2000000</span>)&gt;]
+    <span class="k">member</span> <span class="k">val</span> <span class="k">public</span> <span class="i">Length</span> <span class="o">=</span> <span class="n">0</span> <span class="k">with</span> <span class="i">get</span>, <span onmouseout="hideTip(event, 'fs13', 19)" onmouseover="showTip(event, 'fs13', 19)" class="i">set</span>
+
+    [&lt;<span class="i">Setup</span>&gt;]
+    <span class="k">member</span> <span class="i">self</span><span class="o">.</span><span class="i">SetupData</span>() <span class="o">=</span>
+        <span onmouseout="hideTip(event, 'fs11', 20)" onmouseover="showTip(event, 'fs11', 20)" class="i">list</span> <span class="o">&lt;-</span> [<span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">2..</span><span class="i">self</span><span class="o">.</span><span class="i">Length</span> <span class="k">-&gt;</span> <span class="i">rng</span><span class="o">.</span><span class="i">Next</span>(<span class="n">1</span>, <span onmouseout="hideTip(event, 'fs9', 21)" onmouseover="showTip(event, 'fs9', 21)" class="i">max</span>)]
+
+    [&lt;<span class="i">Benchmark</span>&gt;]
+    <span class="k">member</span> <span class="i">self</span><span class="o">.</span><span class="i">MaxPriorityQueue</span> () <span class="o">=</span> <span class="i">PriorityQueue</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs12', 22)" onmouseover="showTip(event, 'fs12', 22)" class="i">int</span><span class="o">&gt;</span>(<span onmouseout="hideTip(event, 'fs11', 23)" onmouseover="showTip(event, 'fs11', 23)" class="i">list</span>)
+
+    [&lt;<span class="i">Benchmark</span>&gt;]
+    <span class="k">member</span> <span class="i">self</span><span class="o">.</span><span class="i">MaxPriorityQueueInsertingFromStart</span> () <span class="o">=</span> 
+        <span class="k">let</span> <span class="i">pq</span> <span class="o">=</span> <span class="i">PriorityQueue</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs12', 24)" onmouseover="showTip(event, 'fs12', 24)" class="i">int</span><span class="o">&gt;</span>()
+        <span onmouseout="hideTip(event, 'fs11', 25)" onmouseover="showTip(event, 'fs11', 25)" class="i">list</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs14', 26)" onmouseover="showTip(event, 'fs14', 26)" class="i">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs15', 27)" onmouseover="showTip(event, 'fs15', 27)" class="i">iter</span> <span class="i">pq</span><span class="o">.</span><span class="i">Enqueue</span>
+
+    [&lt;<span class="i">Benchmark</span>&gt;]
+    <span class="k">member</span> <span class="i">self</span><span class="o">.</span><span class="i">FSharpxPriorityQueueInsertingFromStart</span> () <span class="o">=</span> 
+        <span class="k">let</span> <span class="i">pq</span> <span class="o">=</span> <span class="i">PriorityQueue</span><span class="o">.</span><span class="i">empty</span> <span class="k">true</span>
+        <span class="k">let</span> <span class="k">rec</span> <span class="i">insertIntoPriorityQueue</span> <span class="i">xs</span> (<span class="i">q</span><span class="o">:</span> <span class="i">IPriorityQueue</span><span class="o">&lt;</span><span class="i">IComparable</span><span class="o">&gt;</span>) <span class="o">=</span>
+            <span class="k">match</span> <span class="i">xs</span> <span class="k">with</span>
+            | [] <span class="k">-&gt;</span> ()
+            | <span class="i">h</span><span class="o">::</span><span class="i">tail</span> <span class="k">-&gt;</span> <span class="i">insertIntoPriorityQueue</span> <span class="i">tail</span> (<span class="i">q</span><span class="o">.</span><span class="i">Insert</span>(<span class="i">h</span>))
+        <span class="i">insertIntoPriorityQueue</span> <span onmouseout="hideTip(event, 'fs11', 28)" onmouseover="showTip(event, 'fs11', 28)" class="i">list</span> <span class="i">pq</span>
+
+[&lt;<span onmouseout="hideTip(event, 'fs16', 29)" onmouseover="showTip(event, 'fs16', 29)" class="i">EntryPoint</span>&gt;]
+<span class="k">let</span> <span class="i">main</span> <span class="i">argv</span> <span class="o">=</span> 
+    (<span class="i">BenchmarkSwitcher</span>[|<span onmouseout="hideTip(event, 'fs17', 30)" onmouseover="showTip(event, 'fs17', 30)" class="i">typeof</span><span class="o">&lt;</span><span class="i">PriorityQueue</span>&gt;|])<span class="o">.</span><span class="i">Run</span> <span class="i">argv</span>
+    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs18', 31)" onmouseover="showTip(event, 'fs18', 31)" class="i">string</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs19', 32)" onmouseover="showTip(event, 'fs19', 32)" class="i">printfn</span> <span class="s">&quot;%s&quot;</span>
+    <span class="n">0</span>
+</code></pre></td>
+</tr>
+</table>
+<p>And here are the results:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="ini">BenchmarkDotNet=v0.10.1, OS=Microsoft Windows NT 6.2.9200.0
+Processor=Intel(R) Core(TM) i7-3720QM CPU 2.60GHz, ProcessorCount=4
+Frequency=2533316 Hz, Resolution=394.7395 ns, Timer=TSC
+  [Host]     : Clr 4.0.30319.42000, 32bit LegacyJIT-v4.6.1586.0
+  DefaultJob : Clr 4.0.30319.42000, 32bit LegacyJIT-v4.6.1586.0
+</code></pre></td></tr></table>
+<style type="text/css">
+	.tbl { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	.thtd { padding: 6px 13px; border: 1px solid #ddd; }
+	.tr { background-color: #fff; border-top: 1px solid #ccc; }
+	.tr:nth-child(even) { background: #f8f8f8; }
+</style>
+<table class="tbl">
+<thead>
+<tr class="header tr">
+<th class="thtd"><p>Method</p></th>
+<th class="thtd"><p>Length</p></th>
+<th class="thtd"><p>Mean</p></th>
+<th class="thtd"><p>StdDev</p></th>
+<th class="thtd"><p>Allocated</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd tr">
+<td class="thtd"><p><strong>MaxPriorityQueue</strong></p></td>
+<td class="thtd"><p><strong>2000</strong></p></td>
+<td class="thtd"><p><strong>568.6416 us</strong></p></td>
+<td class="thtd"><p><strong>10.9266 us</strong></p></td>
+<td class="thtd"><p><strong>107.1 kB</strong></p></td>
+</tr>
+<tr class="even tr">
+<td class="thtd"><p>MaxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>2000</p></td>
+<td class="thtd"><p>687.4757 us</p></td>
+<td class="thtd"><p>1.7271 us</p></td>
+<td class="thtd"><p>123.5 kB</p></td>
+</tr>
+<tr class="odd tr">
+<td class="thtd"><p>FSharpxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>2000</p></td>
+<td class="thtd"><p>423.1923 us</p></td>
+<td class="thtd"><p>10.4438 us</p></td>
+<td class="thtd"><p>167.92 kB</p></td>
+</tr>
+<tr class="even tr">
+<td class="thtd"><p><strong>MaxPriorityQueue</strong></p></td>
+<td class="thtd"><p><strong>20000</strong></p></td>
+<td class="thtd"><p><strong>5,646.1750 us</strong></p></td>
+<td class="thtd"><p><strong>13.7735 us</strong></p></td>
+<td class="thtd"><p><strong>1.16 MB</strong></p></td>
+</tr>
+<tr class="odd tr">
+<td class="thtd"><p>MaxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>20000</p></td>
+<td class="thtd"><p>7,006.6801 us</p></td>
+<td class="thtd"><p>21.8178 us</p></td>
+<td class="thtd"><p>1.35 MB</p></td>
+</tr>
+<tr class="even tr">
+<td class="thtd"><p>FSharpxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>20000</p></td>
+<td class="thtd"><p>4,854.3166 us</p></td>
+<td class="thtd"><p>19.2608 us</p></td>
+<td class="thtd"><p>1.68 MB</p></td>
+</tr>
+<tr class="odd" tr>
+<td class="thtd"><p><strong>MaxPriorityQueue</strong></p></td>
+<td class="thtd"><p><strong>200000</strong></p></td>
+<td class="thtd"><p><strong>57,873.1854 us</strong></p></td>
+<td class="thtd"><p><strong>302.7054 us</strong></p></td>
+<td class="thtd"><p><strong>11.14 MB</strong></p></td>
+</tr>
+<tr class="even tr">
+<td class="thtd"><p>MaxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>200000</p></td>
+<td class="thtd"><p>72,939.0291 us</p></td>
+<td class="thtd"><p>573.1936 us</p></td>
+<td class="thtd"><p>13.06 MB</p></td>
+</tr>
+<tr class="odd tr">
+<td class="thtd"><p>FSharpxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>200000</p></td>
+<td class="thtd"><p>104,380.8573 us</p></td>
+<td class="thtd"><p>1,036.8847 us</p></td>
+<td class="thtd"><p>16.8 MB</p></td>
+</tr>
+<tr class="even tr">
+<td class="thtd"><p><strong>MaxPriorityQueue</strong></p></td>
+<td class="thtd"><p><strong>2000000</strong></p></td>
+<td class="thtd"><p><strong>596,396.9013 us</strong></p></td>
+<td class="thtd"><p><strong>3,905.1761 us</strong></p></td>
+<td class="thtd"><p><strong>107.11 MB</strong></p></td>
+</tr>
+<tr class="odd tr">
+<td class="thtd"><p>MaxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>2000000</p></td>
+<td class="thtd"><p>747,160.8772 us</p></td>
+<td class="thtd"><p>26,935.2538 us</p></td>
+<td class="thtd"><p>126.29 MB</p></td>
+</tr>
+<tr class="even tr">
+<td class="thtd"><p>FSharpxPriorityQueueInsertingFromStart</p></td>
+<td class="thtd"><p>2000000</p></td>
+<td class="thtd"><p>1,537,904.5511 us</p></td>
+<td class="thtd"><p>62,809.3363 us</p></td>
+<td class="thtd"><p>168 MB</p></td>
+</tr>
+</tbody>
+</table>
+<br />
+<p>My implementation seems to be fastest starting from 200000 elements and with 2 millions is twice as fast as <code>FSharpx.Collections.PriorityQueue</code> for enqueueing elements.</p>
+<p>Now that I have my working implementation of priority queue, I can finally implement the shortest path Dijkstra algorithm</p>
+<h2>The shortest path algorithm (part II)</h2>
+<p>I need some basic data structures to represent my graph of nodes. I need an <code>Edge</code>, a node that I called <code>Vertex</code> and the <code>Graph</code>.</p>
+<p><strong>Note:</strong> <em>in my implementation I use the name 'vertex' instead of 'node' but this is the same</em></p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">Edge</span> <span class="o">=</span> { <span class="i">DestinationVertexId</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs12', 33)" onmouseover="showTip(event, 'fs12', 33)" class="i">int</span>; <span class="i">Distance</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs20', 34)" onmouseover="showTip(event, 'fs20', 34)" class="i">double</span> }
+
+[&lt;<span onmouseout="hideTip(event, 'fs21', 35)" onmouseover="showTip(event, 'fs21', 35)" class="i">CustomComparison</span>; <span onmouseout="hideTip(event, 'fs22', 36)" onmouseover="showTip(event, 'fs22', 36)" class="i">StructuralEquality</span>&gt;]
+<span class="k">type</span> <span class="i">Vertex</span> <span class="o">=</span> { <span class="i">Id</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs12', 37)" onmouseover="showTip(event, 'fs12', 37)" class="i">int</span>; <span class="i">ShortestDistance</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs20', 38)" onmouseover="showTip(event, 'fs20', 38)" class="i">double</span>; <span class="i">Edges</span><span class="o">:</span> <span class="i">Edge</span> <span onmouseout="hideTip(event, 'fs11', 39)" onmouseover="showTip(event, 'fs11', 39)" class="i">list</span>; <span class="i">Path</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs12', 40)" onmouseover="showTip(event, 'fs12', 40)" class="i">int</span> <span onmouseout="hideTip(event, 'fs11', 41)" onmouseover="showTip(event, 'fs11', 41)" class="i">list</span> }
+                <span class="k">interface</span> <span class="i">IComparable</span><span class="o">&lt;</span><span class="i">Vertex</span><span class="o">&gt;</span> <span class="k">with</span>
+                        <span class="k">member</span> <span class="i">this</span><span class="o">.</span><span class="i">CompareTo</span> <span class="i">other</span> <span class="o">=</span>
+                            <span onmouseout="hideTip(event, 'fs23', 42)" onmouseover="showTip(event, 'fs23', 42)" class="i">compare</span> <span class="i">this</span><span class="o">.</span><span class="i">ShortestDistance</span> <span class="i">other</span><span class="o">.</span><span class="i">ShortestDistance</span>
+                <span class="k">interface</span> <span class="i">IComparable</span> <span class="k">with</span>
+                    <span class="k">member</span> <span class="i">this</span><span class="o">.</span><span class="i">CompareTo</span>(<span onmouseout="hideTip(event, 'fs24', 43)" onmouseover="showTip(event, 'fs24', 43)" class="i">obj</span><span class="o">:</span> <span onmouseout="hideTip(event, 'fs24', 44)" onmouseover="showTip(event, 'fs24', 44)" class="i">obj</span>) <span class="o">=</span>
+                        <span class="k">match</span> <span onmouseout="hideTip(event, 'fs24', 45)" onmouseover="showTip(event, 'fs24', 45)" class="i">obj</span> <span class="k">with</span>
+                        | <span class="o">:?</span> <span class="i">Vertex</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs23', 46)" onmouseover="showTip(event, 'fs23', 46)" class="i">compare</span> <span class="i">this</span><span class="o">.</span><span class="i">ShortestDistance</span> (<span onmouseout="hideTip(event, 'fs25', 47)" onmouseover="showTip(event, 'fs25', 47)" class="i">unbox</span><span class="o">&lt;</span><span class="i">Vertex</span><span class="o">&gt;</span> <span onmouseout="hideTip(event, 'fs24', 48)" onmouseover="showTip(event, 'fs24', 48)" class="i">obj</span>)<span class="o">.</span><span class="i">ShortestDistance</span>
+                        | _ <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs26', 49)" onmouseover="showTip(event, 'fs26', 49)" class="i">invalidArg</span> <span class="s">&quot;obj&quot;</span> <span class="s">&quot;Must be of type Vertex&quot;</span>
+
+<span class="k">type</span> <span class="i">Graph</span> <span class="o">=</span> { <span class="i">Vertices</span><span class="o">:</span> <span class="i">Vertex</span> <span onmouseout="hideTip(event, 'fs11', 50)" onmouseover="showTip(event, 'fs11', 50)" class="i">list</span> }
+</code></pre></td>
+</tr>
+</table>
+<p>The <code>Edge</code> points to the destination <code>Vertex</code> and has also a <code>Distance</code>. The <code>Vertex</code> has a list of edges and the <code>ShortestDistance</code> label which will be calculated and updated according to the "source" <code>Vertex</code>. Note that the implementation of <code>IComparable</code> interface is made on that label which is logical because when dequeuing elements from the min priority queue we want to explore nodes with the shortest distance first. The <code>Graph</code> is just a list of nodes.</p>
+<p>Let's start with the implementation following the pseudo code that I showed before. This looks something like that in F# (I'm sorry for not following the functional style but I care more about the steps of the algorithm) :</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">shortestPath</span> <span class="i">graph</span> <span class="i">destinationId</span> <span class="o">=</span>
+
+ <span class="k">let</span> <span class="i">pq</span> <span class="o">=</span> <span class="i">PriorityQueue</span><span class="o">&lt;</span><span class="i">Vertex</span><span class="o">&gt;</span>(<span class="i">graph</span><span class="o">.</span><span class="i">GetVertices</span>(), <span class="k">false</span>)
+
+ <span class="k">while</span> <span onmouseout="hideTip(event, 'fs1', 51)" onmouseover="showTip(event, 'fs1', 51)" class="i">not</span> <span class="i">pq</span><span class="o">.</span><span class="i">IsEmpty</span> <span class="k">do</span>
+    <span class="k">let</span> <span class="i">vertex</span> <span class="o">=</span> <span class="i">pq</span><span class="o">.</span><span class="i">Dequeue</span>()
+    <span onmouseout="hideTip(event, 'fs19', 52)" onmouseover="showTip(event, 'fs19', 52)" class="i">printfn</span> <span class="s">&quot;Visiting node %i - value %f&quot;</span> <span class="i">vertex</span><span class="o">.</span><span class="i">Id</span> <span class="i">vertex</span><span class="o">.</span><span class="i">ShortestDistance</span>
+    <span class="k">for</span> <span class="i">edge</span> <span class="k">in</span> <span class="i">vertex</span><span class="o">.</span><span class="i">Edges</span> <span class="k">do</span>
+        <span class="k">let</span> <span class="i">destinationId</span> <span class="o">=</span> <span class="i">edge</span><span class="o">.</span><span class="i">DestinationVertexId</span>
+        <span class="k">match</span> <span class="i">pq</span><span class="o">.</span><span class="i">TryFind</span> (<span class="k">fun</span> <span class="i">e</span> <span class="k">-&gt;</span> <span class="i">e</span><span class="o">.</span><span class="i">Id</span> <span class="o">=</span> <span class="i">destinationId</span>) <span class="k">with</span>
+        | <span onmouseout="hideTip(event, 'fs27', 53)" onmouseover="showTip(event, 'fs27', 53)" class="i">None</span> <span class="k">-&gt;</span> ()
+        | <span onmouseout="hideTip(event, 'fs28', 54)" onmouseover="showTip(event, 'fs28', 54)" class="i">Some</span>(<span class="i">indx</span>, <span class="i">destination</span>) <span class="k">-&gt;</span>
+            <span class="k">let</span> <span class="i">newDistance</span> <span class="o">=</span> <span class="i">edge</span><span class="o">.</span><span class="i">Distance</span> <span class="o">+</span> <span class="i">vertex</span><span class="o">.</span><span class="i">ShortestDistance</span>
+            <span class="k">if</span> <span class="i">newDistance</span> <span class="o">&lt;</span> <span class="i">destination</span><span class="o">.</span><span class="i">ShortestDistance</span> <span class="k">then</span>
+                <span class="k">let</span> <span class="i">newDestination</span> <span class="o">=</span> { <span class="i">destination</span> <span class="k">with</span> <span class="i">ShortestDistance</span> <span class="o">=</span> <span class="i">newDistance</span> }
+                <span class="i">pq</span><span class="o">.</span><span class="i">Update</span> <span class="i">indx</span> <span class="i">newDestination</span>
+            <span class="k">else</span> ()
+</code></pre></td>
+</tr>
+</table>
+<p>What is interesting that at line 15 I need to update the queue <code>pq.Update indx newDestination</code> with the new calculated ShortestDistance for the node. This is an operation <span class="math">\(O(1)\)</span> because I have an index retrieved at line 10 with <code>pq.TryFind</code>. To find the index of the node in the queue I need to traverse the whole tree which is <span class="math">\(O(|V|)\)</span> operation. Watch out, but this may cause the serious performance problems.</p>
+<h3>Test drive on wikipedia example</h3>
+<p>Before trying my algorithm on the real world data, let's check if it's correct on wikipedia example (see the image above in "The shortest path algorithm (part I)"). We need to find the path between the node <strong>a (1)</strong> and <strong>b (5)</strong>. The value should be 20.</p>
+<p>Running the algorithm produces the following output</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="ini">Visiting node 1 - value 0.000000
+Visiting node 2 - value 7.000000
+Visiting node 3 - value 9.000000
+Visiting node 6 - value 11.000000
+Visiting node 5 - value 20.000000
+Visiting node 4 - value 20.000000
+</code></pre></td></tr></table>
+<p>The node 5 has a value of 20 which is correct. We can move to more serious step.</p>
+<h3>Real world example: Santa Claus way to San Francisco (FAIL)</h3>
+<p>The next step is to try it on the real world data. After some googling I found interesting data used by <a href="http://www.dis.uniroma1.it/challenge9/competition.shtml">9th DIMACS Implementation Challenge - Shortest Paths</a>. I used California and Nevada datasets with the following properties:</p>
+<ul>
+<li><strong># of nodes</strong> 1 890 815</li>
+<li><strong># of edges</strong> 4 657 742</li>
+</ul>
+<p>This will be more challendging that 6 node example from wikipedia. Before running the sample I made a small change to my algorithm to ease the data conversion from the data set files. I'm not using my <code>Graph</code> type but a simple <code>Dictionary&lt;int, Vertex&gt;</code>.</p>
+<p>The dataset file has the following format</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="ini">a 1 1048577 456
+a 1048577 1 456
+a 2 1048578 2389
+a 1048578 2 2389
+a 3 1048579 358
+</code></pre></td></tr></table>
+<p>We can drop the first column (letter a). The second column is the starting nodeId, next column is the destination nodeId and the last column is the distance.</p>
+<p>Here is the script loading the data from the file and converting it to the <code>Dictionary&lt;int, Vertex&gt;</code>.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">readLines</span> <span class="i">filePath</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs4', 55)" onmouseover="showTip(event, 'fs4', 55)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs29', 56)" onmouseover="showTip(event, 'fs29', 56)" class="i">IO</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs30', 57)" onmouseover="showTip(event, 'fs30', 57)" class="i">File</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs31', 58)" onmouseover="showTip(event, 'fs31', 58)" class="i">ReadLines</span>(<span class="i">filePath</span>)
+
+<span class="k">let</span> <span class="i">lines</span> <span class="o">=</span> <span class="i">readLines</span> <span class="s">&quot;USA-road-d.CAL.gr&quot;</span>
+
+<span class="k">let</span> <span class="i">graphMap</span> <span class="o">=</span>
+    <span class="i">lines</span>
+    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs32', 59)" onmouseover="showTip(event, 'fs32', 59)" class="i">Seq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs33', 60)" onmouseover="showTip(event, 'fs33', 60)" class="i">map</span> (<span class="k">fun</span> <span class="i">l</span> <span class="k">-&gt;</span> <span class="k">let</span> <span class="i">a</span> <span class="o">=</span> <span class="i">l</span><span class="o">.</span><span class="i">Split</span>()
+                         (<span onmouseout="hideTip(event, 'fs12', 61)" onmouseover="showTip(event, 'fs12', 61)" class="i">int</span> <span class="i">a</span><span class="o">.</span>[<span class="n">1</span>], <span onmouseout="hideTip(event, 'fs12', 62)" onmouseover="showTip(event, 'fs12', 62)" class="i">int</span> <span class="i">a</span><span class="o">.</span>[<span class="n">2</span>], <span onmouseout="hideTip(event, 'fs34', 63)" onmouseover="showTip(event, 'fs34', 63)" class="i">float</span> <span class="i">a</span><span class="o">.</span>[<span class="n">3</span>])) <span class="c">// we drop the first column</span>
+    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs32', 64)" onmouseover="showTip(event, 'fs32', 64)" class="i">Seq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs35', 65)" onmouseover="showTip(event, 'fs35', 65)" class="i">groupBy</span> (<span class="k">fun</span> (<span class="i">f</span>, <span class="i">t</span>, <span class="i">d</span>) <span class="k">-&gt;</span> <span class="i">f</span>)
+    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs32', 66)" onmouseover="showTip(event, 'fs32', 66)" class="i">Seq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs33', 67)" onmouseover="showTip(event, 'fs33', 67)" class="i">map</span> (<span class="k">fun</span> (<span class="i">key</span>, <span class="i">values</span>) <span class="k">-&gt;</span> (<span class="i">key</span>, <span class="i">values</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs32', 68)" onmouseover="showTip(event, 'fs32', 68)" class="i">Seq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs33', 69)" onmouseover="showTip(event, 'fs33', 69)" class="i">map</span> (<span class="k">fun</span> (<span class="i">k</span>, <span class="i">v</span>, <span class="i">z</span>) <span class="k">-&gt;</span> <span class="i">z</span>, <span class="i">v</span>) <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs32', 70)" onmouseover="showTip(event, 'fs32', 70)" class="i">Seq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs36', 71)" onmouseover="showTip(event, 'fs36', 71)" class="i">toList</span>))
+    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs37', 72)" onmouseover="showTip(event, 'fs37', 72)" class="i">Map</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs38', 73)" onmouseover="showTip(event, 'fs38', 73)" class="i">ofSeq</span>
+
+<span class="k">let</span> <span class="i">roadNetwork</span> <span class="o">=</span> <span class="i">graphMap</span>
+                    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs37', 74)" onmouseover="showTip(event, 'fs37', 74)" class="i">Map</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs39', 75)" onmouseover="showTip(event, 'fs39', 75)" class="i">map</span> <span class="i">makeVertex</span>
+                    <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs37', 76)" onmouseover="showTip(event, 'fs37', 76)" class="i">Map</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs40', 77)" onmouseover="showTip(event, 'fs40', 77)" class="i">fold</span> (<span class="k">fun</span> (<span class="i">graph</span><span class="o">:</span> <span class="i">Dictionary</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs12', 78)" onmouseover="showTip(event, 'fs12', 78)" class="i">int</span>, <span class="i">Vertex</span><span class="o">&gt;</span>) 
+                    		_ <span class="i">v</span> <span class="k">-&gt;</span> <span class="i">graph</span><span class="o">.</span><span class="i">Add</span>(<span class="i">v</span><span class="o">.</span><span class="i">Id</span>, <span class="i">v</span>); <span class="i">graph</span>) (<span class="i">Dictionary</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs12', 79)" onmouseover="showTip(event, 'fs12', 79)" class="i">int</span>, <span class="i">Vertex</span><span class="o">&gt;</span>())
+</code></pre></td>
+</tr>
+</table>
+<p>Note that all of the nodes has the ShortestPath set to positiveInfinity.
+Then we need to set the starting node by setting it's shortest distance to <strong>0</strong>.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">start</span> <span class="o">=</span> <span class="i">roadNetwork</span><span class="o">.</span>[<span class="n">1215934</span>]
+<span class="i">roadNetwork</span><span class="o">.</span>[<span class="n">1215934</span>] <span class="o">&lt;-</span> {<span class="i">start</span> <span class="k">with</span> <span class="i">ShortestDistance</span> <span class="o">=</span> <span class="n">0.0</span> }
+</code></pre></td>
+</tr>
+</table>
+<p>The node number <strong>1215934</strong> is the following address <strong>512 Partridge Ave, Bakersfield, CA 93309, USA</strong>.<br />
+The destination is the node number <strong>1598609</strong> at the address <strong>US-101, San Francisco, CA 94129, États-Unis Golden Gate Bridge</strong></p>
+<p>Let's run the algorithm.</p>
+<p><strong>Well, after maybe 30 minutes I killed the FSI because nothing happened, it was stuck somewhere and maybe the algorithm would never finish.</strong></p>
+<p>Let's try to find out why. If you remember the running time of the algorithm is <span class="math">\(O(|E| \cdot T_{dk} + |V| \cdot T_{em})\)</span> where <span class="math">\(T_{dk}\)</span> and <span class="math">\(T_{em}\)</span> are the complexities of the <strong>decrease_key</strong> and <strong>extract_minimum</strong> operations in <code>Q</code> respectively. The <code>Q</code> is my priority queue <code>pq</code>, the <strong>decrease_key</strong> is the <code>pq.TryFind</code> and <code>pq.Update indx newDestination</code> all together. <strong>Extract_minimum</strong> is <code>pq.Dequeue()</code> but I know that this operation works in <span class="math">\(O(1)\)</span> so it's not a problem. The <code>pq.TryFind</code> uses the pre-order traversal of the tree which is <span class="math">\(O(|V|)\)</span>. Too bad, because the running time of the algorithm is something like <span class="math">\(O(|E| \cdot |V| + |V|)\)</span>. With almost 5 millions of edges and 2 millions of nodes, I'm not surprised that the algorithm has never finished.</p>
+<p>Can we do better? Yes. It's time for the optimization</p>
+<h3>Real world example: Santa Claus way to San Francisco (SUCCESS)</h3>
+<p>What can be improved? After some thinking here are some ideas:</p>
+<ol>
+<li>The graph is connected so after the node has been explored we can mark it as visited and when other nodes will point to it, we simple can ignore it. So the idea is to not visit already visited nodes.</li>
+<li>There may be nodes which we don't want to explore because they won't be reachable at all. Their <code>ShortesDistance</code> will be <strong>positiveInfinity</strong> when dequeuing so we can simply ignore it.</li>
+<li>Another improvment would be to get rid of the costly <code>pq.TryFind</code> function. Why not to store nodes in a dictionary and priority queue at the same time? The dictionary would allow to fast lookup of the node and the priority queue would ensure to get the minimu node with the <code>ShortestDistance</code>. What we need is just to <code>pq.Enqueue newDestination</code> node and update it in the dictionary at the same time for further retrieval. This would be a double space complexity but that's a tradeoff</li>
+<li>Another nice feature will be to track all visited nodes so we could draw a path for the Santa Claus.</li>
+</ol>
+<p>Here are some improvments:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">shortestPath</span> (<span class="i">graph</span><span class="o">:</span> <span class="i">Dictionary</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs12', 80)" onmouseover="showTip(event, 'fs12', 80)" class="i">int</span>, <span class="i">Vertex</span><span class="o">&gt;</span>) <span class="i">destinationId</span> <span class="o">=</span>
+
+<span class="k">let</span> <span class="i">pq</span> <span class="o">=</span> <span class="i">PriorityQueue</span><span class="o">&lt;</span><span class="i">Vertex</span><span class="o">&gt;</span>(<span class="i">graph</span><span class="o">.</span><span class="i">Values</span>, <span class="k">false</span>)
+<span class="k">let</span> <span class="k">mutable</span> <span class="i">dest</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs41', 81)" onmouseover="showTip(event, 'fs41', 81)" class="i">Option</span><span class="o">&lt;</span><span class="i">Vertex</span><span class="o">&gt;</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs27', 82)" onmouseover="showTip(event, 'fs27', 82)" class="i">None</span>
+<span class="k">let</span> <span class="i">visited</span> <span class="o">=</span> <span class="i">Dictionary</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs12', 83)" onmouseover="showTip(event, 'fs12', 83)" class="i">int</span>, <span class="i">Vertex</span><span class="o">&gt;</span>()
+
+<span class="k">while</span> <span onmouseout="hideTip(event, 'fs1', 84)" onmouseover="showTip(event, 'fs1', 84)" class="i">not</span> <span class="i">pq</span><span class="o">.</span><span class="i">IsEmpty</span> <span class="k">do</span>
+    <span class="k">let</span> <span class="i">vertex</span> <span class="o">=</span> <span class="i">pq</span><span class="o">.</span><span class="i">Dequeue</span>()
+    <span class="k">if</span> <span class="i">vertex</span><span class="o">.</span><span class="i">ShortestDistance</span> <span class="o">&lt;&gt;</span> <span class="i">Double</span><span class="o">.</span><span class="i">PositiveInfinity</span> <span class="o">&amp;&amp;</span> <span onmouseout="hideTip(event, 'fs1', 85)" onmouseover="showTip(event, 'fs1', 85)" class="i">not</span> (<span class="i">visited</span><span class="o">.</span><span class="i">ContainsKey</span>(<span class="i">vertex</span><span class="o">.</span><span class="i">Id</span>)) <span class="k">then</span>
+        <span class="k">if</span> <span class="i">vertex</span><span class="o">.</span><span class="i">Id</span> <span class="o">=</span> <span class="i">destinationId</span> <span class="k">then</span>
+            <span class="i">dest</span> <span class="o">&lt;-</span> <span onmouseout="hideTip(event, 'fs28', 86)" onmouseover="showTip(event, 'fs28', 86)" class="i">Some</span>(<span class="i">vertex</span>)
+
+        <span class="k">for</span> <span class="i">edge</span> <span class="k">in</span> <span class="i">vertex</span><span class="o">.</span><span class="i">Edges</span> <span class="k">do</span>
+            <span class="k">let</span> <span class="i">destinationId</span> <span class="o">=</span> <span class="i">edge</span><span class="o">.</span><span class="i">DestinationVertexId</span>
+            <span class="k">if</span> <span onmouseout="hideTip(event, 'fs1', 87)" onmouseover="showTip(event, 'fs1', 87)" class="i">not</span> (<span class="i">visited</span><span class="o">.</span><span class="i">ContainsKey</span>(<span class="i">destinationId</span>)) <span class="k">then</span>
+                <span class="k">let</span> <span class="i">newDistance</span> <span class="o">=</span> <span class="i">edge</span><span class="o">.</span><span class="i">Distance</span> <span class="o">+</span> <span class="i">vertex</span><span class="o">.</span><span class="i">ShortestDistance</span>
+                <span class="k">let</span> <span class="i">destination</span> <span class="o">=</span> <span class="i">graph</span><span class="o">.</span>[<span class="i">destinationId</span>]
+                <span class="k">if</span> <span class="i">newDistance</span> <span class="o">&lt;</span> <span class="i">destination</span><span class="o">.</span><span class="i">ShortestDistance</span> <span class="k">then</span>
+                    <span class="k">let</span> <span class="i">newDestination</span> <span class="o">=</span> { <span class="i">destination</span> <span class="k">with</span> <span class="i">ShortestDistance</span> <span class="o">=</span> <span class="i">newDistance</span>; <span class="i">Path</span> <span class="o">=</span> <span class="i">destination</span><span class="o">.</span><span class="i">Id</span> <span class="o">::</span> <span class="i">vertex</span><span class="o">.</span><span class="i">Path</span> }
+                    <span class="i">pq</span><span class="o">.</span><span class="i">Enqueue</span> <span class="i">newDestination</span>
+                    <span class="i">graph</span><span class="o">.</span>[<span class="i">destinationId</span>] <span class="o">&lt;-</span> <span class="i">newDestination</span>
+                <span class="k">else</span> ()
+            <span class="k">else</span> ()
+        <span class="i">visited</span><span class="o">.</span><span class="i">Add</span>(<span class="i">vertex</span><span class="o">.</span><span class="i">Id</span>, <span class="i">vertex</span>)
+<span class="i">dest</span>
+</code></pre></td>
+</tr>
+</table>
+<p>As you can see the graph is now represented with <code>Dictionary&lt;int, Vertex&gt;</code>. This is our structure allowing finding nodes in <span class="math">\(O(1)\)</span> time. At line 9 and 15 we check that the node is not already visited, this should save some time. Also on line 9 we ignore all the nodes with <strong>positiveInfinity</strong>. Then on the line 20, if the shortest distance was calculated for the node, we enqueue it in the priority queue so it will be explored before nodes with <strong>positiveInfinity</strong> and we update on the line 21 the dictionary of nodes, so it will be easily retrieved the next time. On the line 18 when creating the <code>newDestination</code> record I'm adding to the <code>Path</code> containing all the visited nodes, the current destination.Id of the node. This is our tracking system of the shortest path.</p>
+<p>Let's run the algorithm again we those improvments. We will hopefully calculate the path from Bakersfield CA to San Francisco Gloden Gate Bridge!</p>
+<p>The algorith finished!</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Real</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">18.985</span>, <span class="i">CPU</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">18.968</span>, <span class="i">GC</span> <span class="i">gen0</span><span class="o">:</span> <span class="n">14</span>, <span class="i">gen1</span><span class="o">:</span> <span class="n">13</span>, <span class="i">gen2</span><span class="o">:</span> <span class="n">0</span>
+</code></pre></td>
+</tr>
+</table>
+<p>It's a very good improvment, from never finishing run to 18 seconds. I know that 18 seconds is maybe much for a GPS device but it's a very good start to improve. The running time is <span class="math">\(O(|E| + |V|)\)</span> which is a way better than before.</p>
+<p>How to know if the algorithm is correct? Well, we have tracked all the intermediate nodes (1415 nodes) on the shortest path. I have retrived their lon lat coordinates and draw it on the google map. Here is what I have:</p>
+<p><img src="img/BakersfieldSanFrancisco.png" alt="Bakersfiled to San Francisco" /></p>
+<p>It's maybe not the fastest way to get from Bakersfield to San Francisco Golden Gate bridge but it seems that this can be the shortest path indeed.</p>
+<p>Let's look more closely:</p>
+<p><img src="img/BakersfieldSanFrancisco2.png" alt="Bakersfiled to San Francisco zoom" /></p>
+<p>And the destination point:</p>
+<p><img src="img/BakersfieldSanFrancisco3.png" alt="Bakersfiled to San Francisco zoom" /></p>
+<p>Let's try a longer way. The destination point will be always the Golden Gate Bridge in San Francisco but the starting point will be <strong>1385 US-93, Jackpot, NV 89825, USA</strong></p>
+<p>The algorithm has finished!</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Real</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">18.658</span>, <span class="i">CPU</span><span class="o">:</span> <span class="n">00</span><span class="o">:</span><span class="n">00</span><span class="o">:</span><span class="n">18.531</span>, <span class="i">GC</span> <span class="i">gen0</span><span class="o">:</span> <span class="n">14</span>, <span class="i">gen1</span><span class="o">:</span> <span class="n">13</span>, <span class="i">gen2</span><span class="o">:</span> <span class="n">0</span>
+</code></pre></td>
+</tr>
+</table>
+<p>This is similar running time as before. Cool. It produces the shortest path of 2210 nodes. Let's check on the map:</p>
+<p><img src="img/JackpotSanFrancisco.png" alt="Jackpot to San Francisco" /></p>
+<p>It seems like tha algorithm is working. Let's look at the starting point:</p>
+<p><img src="img/JackpotSanFrancisco2.png" alt="Jackpot to San Francisco zoom" /></p>
+<p>and the arrival:</p>
+<p><img src="img/JackpotSanFrancisco3.png" alt="Jackpot to San Francisco zoom" /></p>
+<p>This may be not following exactely the roads but it seems the coordinates from th datasets.</p>
+<h2>Conclusion</h2>
+<p>The goal of this article was to show how with few lines of code and F# you can write a simple mutable data structure and algorithm that operates on millions of node and edgest to calculate the shortes path from one point on the map to another. The code doesn't follow the functional style and mutability is everywhere but the goal was to understand the underlying implementation. The next time I focus on the same problem but this time writing a fully functional datastructure and algorithm. This is a toy example but in the real world algorithms have to take into account the weights on the edges, traffic data and so on, and should run much more quicker than this one. The best implementation from 9th DIMACS Implementation Challenge that I used the datasets from, have query times expressed in <strong>microseconds</strong>. Note that these are not simply Dijkstra's algorithms, of course, as the whole point was to get results faster.</p>
+<p>The script used for this blog is <a href="https://github.com/tjaskula/BlogSupport/blob/master/DataStructures/PriorityQueue.fsx">here</a>. The priority queue implementation with performance tests is <a href="https://github.com/tjaskula/FSharpz">here</a>.</p>
+<h2>References</h2>
+<p>Here are some references used in this article:</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Dijkstra's_algorithm">Dijkstra's algorithm</a></li>
+<li><a href="http://www.dis.uniroma1.it/challenge9/download.shtml">9th DIMACS Implementation Challenge - Shortest Paths datasets</a></li>
+<li><a href="https://github.com/fsprojects/FSharpx.Collections">FSharpx.Collections</a></li>
+</ul>
+
+<div class="tip" id="fs1">val not : value:bool -&gt; bool<br /><br />Full name: Microsoft.FSharp.Core.Operators.not</div>
+<div class="tip" id="fs2">Multiple items<br />val seq : sequence:seq&lt;&#39;T&gt; -&gt; seq&lt;&#39;T&gt;<br /><br />Full name: Microsoft.FSharp.Core.Operators.seq<br /><br />--------------------<br />type seq&lt;&#39;T&gt; = System.Collections.Generic.IEnumerable&lt;&#39;T&gt;<br /><br />Full name: Microsoft.FSharp.Collections.seq&lt;_&gt;</div>
+<div class="tip" id="fs3">type bool = System.Boolean<br /><br />Full name: Microsoft.FSharp.Core.bool</div>
+<div class="tip" id="fs4">namespace System</div>
+<div class="tip" id="fs5">namespace System.Collections</div>
+<div class="tip" id="fs6">namespace System.Collections.Generic</div>
+<div class="tip" id="fs7">Multiple items<br />type List&lt;&#39;T&gt; =<br />&#160;&#160;new : unit -&gt; List&lt;&#39;T&gt; + 2 overloads<br />&#160;&#160;member Add : item:&#39;T -&gt; unit<br />&#160;&#160;member AddRange : collection:IEnumerable&lt;&#39;T&gt; -&gt; unit<br />&#160;&#160;member AsReadOnly : unit -&gt; ReadOnlyCollection&lt;&#39;T&gt;<br />&#160;&#160;member BinarySearch : item:&#39;T -&gt; int + 2 overloads<br />&#160;&#160;member Capacity : int with get, set<br />&#160;&#160;member Clear : unit -&gt; unit<br />&#160;&#160;member Contains : item:&#39;T -&gt; bool<br />&#160;&#160;member ConvertAll&lt;&#39;TOutput&gt; : converter:Converter&lt;&#39;T, &#39;TOutput&gt; -&gt; List&lt;&#39;TOutput&gt;<br />&#160;&#160;member CopyTo : array:&#39;T[] -&gt; unit + 2 overloads<br />&#160;&#160;...<br />&#160;&#160;nested type Enumerator<br /><br />Full name: System.Collections.Generic.List&lt;_&gt;<br /><br />--------------------<br />System.Collections.Generic.List() : unit<br />System.Collections.Generic.List(capacity: int) : unit<br />System.Collections.Generic.List(collection: System.Collections.Generic.IEnumerable&lt;&#39;T&gt;) : unit</div>
+<div class="tip" id="fs8">val raise : exn:System.Exception -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Core.Operators.raise</div>
+<div class="tip" id="fs9">val max : e1:&#39;T -&gt; e2:&#39;T -&gt; &#39;T (requires comparison)<br /><br />Full name: Microsoft.FSharp.Core.Operators.max</div>
+<div class="tip" id="fs10">val pown : x:&#39;T -&gt; n:int -&gt; &#39;T (requires member get_One and member ( * ) and member ( / ))<br /><br />Full name: Microsoft.FSharp.Core.Operators.pown</div>
+<div class="tip" id="fs11">type &#39;T list = List&lt;&#39;T&gt;<br /><br />Full name: Microsoft.FSharp.Collections.list&lt;_&gt;</div>
+<div class="tip" id="fs12">Multiple items<br />val int : value:&#39;T -&gt; int (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.Operators.int<br /><br />--------------------<br />type int = int32<br /><br />Full name: Microsoft.FSharp.Core.int<br /><br />--------------------<br />type int&lt;&#39;Measure&gt; = int<br /><br />Full name: Microsoft.FSharp.Core.int&lt;_&gt;</div>
+<div class="tip" id="fs13">val set : elements:seq&lt;&#39;T&gt; -&gt; Set&lt;&#39;T&gt; (requires comparison)<br /><br />Full name: Microsoft.FSharp.Core.ExtraTopLevelOperators.set</div>
+<div class="tip" id="fs14">Multiple items<br />module List<br /><br />from Microsoft.FSharp.Collections<br /><br />--------------------<br />type List&lt;&#39;T&gt; =<br />&#160;&#160;| ( [] )<br />&#160;&#160;| ( :: ) of Head: &#39;T * Tail: &#39;T list<br />&#160;&#160;interface IEnumerable<br />&#160;&#160;interface IEnumerable&lt;&#39;T&gt;<br />&#160;&#160;member GetSlice : startIndex:int option * endIndex:int option -&gt; &#39;T list<br />&#160;&#160;member Head : &#39;T<br />&#160;&#160;member IsEmpty : bool<br />&#160;&#160;member Item : index:int -&gt; &#39;T with get<br />&#160;&#160;member Length : int<br />&#160;&#160;member Tail : &#39;T list<br />&#160;&#160;static member Cons : head:&#39;T * tail:&#39;T list -&gt; &#39;T list<br />&#160;&#160;static member Empty : &#39;T list<br /><br />Full name: Microsoft.FSharp.Collections.List&lt;_&gt;</div>
+<div class="tip" id="fs15">val iter : action:(&#39;T -&gt; unit) -&gt; list:&#39;T list -&gt; unit<br /><br />Full name: Microsoft.FSharp.Collections.List.iter</div>
+<div class="tip" id="fs16">Multiple items<br />type EntryPointAttribute =<br />&#160;&#160;inherit Attribute<br />&#160;&#160;new : unit -&gt; EntryPointAttribute<br /><br />Full name: Microsoft.FSharp.Core.EntryPointAttribute<br /><br />--------------------<br />new : unit -&gt; EntryPointAttribute</div>
+<div class="tip" id="fs17">val typeof&lt;&#39;T&gt; : System.Type<br /><br />Full name: Microsoft.FSharp.Core.Operators.typeof</div>
+<div class="tip" id="fs18">Multiple items<br />val string : value:&#39;T -&gt; string<br /><br />Full name: Microsoft.FSharp.Core.Operators.string<br /><br />--------------------<br />type string = System.String<br /><br />Full name: Microsoft.FSharp.Core.string</div>
+<div class="tip" id="fs19">val printfn : format:Printf.TextWriterFormat&lt;&#39;T&gt; -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Core.ExtraTopLevelOperators.printfn</div>
+<div class="tip" id="fs20">Multiple items<br />val double : value:&#39;T -&gt; double (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.ExtraTopLevelOperators.double<br /><br />--------------------<br />type double = System.Double<br /><br />Full name: Microsoft.FSharp.Core.double</div>
+<div class="tip" id="fs21">Multiple items<br />type CustomComparisonAttribute =<br />&#160;&#160;inherit Attribute<br />&#160;&#160;new : unit -&gt; CustomComparisonAttribute<br /><br />Full name: Microsoft.FSharp.Core.CustomComparisonAttribute<br /><br />--------------------<br />new : unit -&gt; CustomComparisonAttribute</div>
+<div class="tip" id="fs22">Multiple items<br />type StructuralEqualityAttribute =<br />&#160;&#160;inherit Attribute<br />&#160;&#160;new : unit -&gt; StructuralEqualityAttribute<br /><br />Full name: Microsoft.FSharp.Core.StructuralEqualityAttribute<br /><br />--------------------<br />new : unit -&gt; StructuralEqualityAttribute</div>
+<div class="tip" id="fs23">val compare : e1:&#39;T -&gt; e2:&#39;T -&gt; int (requires comparison)<br /><br />Full name: Microsoft.FSharp.Core.Operators.compare</div>
+<div class="tip" id="fs24">type obj = System.Object<br /><br />Full name: Microsoft.FSharp.Core.obj</div>
+<div class="tip" id="fs25">val unbox : value:obj -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Core.Operators.unbox</div>
+<div class="tip" id="fs26">val invalidArg : argumentName:string -&gt; message:string -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Core.Operators.invalidArg</div>
+<div class="tip" id="fs27">union case Option.None: Option&lt;&#39;T&gt;</div>
+<div class="tip" id="fs28">union case Option.Some: Value: &#39;T -&gt; Option&lt;&#39;T&gt;</div>
+<div class="tip" id="fs29">namespace System.IO</div>
+<div class="tip" id="fs30">type File =<br />&#160;&#160;static member AppendAllLines : path:string * contents:IEnumerable&lt;string&gt; -&gt; unit + 1 overload<br />&#160;&#160;static member AppendAllText : path:string * contents:string -&gt; unit + 1 overload<br />&#160;&#160;static member AppendText : path:string -&gt; StreamWriter<br />&#160;&#160;static member Copy : sourceFileName:string * destFileName:string -&gt; unit + 1 overload<br />&#160;&#160;static member Create : path:string -&gt; FileStream + 3 overloads<br />&#160;&#160;static member CreateText : path:string -&gt; StreamWriter<br />&#160;&#160;static member Decrypt : path:string -&gt; unit<br />&#160;&#160;static member Delete : path:string -&gt; unit<br />&#160;&#160;static member Encrypt : path:string -&gt; unit<br />&#160;&#160;static member Exists : path:string -&gt; bool<br />&#160;&#160;...<br /><br />Full name: System.IO.File</div>
+<div class="tip" id="fs31">System.IO.File.ReadLines(path: string) : System.Collections.Generic.IEnumerable&lt;string&gt;<br />System.IO.File.ReadLines(path: string, encoding: System.Text.Encoding) : System.Collections.Generic.IEnumerable&lt;string&gt;</div>
+<div class="tip" id="fs32">module Seq<br /><br />from Microsoft.FSharp.Collections</div>
+<div class="tip" id="fs33">val map : mapping:(&#39;T -&gt; &#39;U) -&gt; source:seq&lt;&#39;T&gt; -&gt; seq&lt;&#39;U&gt;<br /><br />Full name: Microsoft.FSharp.Collections.Seq.map</div>
+<div class="tip" id="fs34">Multiple items<br />val float : value:&#39;T -&gt; float (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.Operators.float<br /><br />--------------------<br />type float = System.Double<br /><br />Full name: Microsoft.FSharp.Core.float<br /><br />--------------------<br />type float&lt;&#39;Measure&gt; = float<br /><br />Full name: Microsoft.FSharp.Core.float&lt;_&gt;</div>
+<div class="tip" id="fs35">val groupBy : projection:(&#39;T -&gt; &#39;Key) -&gt; source:seq&lt;&#39;T&gt; -&gt; seq&lt;&#39;Key * seq&lt;&#39;T&gt;&gt; (requires equality)<br /><br />Full name: Microsoft.FSharp.Collections.Seq.groupBy</div>
+<div class="tip" id="fs36">val toList : source:seq&lt;&#39;T&gt; -&gt; &#39;T list<br /><br />Full name: Microsoft.FSharp.Collections.Seq.toList</div>
+<div class="tip" id="fs37">Multiple items<br />module Map<br /><br />from Microsoft.FSharp.Collections<br /><br />--------------------<br />type Map&lt;&#39;Key,&#39;Value (requires comparison)&gt; =<br />&#160;&#160;interface IEnumerable<br />&#160;&#160;interface IComparable<br />&#160;&#160;interface IEnumerable&lt;KeyValuePair&lt;&#39;Key,&#39;Value&gt;&gt;<br />&#160;&#160;interface ICollection&lt;KeyValuePair&lt;&#39;Key,&#39;Value&gt;&gt;<br />&#160;&#160;interface IDictionary&lt;&#39;Key,&#39;Value&gt;<br />&#160;&#160;new : elements:seq&lt;&#39;Key * &#39;Value&gt; -&gt; Map&lt;&#39;Key,&#39;Value&gt;<br />&#160;&#160;member Add : key:&#39;Key * value:&#39;Value -&gt; Map&lt;&#39;Key,&#39;Value&gt;<br />&#160;&#160;member ContainsKey : key:&#39;Key -&gt; bool<br />&#160;&#160;override Equals : obj -&gt; bool<br />&#160;&#160;member Remove : key:&#39;Key -&gt; Map&lt;&#39;Key,&#39;Value&gt;<br />&#160;&#160;...<br /><br />Full name: Microsoft.FSharp.Collections.Map&lt;_,_&gt;<br /><br />--------------------<br />new : elements:seq&lt;&#39;Key * &#39;Value&gt; -&gt; Map&lt;&#39;Key,&#39;Value&gt;</div>
+<div class="tip" id="fs38">val ofSeq : elements:seq&lt;&#39;Key * &#39;T&gt; -&gt; Map&lt;&#39;Key,&#39;T&gt; (requires comparison)<br /><br />Full name: Microsoft.FSharp.Collections.Map.ofSeq</div>
+<div class="tip" id="fs39">val map : mapping:(&#39;Key -&gt; &#39;T -&gt; &#39;U) -&gt; table:Map&lt;&#39;Key,&#39;T&gt; -&gt; Map&lt;&#39;Key,&#39;U&gt; (requires comparison)<br /><br />Full name: Microsoft.FSharp.Collections.Map.map</div>
+<div class="tip" id="fs40">val fold : folder:(&#39;State -&gt; &#39;Key -&gt; &#39;T -&gt; &#39;State) -&gt; state:&#39;State -&gt; table:Map&lt;&#39;Key,&#39;T&gt; -&gt; &#39;State (requires comparison)<br /><br />Full name: Microsoft.FSharp.Collections.Map.fold</div>
+<div class="tip" id="fs41">module Option<br /><br />from Microsoft.FSharp.Core</div>
+
+
+<!-- AddThis -->
+
+    <div class="addthis_sharing_toolbox"></div>
+    <!-- Go to www.addthis.com/dashboard to customize your tools -->
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54bed07b3003b40e"></script>
+
+
+<!-- END AddThis -->
+
+
+<!-- Disqus -->
+    <div id="disqus_thread"></div>
+    <script>
+
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+    
+    var disqus_config = function () {
+
+    this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    this.page.title = 'Data structures and algorithms - helping Santa Claus find his road to San Francisco';
+    };
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//tjaskula.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<!-- Disqus END -->
+        </main>
+        <aside class="col-lg-4">
+              <article>
+                <img class="img-responsive img-circle" src="http://jaskula.fr//img/aside-face200.jpg" />
+                <div class="aside-text">
+                    <blockquote class="small">
+                        <p><cite>Welcome to my blog! F# and functional programming it's what I'm interested in and passionate about at the moment. However, software architecture, software craftsmanship, Domain Driven Design are also topics dear to my heart. So stay tuned! There is more to come...</cite></p>
+                          <footer>Tomasz Jaskuła</footer>
+                    </blockquote>
+                </div>
+                <div class="social">
+                    <a href="https://www.facebook.com/thomas.jaskula" title="facebook"><img src="http://jaskula.fr//img/facebook.jpg" /></a>
+                    <a href="https://github.com/tjaskula" title="github"><img src="http://jaskula.fr//img/github.jpg" /></a>
+                    <a href="https://plus.google.com/u/1/106268061202265370189/about" title="google"><img src="http://jaskula.fr//img/google.jpg" /></a>
+                    <a href="https://twitter.com/tjaskula" title="twitter"><img src="http://jaskula.fr//img/twitter.jpg" /></a>
+                    <a href="http://jaskula.fr//rss.xml" title="rss"><img src="http://jaskula.fr//img/rss.jpg" /></a>
+                </div>
+            </article>
+              <article>
+                   <h2>Recent posts</h2>
+
+                      <ul class="articles-list">
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2016/12-19-data-structures-and-algorithms-helping-santa-claus-find-his-road-to-san-francisco/index.html">Data structures and algorithms - helping Santa Claus find his road to San Francisco</a>
+                                      <span>    <time datetime="2016-12-19T10:35:01" pubdate data-updated="true">Dec 19, 2016</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2016/11-09-back-to-basics-algorithms-finding-the-max-pairwise-product/index.html">Back to basics: Algorithms - finding the max pairwise product</a>
+                                      <span>    <time datetime="2016-11-09T08:05:56" pubdate data-updated="true">Nov 9, 2016</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/12-02-data-science-tools-in-f-through-univariante-linear-regression/index.html">Data Science tools in F# through univariante linear regression</a>
+                                      <span>    <time datetime="2015-12-02T03:18:24" pubdate data-updated="true">Dec 2, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/08-14-integrating-ndepend-with-teamcity-9/index.html">Integrating NDepend with TeamCity 9</a>
+                                      <span>    <time datetime="2015-08-14T00:10:22" pubdate data-updated="true">Aug 14, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                              <li>
+                                  <h3><a href="http://jaskula.fr//blog/2015/01-21-beginners-quick-guide-to-setup-fsblog-and-start-to-blog-in-5-minutes/index.html">Beginners quick guide to setup FsBlog and start to blog in 5 minutes</a>
+                                      <span>    <time datetime="2015-01-21T11:55:09" pubdate data-updated="true">Jan 21, 2015</time>
+</span>
+                                  </h3>
+                              </li>
+                      </ul>
+
+                  <h4>Blog tags</h4>
+                  <p>
+
+                    <a href="http://jaskula.fr//blog/tag/fsharp/">f#</a>&nbsp;(8),                     <a href="http://jaskula.fr//blog/tag/functional-programming/">functional programming</a>&nbsp;(4),                     <a href="http://jaskula.fr//blog/tag/fp/">fp</a>&nbsp;(3),                     <a href="http://jaskula.fr//blog/tag/algorithms/">algorithms</a>&nbsp;(2),                     <a href="http://jaskula.fr//blog/tag/graphs/">graphs</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/data-structures/">data structures</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/priority-queue/">priority queue</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/binary-heap/">binary heap</a>&nbsp;(1),                     <a href="http://jaskula.fr//blog/tag/dijkstra-shortest-path/">dijkstra shortest path</a>&nbsp;(1)                  </p>
+
+                  <h4>Blog archives</h4>
+                    <a href="http://jaskula.fr//blog/archive/december-2016/index.html">
+                      December 2016 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/november-2016/index.html">
+                      November 2016 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/december-2015/index.html">
+                      December 2015 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/august-2015/index.html">
+                      August 2015 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/january-2015/index.html">
+                      January 2015 (2)</a>,                    <a href="http://jaskula.fr//blog/archive/august-2013/index.html">
+                      August 2013 (4)</a>,                    <a href="http://jaskula.fr//blog/archive/july-2013/index.html">
+                      July 2013 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/october-2012/index.html">
+                      October 2012 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/april-2012/index.html">
+                      April 2012 (1)</a>,                    <a href="http://jaskula.fr//blog/archive/march-2012/index.html">
+                      March 2012 (1)</a>,
+              </article>
+        </aside>
+      </div>
+    </div>
+
+      <footer class="bottom">
+          <div class="container">
+              <div class="row">
+                  <div class="col-lg-12">
+                      <p>This site is generated using <a href="https://github.com/fsprojects/FsBlog">FsBlog</a> and hosted on <a href="https://github.com/tjaskula/Blog">GitHub</a></p>
+                      <p><small>By Tomasz Jaskula, 2015 &mdash; Theme by <a href="https://github.com/matjas">matjas</a></small></p>
+                  </div>
+              </div>
+          </div>
+
+      </footer>
+
+    <script src="http://jaskula.fr//javascripts/scale.fix.js"></script>
+  </body>
+</html>

@@ -5,6 +5,20 @@
     <description>F# and functional programming is the topic I'm interested in and passionate about at the moment. However, software architecture, software craftsmanship, Domain Driven Design are also topics dear to my heart. So stay tuned! There is more to come...
 </description>
     <item>
+      <title>Data structures and algorithms - helping Santa Claus find his road to San Francisco</title>
+      <guid>http://jaskula.fr//blog/2016/12-19-data-structures-and-algorithms-helping-santa-claus-find-his-road-to-san-francisco</guid>
+      <link>http://jaskula.fr//blog/2016/12-19-data-structures-and-algorithms-helping-santa-claus-find-his-road-to-san-francisco/index.html</link>
+      <pubDate>Mon, 19 Dec 2016 09:35:01 GMT</pubDate>
+      <description>&lt;div class="row"&gt;
+&lt;div class="medium-8 columns"&gt;
+&lt;p&gt;It's almost a Christmas time and very soon Santa Claus will pull out his sleigh along with the herd of reindeers. But how his gonna find his way to all the places he is supposed to visit? Well, asuming his not going to buy any GPS device we will try to help him out writing the shortest path algorithm from scratch with the underlying data structures. The goal of this article is to understand the nitty-gritty details about the algorithms and underlying data structures and not how to write code in functional style. That's why I'm not going to use the functional data structures and style (most of the time) but bear with me, this is just to set everyone one on the same page and give the basic understanding of the topic. I want also to give some intuition about the choices that has been made in terms of running time and space complexity.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+</description>
+    </item>
+    <item>
       <title>Back to basics: Algorithms - finding the max pairwise product</title>
       <guid>http://jaskula.fr//blog/2016/11-09-back-to-basics-algorithms-finding-the-max-pairwise-product</guid>
       <link>http://jaskula.fr//blog/2016/11-09-back-to-basics-algorithms-finding-the-max-pairwise-product/index.html</link>
